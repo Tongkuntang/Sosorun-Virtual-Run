@@ -47,7 +47,7 @@ export default function indxx({ navigation }) {
   if (user == null) {
     return (
       <View style={{ flex: 1 }}>
-        <ActivityIndicator />
+        <ActivityIndicator color="#fff" />
       </View>
     );
   }

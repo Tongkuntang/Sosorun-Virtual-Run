@@ -22,6 +22,7 @@
   <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
 
   <queries>
+    <package android:name="com.google.android.apps.fitness" />
     <intent>
       <action android:name="android.intent.action.VIEW"/>
       <category android:name="android.intent.category.BROWSABLE"/>

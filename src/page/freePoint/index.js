@@ -182,7 +182,7 @@ export default function index({ navigation }) {
   if (user == null) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <ActivityIndicator size={"large"} />
+        <ActivityIndicator color="#fff" size={"large"} />
       </View>
     );
   }

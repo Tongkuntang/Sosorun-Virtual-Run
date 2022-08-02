@@ -95,7 +95,12 @@ export default function page2({ onPress, navigation }) {
       </Modal>
 
       <FlatList
-        data={event}
+        data={event.filter((item) => {
+          return (
+            item.request_ranking ==
+            autolize_Lv(user.user_accounts.total_distance).lv
+          );
+        })}
         extraData={datauser}
         ListFooterComponent={<View style={{ height: 50 }} />}
         renderItem={({ item }) => {

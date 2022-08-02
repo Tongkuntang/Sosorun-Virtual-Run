@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -22,6 +22,10 @@ import {
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import Headerevent from "../components/headerevent";
+import { apiservice } from "../../service/service";
+import { useRecoilValue } from "recoil";
+import { tokenState } from "../../reducer/reducer/reducer/Atom";
+import moment from "moment";
 const { width, height } = Dimensions.get("window");
 
 const DATA = [
@@ -46,6 +50,22 @@ const DATA = [
 ];
 
 export default function notification({ navigation }) {
+  const [state, setstate] = useState([]);
+  const token = useRecoilValue(tokenState);
+  useEffect(() => {
+    callAPi();
+  }, []);
+
+  async function callAPi() {
+    const res = await apiservice({
+      path: "/notification/getnoti_log",
+      token: token.accessToken,
+    });
+    console.log(res);
+    if (res?.status == 200) {
+      setstate(res?.data?.data);
+    }
+  }
   return (
     <View style={styles.container}>
       <SafeAreaView />
@@ -58,11 +78,17 @@ export default function notification({ navigation }) {
       </View>
       <View>
         <FlatList
-          data={DATA}
+          data={state}
           style={{ backgroundColor: "white", width: width }}
           renderItem={({ item, index }) => {
             return (
               <TouchableOpacity
+                onPress={() => {
+                  if (item.type == "EVENT") {
+                    navigation.navigate("EventDetail", { item: item?.detail });
+                  } else {
+                  }
+                }}
                 style={{
                   width: width,
                   height: 80,
@@ -75,9 +101,14 @@ export default function notification({ navigation }) {
                   borderBottomColor: "#707070",
                 }}
               >
-                <View style={{ flexDirection: "row" }}>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
                   <Image
-                    source={item.imageURL}
+                    source={{
+                      uri:
+                        item?.type != "EVENT"
+                          ? "https://ssr-project.s3.ap-southeast-1.amazonaws.com/icon_noti2.png"
+                          : "https://ssr-project.s3.ap-southeast-1.amazonaws.com/icon_noti1.png",
+                    }}
                     style={{
                       width: 50,
                       height: 50,
@@ -121,7 +152,7 @@ export default function notification({ navigation }) {
                           alignSelf: "center",
                         }}
                       >
-                        12:00 AM
+                        {moment(item?.createdAt).format("DD-MM-YYYY hh:mm:ss")}
                       </Text>
                     </View>
                     <Text
@@ -141,7 +172,7 @@ export default function notification({ navigation }) {
                         color: "#434343",
                       }}
                     >
-                      We have an Exciting Offers for you near to yo...
+                      {item.message}
                     </Text>
                   </View>
                 </View>

@@ -13,6 +13,8 @@ import {
   ScrollView,
   BackHandler,
   KeyboardAvoidingView,
+  TextInput,
+  Alert,
 } from "react-native";
 import Headerdetail from "../components/headerdetail";
 import Input from "./input";
@@ -33,11 +35,11 @@ const AddressThailand = require("../../address/address_thailand.json");
 const { width, height } = Dimensions.get("window");
 export default function index({ navigation, route }) {
   const dataEV = route.params.dataEV;
-
   const price = route.params.price;
   const [BIB, setBIB] = useState(route.params.BIB);
   const premium = route.params.premium;
   const [dot1, setdot1] = useState(null);
+  const [dot2, setdot2] = useState(null);
   const [dot, setdot] = useState(true);
   const [id, setId] = useState(0);
   const [token, setToken] = useRecoilState(tokenState);
@@ -46,11 +48,14 @@ export default function index({ navigation, route }) {
   const le = user.user_accounts.storage.full_add.length;
   const [address1, setaddress1] = useState(true);
   const [modalVisible, setmodalVisible] = useState(false);
+  const [vat, setvat] = useState(false);
   const [modalVisible2, setmodalVisible2] = useState(false);
   const [num, setnum] = useState(0);
   const [address, setaddress] = useState(null);
   const [open, setOpen] = useState([]);
+  console.log(user);
   const [state2, setstate2] = useState(user.user_accounts.full_address);
+  const [state3, setstate3] = useState(user.user_accounts.full_address);
   const focus = useIsFocused();
   const charec = [
     "A",
@@ -122,6 +127,8 @@ export default function index({ navigation, route }) {
           last_distance: 0,
           reward_Info: dataEV.reward,
           fullAddress: state2,
+          fullAddress_vat: state3,
+          chack_vat: vat,
           tracking: "",
           bib:
             (premium ? charec[numb + 1] : BIB[0]) +
@@ -166,7 +173,7 @@ export default function index({ navigation, route }) {
       );
     }
   }
-
+  console.log("distance", dataEV.distance);
   async function onNavigationStateChange(params) {
     if (params.url.includes("chillpay/postpayment_result")) {
       if (num == 0) {
@@ -193,10 +200,12 @@ export default function index({ navigation, route }) {
               event_name: dataEV.titel,
               Type: "EVENT",
               uid: user.id,
-              total_distance: dataEV.distance[0] * 1000,
+              total_distance: dataEV.distance * 1000,
               last_distance: 0,
               reward_Info: dataEV.reward,
               fullAddress: state2,
+              fullAddress_vat: state3,
+              chack_vat: vat,
               tracking: "",
               bib: BIB,
               biburl: premium ? dataEV.img_bibPremium : dataEV.img_bibbasic,
@@ -277,6 +286,11 @@ export default function index({ navigation, route }) {
     usesss();
   }, [focus]);
 
+  useEffect(() => {
+    console.log("เข้านะ");
+    setstate2(user.full_address);
+  }, [user]);
+
   async function usesss() {
     const getuser = await getActionUser(token);
     setUser(getuser.data);
@@ -323,7 +337,7 @@ export default function index({ navigation, route }) {
                 <body>
                 <form id="payment-form" action="https://sandbox-cdnv3.chillpay.co/Payment/" method="post" role="form" class="form-horizontal">
                 <modernpay:widget id="modernpay-widget-container" 
-                data-merchantid="M032746" data-amount="${route.params.totalssprice}" data-orderno="00000001" data-customerid="123456" 
+                data-merchantid="M032746" data-amount="${route.params.price}00" data-orderno="00000001" data-customerid="123456" 
                 data-mobileno="0889999999" data-clientip="183.89.110.23" data-routeno="1" data-currency="764" 
                 data-description="Sosorun Payment" data-apikey="4wSW26BJzRMQbNRAlosseuin4FooeUNEtk4Fd6bjubedQ7X8rZgIKezL09MSWcaO">
                 </modernpay:widget>
@@ -405,7 +419,7 @@ export default function index({ navigation, route }) {
                         {dot !== true ? (
                           <TouchableOpacity
                             onPress={() => {
-                              setstate2(user.user_accounts.full_address);
+                              setstate2(user.full_address);
                               setdot(true);
                               setdot1(null);
                             }}
@@ -464,83 +478,201 @@ export default function index({ navigation, route }) {
                     )}
                   </View>
                 )}
-                <FlatList
-                  data={full}
-                  renderItem={({ item, index }) => {
-                    return (
-                      <View style={styles.viewaddess}>
-                        <View style={styles.viewin}>
-                          <View style={styles.viewsmall}>
-                            {dot1 != index ? (
-                              <TouchableOpacity
-                                onPress={() => {
-                                  setdot1(index);
-                                  setdot(false);
-                                  setstate2(item);
-                                }}
-                              >
-                                <FontAwesome
-                                  name="circle-o"
-                                  size={24}
-                                  color="black"
-                                />
-                              </TouchableOpacity>
-                            ) : (
-                              <TouchableOpacity
-                                onPress={() => {
-                                  setdot1(null);
-                                  setstate2(user.user_accounts.full_address);
-                                }}
-                              >
-                                <Image
-                                  source={{
-                                    uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/dot.png",
+                <View>
+                  <FlatList
+                    data={full}
+                    renderItem={({ item, index }) => {
+                      return (
+                        <View style={styles.viewaddess}>
+                          <View style={styles.viewin}>
+                            <View style={styles.viewsmall}>
+                              {dot1 != index ? (
+                                <TouchableOpacity
+                                  onPress={() => {
+                                    setdot1(index);
+                                    setdot(false);
+                                    setstate2(item);
                                   }}
-                                  style={{ width: 20, height: 20 }}
-                                />
+                                >
+                                  <FontAwesome
+                                    name="circle-o"
+                                    size={24}
+                                    color="black"
+                                  />
+                                </TouchableOpacity>
+                              ) : (
+                                <TouchableOpacity
+                                  onPress={() => {
+                                    setdot1(null);
+                                    setstate2(user.user_accounts.full_address);
+                                  }}
+                                >
+                                  <Image
+                                    source={{
+                                      uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/dot.png",
+                                    }}
+                                    style={{ width: 20, height: 20 }}
+                                  />
+                                </TouchableOpacity>
+                              )}
+                              <View style={{ marginLeft: 10 }}>
+                                <Text style={styles.textdetailaddess}>
+                                  {item.name}
+                                </Text>
+                                <Text style={styles.textdetailaddess}>
+                                  {item.ShippingAddress} {item.district}{" "}
+                                  {item.subDistrict} {item.province}{" "}
+                                  {item.postcode}
+                                </Text>
+                                <Text style={styles.textdetailaddess}>
+                                  {item.telnum}
+                                </Text>
+                              </View>
+                            </View>
+                            <TouchableOpacity
+                              onPress={() => {
+                                navigation.navigate("EditAdd", {
+                                  item,
+                                  index,
+                                  full,
+                                  dataEV,
+                                });
+                              }}
+                            >
+                              <Text style={styles.textdetailaddess}>แก้ไข</Text>
+                            </TouchableOpacity>
+                          </View>
+                          {dot1 != index ? (
+                            <View />
+                          ) : (
+                            <TouchableOpacity style={styles.touch}>
+                              <Text style={styles.texttouch}>
+                                ที่อยู่ในการจัดส่ง
+                              </Text>
+                            </TouchableOpacity>
+                          )}
+                        </View>
+                      );
+                    }}
+                  />
+                </View>
+                <View style={styles.view}>
+                  <TouchableOpacity
+                    onPress={() => setvat((val) => !val)}
+                    style={{ flexDirection: "row", alignItems: "center" }}
+                  >
+                    <Image
+                      resizeMode="contain"
+                      style={{ width: 25, height: 25, marginRight: 10 }}
+                      source={
+                        vat
+                          ? require("../../img/radio-on-button.png")
+                          : require("../../img/rec.png")
+                      }
+                    />
+                    <Text style={styles.textaddess}>ใบกำกับภาษี</Text>
+                  </TouchableOpacity>
+                </View>
+                {vat && (
+                  <View>
+                    <TextInput
+                      placeholder="เลขที่ใบกำกับ"
+                      defaultValue={state3?.text}
+                      onChangeText={(text) =>
+                        setstate3((val) => ({ ...val, text }))
+                      }
+                      style={{
+                        width: width * 0.9,
+                        backgroundColor: "#fff",
+                        alignSelf: "center",
+                        height: 40,
+                        paddingHorizontal: 15,
+                      }}
+                    />
+                    <FlatList
+                      data={full}
+                      renderItem={({ item, index }) => {
+                        return (
+                          <View style={styles.viewaddess}>
+                            <View style={styles.viewin}>
+                              <View style={styles.viewsmall}>
+                                {dot2 != index ? (
+                                  <TouchableOpacity
+                                    onPress={() => {
+                                      setdot2(index);
+                                      setstate3((val) => ({ ...val, ...item }));
+                                    }}
+                                  >
+                                    <FontAwesome
+                                      name="circle-o"
+                                      size={24}
+                                      color="black"
+                                    />
+                                  </TouchableOpacity>
+                                ) : (
+                                  <TouchableOpacity
+                                    onPress={() => {
+                                      setdot2(null);
+                                      setstate3((val) => ({
+                                        ...val,
+                                        ...full?.[0],
+                                      }));
+                                    }}
+                                  >
+                                    <Image
+                                      source={{
+                                        uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/dot.png",
+                                      }}
+                                      style={{ width: 20, height: 20 }}
+                                    />
+                                  </TouchableOpacity>
+                                )}
+                                <View style={{ marginLeft: 10 }}>
+                                  <Text style={styles.textdetailaddess}>
+                                    {item.name}
+                                  </Text>
+                                  <Text style={styles.textdetailaddess}>
+                                    {item.ShippingAddress} {item.district}{" "}
+                                    {item.subDistrict} {item.province}{" "}
+                                    {item.postcode}
+                                  </Text>
+                                  <Text style={styles.textdetailaddess}>
+                                    {item.telnum}
+                                  </Text>
+                                </View>
+                              </View>
+                              <TouchableOpacity
+                                onPress={() => {
+                                  navigation.navigate("EditAdd", {
+                                    item,
+                                    index,
+                                    full,
+                                    dataEV,
+                                  });
+                                }}
+                              >
+                                <Text style={styles.textdetailaddess}>
+                                  แก้ไข
+                                </Text>
+                              </TouchableOpacity>
+                            </View>
+                            {dot1 != index ? (
+                              <View />
+                            ) : (
+                              <TouchableOpacity style={styles.touch}>
+                                <Text style={styles.texttouch}>
+                                  ที่อยู่ในการจัดส่ง
+                                </Text>
                               </TouchableOpacity>
                             )}
-                            <View style={{ marginLeft: 10 }}>
-                              <Text style={styles.textdetailaddess}>
-                                {item.name}
-                              </Text>
-                              <Text style={styles.textdetailaddess}>
-                                {item.ShippingAddress} {item.district}{" "}
-                                {item.subDistrict} {item.province}{" "}
-                                {item.postcode}
-                              </Text>
-                              <Text style={styles.textdetailaddess}>
-                                {item.telnum}
-                              </Text>
-                            </View>
                           </View>
-                          <TouchableOpacity
-                            onPress={() => {
-                              navigation.navigate("EditAdd", {
-                                item,
-                                index,
-                                full,
-                                dataEV,
-                              });
-                            }}
-                          >
-                            <Text style={styles.textdetailaddess}>แก้ไข</Text>
-                          </TouchableOpacity>
-                        </View>
-                        {dot1 != index ? (
-                          <View />
-                        ) : (
-                          <TouchableOpacity style={styles.touch}>
-                            <Text style={styles.texttouch}>
-                              ที่อยู่ในการจัดส่ง
-                            </Text>
-                          </TouchableOpacity>
-                        )}
-                      </View>
-                    );
-                  }}
-                />
+                        );
+                      }}
+                    />
+                  </View>
+                )}
                 <TouchableOpacity
+                  disabled={!state2}
                   onPress={async () => {
                     if (route.params.totalssprice == 0) {
                       if (num == 0) {
@@ -571,6 +703,8 @@ export default function index({ navigation, route }) {
                               last_distance: 0,
                               reward_Info: dataEV.reward,
                               fullAddress: state2,
+                              fullAddress_vat: state3,
+                              chack_vat: vat,
                               tracking: "",
                               bib: BIB,
                               biburl: premium
@@ -613,6 +747,15 @@ export default function index({ navigation, route }) {
 
                   <TouchableOpacity
                     onPress={async () => {
+                      if (body.name.length == 0) {
+                        Alert.alert("กรุณาใส่ชื่อ");
+                        return;
+                      }
+                      if (body.telnum.length == 0) {
+                        Alert.alert("กรุณาใส่เบอร์โทร");
+                        return;
+                      }
+
                       let full_address = {
                         ShippingAddress: body.ShippingAddress,
                         province: address.province,
@@ -822,7 +965,7 @@ const styles = StyleSheet.create({
   },
   background: {
     width: width,
-    height: height,
+    // height: height,
     backgroundColor: "#FBC71C",
   },
   view: {

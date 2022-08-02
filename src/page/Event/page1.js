@@ -32,6 +32,7 @@ export default function page1({ onPress, navigation }) {
       path: "/event/getAchievement",
       token: token.accessToken,
     });
+
     if (response.status == 200) {
       const getevent = await getallevent(token);
       const rep = response.data.data
@@ -42,22 +43,14 @@ export default function page1({ onPress, navigation }) {
           return e.event_id;
         });
       const getmy = await getmyeventid({ token, uid: user.id });
+
       setevent(
-        getevent.data
-          .filter((item) => getmy.data.filter((e) => e.event_id == item.id))
-          .filter((i) => {
-            return (
-              i.id != rep[0] &&
-              i.id != rep[1] &&
-              i.id != rep[2] &&
-              i.id != rep[3] &&
-              i.id != rep[4] &&
-              i.id != rep[5] &&
-              i.id != rep[6] &&
-              i.id != rep[7] &&
-              i.id != rep[8]
-            );
-          })
+        token?.role == "VIP"
+          ? getevent.data?.filter(
+              (item) =>
+                getmy?.data?.filter((e) => item.id == e.event_id).length > 0
+            )
+          : getevent.data
       );
     }
   }
@@ -106,17 +99,20 @@ export default function page1({ onPress, navigation }) {
                     </Text>
                   </TouchableOpacity>
                 ) : (
-                  <View style={styles.touch}>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate("EventDetail", { item })}
+                    style={styles.touch}
+                  >
                     <View style={styles.view}>
                       <Text style={styles.texthead}>{item.titel}</Text>
-                      <Text style={styles.textlimid1}>เร็วๆนี้</Text>
+                      <Text style={styles.textlimid1}>ซื้อล่วงหน้า</Text>
                     </View>
                     <Text style={styles.texttime}>ระยะเวลา</Text>
                     <Text style={[styles.texttime, { marginBottom: 5 }]}>
                       ตั้งแต่วันที่ {moment(item.startDate).format("DD")} -{" "}
                       {moment(item.expireDate).format("DD/MMMM/YYYY")}
                     </Text>
-                  </View>
+                  </TouchableOpacity>
                 )}
               </View>
             );

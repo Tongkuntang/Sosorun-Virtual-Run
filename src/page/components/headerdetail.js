@@ -49,7 +49,10 @@ export default function headerdetail({ item, navigation, goBack }) {
           >
             <FontAwesome5 name="shopping-bag" size={24} color="black" />
           </TouchableOpacity>
-          <TouchableOpacity style={{ justifyContent: "center" }}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Notification")}
+            style={{ justifyContent: "center" }}
+          >
             <Ionicons name="ios-notifications" size={24} color="black" />
           </TouchableOpacity>
         </View>

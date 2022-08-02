@@ -175,12 +175,12 @@ export default function missionsucc({ navigation, route }) {
                   </View>
                   <TouchableOpacity
                     onPress={async () => {
-                      const response = await actionEditwal({
-                        body: {
-                          gold: story?.reward_Info?.coin || 0,
-                        },
-                        token,
-                      });
+                      // const response = await actionEditwal({
+                      //   body: {
+                      //     gold: story?.reward_Info?.coin || 0,
+                      //   },
+                      //   token,
+                      // });
                       setModal(!modal);
                       navigation.navigate("Event");
                     }}
@@ -238,7 +238,8 @@ export default function missionsucc({ navigation, route }) {
                     source={{
                       uri:
                         "https://api.sosorun.com/api/imaged/get/" +
-                        story.img_event,
+                        (route?.params?.dataEV?.mission_List?.Achievement ||
+                          route?.params?.dataEV?.Achievement),
                     }}
                   />
                   <Text style={styles.textpit}>ขอแสดงความยินดี</Text>
@@ -389,7 +390,9 @@ export default function missionsucc({ navigation, route }) {
               style={styles.imgcat}
               source={{
                 uri:
-                  "https://api.sosorun.com/api/imaged/get/" + story.img_event,
+                  "https://api.sosorun.com/api/imaged/get/" +
+                  (route?.params?.dataEV?.mission_List?.Achievement ||
+                    route?.params?.dataEV?.Achievement),
               }}
             />
             <Text style={styles.textpit}>ขอแสดงความยินดี</Text>

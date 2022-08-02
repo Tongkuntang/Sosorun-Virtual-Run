@@ -8,17 +8,14 @@ import {
   Image,
   Dimensions,
   TouchableOpacity,
-  Modal,
-  FlatList,
   ScrollView,
-  KeyboardAvoidingView,
   ActivityIndicator,
 } from "react-native";
 import Header from "../components/header";
 import { Ionicons } from "@expo/vector-icons";
 import Input from "./input";
 import { DelImg, pickImage } from "../../action/actionImg";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { tokenState, userState } from "../../reducer/reducer/reducer/Atom";
 import { actionEditprofile, getActionUser } from "../../action/actionauth";
 import { useIsFocused } from "@react-navigation/core";
@@ -28,19 +25,26 @@ const AddressThailand = require("../../address/address_thailand.json");
 
 const { width, height } = Dimensions.get("window");
 export default function index({ navigation }) {
-  const [token, setToken] = useRecoilState(tokenState);
+  const token = useRecoilValue(tokenState);
   const isFocus = useIsFocused();
   const [user, setUser] = useRecoilState(userState);
-  // console.log(">>>>>>>>>>>>>>", user);
+  const [body, setbody] = useState({
+    id: user.id,
+    image_Profile: "",
+    email: user.email,
+    name: null,
+    height: null,
+    weight: null,
+    tel: null,
+    full_address: {},
+    friends: null,
+  });
+  const [state, setstate] = useState({
+    ShippingAddress: user.full_address.ShippingAddress,
+    subDistrict: user.full_address.subDistrict,
+  });
   const [address, setaddress] = useState(null);
-  // console.log("addd", address);
   const [open, setOpen] = useState([]);
-
-  async function PickImg() {
-    const response = await pickImage();
-    setbody({ ...body, image_Profile: response.imageRefId });
-    // console.log(response);
-  }
 
   useEffect(() => {
     getUser();
@@ -59,10 +63,15 @@ export default function index({ navigation }) {
     }
   }
 
+  async function PickImg() {
+    const response = await pickImage();
+    setbody({ ...body, image_Profile: response.imageRefId });
+  }
+
   if (user == null) {
     return (
       <View style={{ flex: 1 }}>
-        <ActivityIndicator />
+        <ActivityIndicator color="#fff" />
       </View>
     );
   }
@@ -98,23 +107,6 @@ export default function index({ navigation }) {
     getAddress(user.full_address.postcode);
   }, []);
 
-  const [body, setbody] = useState({
-    id: user.id,
-    image_Profile: "",
-    email: user.email,
-    name: null,
-    height: null,
-    weight: null,
-    tel: null,
-    full_address: {},
-    friends: null,
-  });
-
-  const [state, setstate] = useState({
-    ShippingAddress: user.full_address.ShippingAddress,
-    subDistrict: user.full_address.subDistrict,
-  });
-  // console.log("????????????????????????", state);
   return (
     <View style={styles.contalner}>
       <SafeAreaView />
@@ -306,10 +298,9 @@ export default function index({ navigation }) {
                 },
                 token,
               });
-              // console.log("response>>>>>>>>>>>>>>>>>>>>>>>", response);
+
               if (response.status == 200) {
                 const getuser = await getActionUser(token);
-                // console.log(getuser);
                 setUser(getuser.data);
                 setTimeout(() => {
                   navigation.navigate("Account");

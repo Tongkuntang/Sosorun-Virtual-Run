@@ -57,6 +57,8 @@ export default function index({ navigation, route }) {
     }
   }
 
+  console.log("dataEV", dataEV);
+
   function formaiLenght(params) {
     let paramx = "0000";
     for (let index = 0; index < params.length; index++) {
@@ -217,12 +219,17 @@ export default function index({ navigation, route }) {
             </View>
             <View style={styles.view}>
               <Text style={styles.textpall}>ค่าส่ง</Text>
-              <Text style={styles.textpall}>ฟรี</Text>
+              <Text style={styles.textpall}>
+                {dataEV.fee ? dataEV.fee : "ฟรี"}
+              </Text>
             </View>
             <View style={styles.view}>
               <Text style={styles.texttotle}>รวมทั้งสิ้น</Text>
               <Text style={styles.texttotle}>
-                {dataEV.price + (premium ? 35 : 0)} บาท
+                {dataEV.price +
+                  (dataEV.fee ? parseInt(dataEV.fee) : 0) +
+                  (premium ? 35 : 0)}{" "}
+                บาท
               </Text>
             </View>
             <View style={[styles.view, { marginVertical: 20 }]}>
@@ -232,7 +239,10 @@ export default function index({ navigation, route }) {
                     dataEV,
                     body,
                     token,
-                    price: dataEV.price + (premium ? 35 : 0),
+                    price:
+                      dataEV.price +
+                      (dataEV.fee ? parseInt(dataEV.fee) : 0) +
+                      (premium ? 35 : 0),
                     totalssprice: dataEV.price,
                     premium,
                     BIB: premium

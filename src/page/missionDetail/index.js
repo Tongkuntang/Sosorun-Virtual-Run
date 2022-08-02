@@ -91,7 +91,11 @@ export default function index({ navigation, item, route }) {
                 <Text style={styles.textnum}>ของรางวัลที่จะได้รับ</Text>
                 <View style={styles.viewprice}>
                   <View
-                    style={{ alignItems: "center", justifyContent: "center" }}
+                    style={{
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexDirection: "row",
+                    }}
                   >
                     <FlatList
                       data={dataEV?.reward}
@@ -152,6 +156,17 @@ export default function index({ navigation, item, route }) {
                         );
                       }}
                     />
+                    <TouchableOpacity style={[styles.touch, { marginTop: 15 }]}>
+                      <Image
+                        source={{
+                          uri:
+                            "https://api.sosorun.com/api/imaged/get/" +
+                            dataEV?.Achievement,
+                        }}
+                        style={{ width: 60, height: 60, alignSelf: "center" }}
+                      />
+                      <Text></Text>
+                    </TouchableOpacity>
                   </View>
                 </View>
               </View>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ArKit.ipa</key>
+	<array>
+		<dict>
+			<key>architectures</key>
+			<array>
+				<string>arm64</string>
+			</array>
+			<key>buildNumber</key>
+			<string>6</string>
+			<key>certificate</key>
+			<dict>
+				<key>SHA1</key>
+				<string>623C79388E17B97A8AF1EB2CE91A7AA2979118A0</string>
+				<key>dateExpires</key>
+				<string>24/9/2565 BE</string>
+				<key>type</key>
+				<string>Apple Distribution</string>
+			</dict>
+			<key>embeddedBinaries</key>
+			<array>
+				<dict>
+					<key>architectures</key>
+					<array>
+						<string>arm64</string>
+					</array>
+					<key>buildNumber</key>
+					<string>6</string>
+					<key>certificate</key>
+					<dict>
+						<key>SHA1</key>
+						<string>623C79388E17B97A8AF1EB2CE91A7AA2979118A0</string>
+						<key>dateExpires</key>
+						<string>24/9/2565 BE</string>
+						<key>type</key>
+						<string>Apple Distribution</string>
+					</dict>
+					<key>name</key>
+					<string>ViroKit_static_lib.framework</string>
+					<key>symbols</key>
+					<true/>
+					<key>team</key>
+					<dict>
+						<key>id</key>
+						<string>K42X2CAN87</string>
+						<key>name</key>
+						<string>wongsatorn pintong</string>
+					</dict>
+					<key>versionNumber</key>
+					<string>2.1</string>
+				</dict>
+			</array>
+			<key>entitlements</key>
+			<dict>
+				<key>application-identifier</key>
+				<string>K42X2CAN87.com.arconnect.io</string>
+				<key>beta-reports-active</key>
+				<true/>
+				<key>com.apple.developer.applesignin</key>
+				<array>
+					<string>Default</string>
+				</array>
+				<key>com.apple.developer.team-identifier</key>
+				<string>K42X2CAN87</string>
+				<key>get-task-allow</key>
+				<false/>
+			</dict>
+			<key>name</key>
+			<string>ArKit.app</string>
+			<key>profile</key>
+			<dict>
+				<key>UUID</key>
+				<string>4e0c41a9-b06c-4265-a1ed-6fda4d052b04</string>
+				<key>dateExpires</key>
+				<string>7/12/2565 BE</string>
+				<key>name</key>
+				<string>iOS Team Store Provisioning Profile: com.arconnect.io</string>
+			</dict>
+			<key>symbols</key>
+			<true/>
+			<key>team</key>
+			<dict>
+				<key>id</key>
+				<string>K42X2CAN87</string>
+				<key>name</key>
+				<string>wongsatorn pintong</string>
+			</dict>
+			<key>versionNumber</key>
+			<string>2.1</string>
+		</dict>
+	</array>
+</dict>
+</plist>

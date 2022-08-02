@@ -73,15 +73,20 @@ export default function index({ navigation, route }) {
           </View>
           <View style={styles.viewtouch}>
             <TouchableOpacity
-              onPress={() =>
-                navigation.navigate("RunEvant", {
-                  BIB,
-                  dataEV,
-                  biburl: premium ? dataEV.img_bibPremium : dataEV.img_bibbasic,
-                  last_distance: 0,
-                  id: route.params.id,
-                })
-              }
+              onPress={() => {
+                navigation.navigate(
+                  dataEV?.Type == "Eventonroad" ? "SelectDevice" : "RunEvant",
+                  {
+                    BIB,
+                    dataEV: { ...dataEV, distance: [dataEV.distance] },
+                    biburl: premium
+                      ? dataEV.img_bibPremium
+                      : dataEV.img_bibbasic,
+                    last_distance: 0,
+                    id: route.params.id,
+                  }
+                );
+              }}
               style={styles.touch}
             >
               <View style={styles.viewhead}>
@@ -99,7 +104,7 @@ export default function index({ navigation, route }) {
                     <Text style={styles.textprice}>เริ่ม</Text>
                   </View>
                   <Text style={[styles.texthead, { alignSelf: "center" }]}>
-                    {dataEV.distance[0]}
+                    {dataEV.distance}
                   </Text>
                   <View style={styles.viewprice1}>
                     <Text style={[styles.texthead, { alignSelf: "center" }]}>
@@ -116,7 +121,7 @@ export default function index({ navigation, route }) {
                 justifyContent: "center",
               }}
             >
-              <Image
+              {/* <Image
                 resizeMode="stretch"
                 source={{
                   uri:
@@ -129,7 +134,7 @@ export default function index({ navigation, route }) {
                   height: height * 0.25,
                   position: "absolute",
                 }}
-              />
+              /> */}
 
               <Text style={styles.textbib1}>{BIB}</Text>
             </View>

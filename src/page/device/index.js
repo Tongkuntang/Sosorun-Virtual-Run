@@ -13,26 +13,214 @@ import {
   NativeEventEmitter,
   Modal,
   Linking,
+  NativeAppEventEmitter,
+  Alert,
+  FlatList,
+  ActivityIndicator,
 } from "react-native";
+import { timeformet } from "../components/test";
 const { Fitblekit } = NativeModules;
-import { useRecoilState } from "recoil";
-import { deviceIndex } from "../../reducer/reducer/reducer/Atom";
+import { useRecoilState, useRecoilValue } from "recoil";
+import AppleHealthKit, {
+  HealthValue,
+  HealthKitPermissions,
+} from "react-native-health";
+import GoogleFit, { Scopes, BucketUnit } from "react-native-google-fit";
+import {
+  deviceIndex,
+  deviceRegis,
+  tokenState,
+} from "../../reducer/reducer/reducer/Atom";
 import Header from "../components/header";
 import { TextInput } from "react-native-gesture-handler";
+import { apiservice } from "../../service/service";
+import { getActionUser } from "../../action/actionauth";
+import moment from "moment";
 const { width, height } = Dimensions.get("window");
-// import { GarminConnect } from "garmin-connect/dist";
-// const GCClient = new GarminConnect();
+import ProgressCircle from "react-native-progress-circle";
+import { useIsFocused } from "@react-navigation/native";
+
+const permissions = {
+  permissions: {
+    read: [AppleHealthKit.Constants.Permissions.HeartRate],
+    write: [AppleHealthKit.Constants.Permissions.HeartRate],
+    read: [AppleHealthKit.Constants.Permissions.Steps],
+    write: [AppleHealthKit.Constants.Permissions.Steps],
+  },
+};
 
 export default function index({ navigation }) {
   const [modals, setModal] = useState(false);
+  const [modals1, setModal1] = useState(false);
+  const [modals2, setModal2] = useState(Platform.OS == "android");
+
   const peripherals = new Map();
   const [list, setList] = useState([]);
   const eventEmitter = new NativeEventEmitter(Fitblekit);
-  const [devicsI, setDeviceI] = useRecoilState(deviceIndex);
-  const [bodygarmin, setbodygarmin] = useState({
-    username: "my.email@example.com",
-    password: "MySecretPassword",
-  });
+  const [devicsI, setDeviceI] = useState(0);
+  const [bodygarmin, setbodygarmin] = useRecoilState(deviceRegis);
+  const token = useRecoilValue(tokenState);
+  const isFocus = useIsFocused();
+  const [body, setbody] = useState();
+  const [healthkit, sethealthkit] = useState(0);
+  const [pod, setpod] = useState(0);
+  const [page, setpage] = useState(true);
+  const [data, setData] = useState([]);
+
+  async function fetchData() {
+    const opt = {
+      startDate: moment().add(-1, "days").format("YYYY-MM-DDTHH:mm:ssz"), // required ISO8601Timestamp
+      endDate: new Date().toISOString(), // required ISO8601Timestamp
+      bucketUnit: BucketUnit.DAY, // optional - default "DAY". Valid values: "NANOSECOND" | "MICROSECOND" | "MILLISECOND" | "SECOND" | "MINUTE" | "HOUR" | "DAY"
+      bucketInterval: 1, // optional - default 1.
+    };
+    const res = await GoogleFit.getDailyStepCountSamples(opt);
+
+    res?.map((item) => {
+      if (item.source == "com.google.android.gms:estimated_steps") {
+        if (
+          item.rawSteps?.filter(
+            (e) => e?.appPackageName == "com.xiaomi.hm.health"
+          ).length > 0
+        ) {
+          setDeviceI(5);
+        }
+      }
+    });
+  }
+
+  async function syncData() {
+    setModal1(true);
+
+    const opt = {
+      startDate: moment().add(-1, "days").format("YYYY-MM-DDTHH:mm:ssz"), // required ISO8601Timestamp
+      endDate: new Date().toISOString(), // required ISO8601Timestamp
+      bucketUnit: BucketUnit.DAY, // optional - default "DAY". Valid values: "NANOSECOND" | "MICROSECOND" | "MILLISECOND" | "SECOND" | "MINUTE" | "HOUR" | "DAY"
+      bucketInterval: 1, // optional - default 1.
+    };
+    let steps = 0;
+    const res = await GoogleFit.getDailyStepCountSamples(opt);
+
+    res?.map((item) => {
+      if (item.source == "com.google.android.gms:estimated_steps") {
+        item.rawSteps
+          ?.filter((e) => e?.appPackageName == "com.xiaomi.hm.health")
+          .map((e) => (steps = steps + e.steps));
+      }
+    });
+
+    const res1 = await apiservice({
+      path: "/user/syncdistance",
+      method: "post",
+      body: {
+        uid: body?.id,
+        type: "HEALTHKIT",
+        date: moment(),
+        last_count: (steps * body?.height * 0.415) / 1000,
+      },
+    });
+
+    if (res1.status == 200) {
+      setModal1(false);
+      Alert.alert("อัพเดทข้อมูลสำเร็จ");
+      setDeviceI(0);
+
+      const getuser = await getActionUser(token);
+      setbody(getuser.data);
+    }
+
+    console.log(steps);
+  }
+
+  async function fetchData1() {
+    const opt = {
+      startDate: moment().add(-1, "days").format("YYYY-MM-DDTHH:mm:ssz"), // required ISO8601Timestamp
+      endDate: new Date().toISOString(), // required ISO8601Timestamp
+      bucketUnit: BucketUnit.DAY, // optional - default "DAY". Valid values: "NANOSECOND" | "MICROSECOND" | "MILLISECOND" | "SECOND" | "MINUTE" | "HOUR" | "DAY"
+      bucketInterval: 1, // optional - default 1.
+    };
+    const res = await GoogleFit.getDailyStepCountSamples(opt);
+
+    res?.map((item) => {
+      if (item.source == "com.google.android.gms:estimated_steps") {
+        if (item.rawSteps?.length > 0) {
+          setDeviceI(4);
+        }
+      }
+    });
+  }
+
+  async function syncData1() {
+    setModal1(true);
+
+    const opt = {
+      startDate: moment().add(-1, "days").format("YYYY-MM-DDTHH:mm:ssz"), // required ISO8601Timestamp
+      endDate: new Date().toISOString(), // required ISO8601Timestamp
+      bucketUnit: BucketUnit.DAY, // optional - default "DAY". Valid values: "NANOSECOND" | "MICROSECOND" | "MILLISECOND" | "SECOND" | "MINUTE" | "HOUR" | "DAY"
+      bucketInterval: 1, // optional - default 1.
+    };
+    let steps = 0;
+    const res = await GoogleFit.getDailyStepCountSamples(opt);
+
+    res?.map((item) => {
+      if (item.source == "com.google.android.gms:estimated_steps") {
+        item.rawSteps.map((e) => (steps = steps + e.steps));
+      }
+    });
+
+    const res1 = await apiservice({
+      path: "/user/syncdistance",
+      method: "post",
+      body: {
+        uid: body?.id,
+        type: "HEALTHKIT",
+        date: moment(),
+        last_count: (steps * body?.height * 0.415) / 1000,
+      },
+    });
+
+    console.log((steps * body?.height * 0.415) / 1000);
+
+    if (res1.status == 200) {
+      setModal1(false);
+      Alert.alert("อัพเดทข้อมูลสำเร็จ");
+      setDeviceI(0);
+
+      const getuser = await getActionUser(token);
+      setbody(getuser.data);
+    }
+
+    console.log(steps);
+  }
+
+  useEffect(() => {
+    if (isFocus) {
+      getUser();
+    }
+  }, [isFocus]);
+
+  async function getUser() {
+    const resonse = await getActionUser(token);
+    if (resonse) {
+      setbody({
+        ...resonse.data,
+      });
+
+      const response = await apiservice({
+        path: "/event/getmyEvent/" + resonse.data.id,
+        token: token.accessToken,
+      });
+
+      // console.log("datave", response);
+      if (response.status == 200) {
+        setData(
+          response.data.data.filter((item) => {
+            return item.last_distance <= item.total_distance;
+          })
+        );
+      }
+    }
+  }
 
   const renderItem = (item) => {
     const color = item.connected ? "green" : "#fff";
@@ -81,16 +269,12 @@ export default function index({ navigation }) {
         const newDevice = eventEmitter.addListener(
           "EVENTFBK",
           (deviceDiscovered) => {
-            console.log(deviceDiscovered);
             const ress = deviceDiscovered.split(",");
             if (ress.length > 0) {
               Fitblekit.onConnect("SENIOR", "APPROVE", (e) => {
                 console.log(e);
               });
             }
-            // try {
-            //   Fitblekit.onScanStop();
-            // } catch (error) {}
           }
         );
 
@@ -99,6 +283,13 @@ export default function index({ navigation }) {
           (deviceDiscovered) => {
             console.log(
               "EVENTFBKSTEP",
+              deviceDiscovered
+                .replace(/=/g, ":")
+                .replace(/, calories:/g, `", calories:`)
+                .replace(/createTime:/g, `createTime:"`)
+            );
+
+            setpod(
               deviceDiscovered
                 .replace(/=/g, ":")
                 .replace(/, calories:/g, `", calories:`)
@@ -123,8 +314,6 @@ export default function index({ navigation }) {
             if (deviceDiscovered == "BleConnected") {
               setDeviceI(1);
             }
-
-            // setDeviceList(deviceList => [...deviceList,deviceDiscovered])
           }
         );
 
@@ -190,13 +379,201 @@ export default function index({ navigation }) {
 
   useEffect(() => {
     if (list.length > 0) {
-      testPeripheral(list[3]);
+      // testPeripheral(list[3]);
     }
   }, [list]);
+
+  useEffect(() => {
+    const onReceiveURL = async ({ url }) => {
+      const re = url.split("=");
+
+      const tokens = {
+        access_token: re[1].replace("?expires_in", ""),
+        id_token: re[3].replace("?refreshToken", ""),
+        refreshToken: re[4].replace("?scope", ""),
+      };
+
+      const getuser = await getActionUser(token);
+
+      console.log("getuser", getuser);
+
+      const res = await apiservice({
+        path: "/authen/createhw",
+        method: "post",
+        body: {
+          uid: getuser?.data?.id,
+          info: tokens,
+        },
+      });
+
+      console.log("res", res);
+
+      const regis = await apiservice({
+        method: "post",
+        path: "",
+        url: "https://health-api.cloud.huawei.com/healthkit/v1/dataCollectors",
+        token: re[1].replace("?expires_in", ""),
+        body: {
+          collectorName: "DataCollectorExample",
+          collectorType: "raw",
+          appInfo: {
+            appPackageName: "com.sosorun.asia",
+            appName: "Sosorun Virtual Run",
+            desc: "https://sosorun.com",
+            appVersion: "1",
+          },
+          collectorDataType: {
+            name: "com.huawei.continuous.steps.delta",
+          },
+          deviceInfo: {
+            manufacturer: "huawei",
+            modelNum: "ExampleTablet",
+            devType: "Phone",
+            uniqueId: moment().valueOf(),
+            version: "1.0",
+          },
+        },
+      });
+
+      console.log("regis", regis);
+
+      // const getuser = await getActionUser(tokens);
+      // const data = getuser.data;
+      // if (data.height == null) {
+      //   setmodal(true);
+      //   setTokenvisible(tokens);
+      // } else {
+      //   setAuth({
+      //     auth: true,
+      //   });
+      //   setUser(data);
+      //   setToken(tokens);
+      // }
+    };
+    Linking.addEventListener("url", onReceiveURL);
+  }, []);
 
   return (
     <View style={styles.contalner}>
       <SafeAreaView />
+      <Modal transparent={true} visible={modals2} style={{ flex: 1 }}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "#00000090",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => {
+              setModal2(false);
+            }}
+            style={{
+              paddingHorizontal: 20,
+              paddingVertical: 5,
+              borderRadius: 5,
+              position: "absolute",
+              top: 0,
+              right: 15,
+              marginTop: 15,
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: "Prompt-Regular",
+                fontSize: 19,
+                color: "#fff",
+              }}
+            >
+              Skip
+            </Text>
+          </TouchableOpacity>
+          <View style={{ width: width * 0.7, height: height * 0.7 }}>
+            <FlatList
+              data={[
+                {
+                  img: require("../../img/mi3.png"),
+                  title: "เข้า Application ZepLife และเชื่อมอุปกรณ์",
+                },
+                {
+                  img: require("../../img/mi4.png"),
+                  title: "เข้าไปที่ตั้งค่า และ กดเพิ่มบัญชี",
+                },
+                {
+                  img: require("../../img/mi1.png"),
+                  title: "เลือก GoogleFit และ กดที่ชื่อตนเอง",
+                },
+                {
+                  img: require("../../img/mi2.png"),
+                  title: "รอ GoogleFit Sync Data เป็นอันเสร็จขั้นตอน",
+                },
+              ]}
+              pagingEnabled
+              horizontal
+              renderItem={({ item, index }) => {
+                return (
+                  <View
+                    style={{
+                      width: width * 0.7,
+                      height: height * 0.7,
+                      alignItems: "center",
+                    }}
+                  >
+                    <Image
+                      style={{ width: width * 0.6, height: height * 0.6 }}
+                      source={item?.img}
+                    />
+                    <Text
+                      style={{
+                        color: "#fff",
+                        fontFamily: "Prompt-Regular",
+                        textAlign: "center",
+                        marginTop: 25,
+                      }}
+                    >
+                      {item?.title}
+                    </Text>
+                  </View>
+                );
+              }}
+            />
+          </View>
+        </View>
+      </Modal>
+      <Modal transparent={true} visible={modals1} style={{ flex: 1 }}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "#00000090",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <ActivityIndicator color="#fff" size={"large"} />
+          <TouchableOpacity
+            onPress={() => {
+              setModal1(false);
+            }}
+            style={{
+              paddingHorizontal: 20,
+              paddingVertical: 5,
+              borderRadius: 5,
+              backgroundColor: "#ff0000",
+              marginTop: 15,
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: "Prompt-Regular",
+                fontSize: 19,
+              }}
+            >
+              Close
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
       <Modal transparent={true} visible={modals} style={{ flex: 1 }}>
         <View
           style={{
@@ -262,11 +639,21 @@ export default function index({ navigation }) {
             />
             <TouchableOpacity
               onPress={async () => {
-                await GCClient.login(
-                  "my.email@example.com",
-                  "MySecretPassword"
-                );
-                const userInfo = await GCClient.getUserInfo();
+                const res = await apiservice({
+                  path:
+                    "/user/garmin?user=" +
+                    bodygarmin.username +
+                    "&pass=" +
+                    bodygarmin.password +
+                    "&date=" +
+                    moment().format("YYYY-MM-DD"),
+                });
+                if (res?.data?.steps) {
+                  setDeviceI(2);
+                  setModal(false);
+                } else {
+                  Alert.alert("ไม่มีบัญชีนี้ในระบบ");
+                }
               }}
               style={{
                 backgroundColor: "#000",
@@ -328,95 +715,806 @@ export default function index({ navigation }) {
               navigation.goBack();
             }}
           />
-          <Text style={styles.texthead}>SOSORUN SMART GEAR</Text>
-          {/* <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={styles.touch}
-          >
-            <Image
-              source={{
-                uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/111.png",
-              }}
-              style={styles.imgsoso}
-            />
-            <Text style={styles.textdevice}>SOSORUN POD V1</Text>
-          </TouchableOpacity> */}
-          <View style={styles.line} />
-          {/* <TouchableOpacity
-            onPress={() => {
-              Fitblekit.onScanStart((e, i) => {
-                // console.log(e);
-                // console.log(i);
-              });
+          <View
+            style={{
+              width: width,
+              backgroundColor: "#000",
+              alignItems: "center",
+              justifyContent: "center",
+              paddingVertical: 30,
             }}
-            style={styles.touch}
           >
-            <Image
-              source={{
-                uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/112.png",
+            <TouchableOpacity
+              style={[{ position: "absolute", top: -5, left: -5 }]}
+              onPress={() => {
+                setpage((val) => !val);
               }}
-              style={styles.imgsoso}
-            />
-            <Text style={styles.textdevice}>SOSORUN POD V2</Text>
-            {devicsI == 1 && (
-              <MaterialIcons
-                style={{ position: "absolute", right: 25, top: 25 }}
-                name="check"
-                size={32}
-                color="#55AB68"
+            >
+              <Text style={[styles.texthead]}>SYNC and BOOST</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                setpage((val) => !val);
+              }}
+            >
+              <ProgressCircle
+                percent={body?.distance}
+                radius={80}
+                borderWidth={21}
+                color="#FCC81D"
+                shadowColor="#999"
+                bgColor="#fff"
+              >
+                <Text
+                  style={[
+                    styles.texthead,
+                    { fontSize: 18, marginLeft: 0, marginTop: 0 },
+                  ]}
+                >
+                  {parseFloat(body?.distance || 0).toFixed(2) + "KM"}
+                </Text>
+              </ProgressCircle>
+            </TouchableOpacity>
+          </View>
+          {page && (
+            <View>
+              {(devicsI == 0 || devicsI == 1) && (
+                <Text style={styles.texthead}>SOSORUN SMART GEAR</Text>
+              )}
+              {(devicsI == 0 || devicsI == 1) && <View style={styles.line} />}
+              {(devicsI == 0 || devicsI == 1) && (
+                <View style={styles.touch}>
+                  <Image
+                    source={{
+                      uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/112.png",
+                    }}
+                    style={styles.imgsoso1}
+                  />
+                  <Text style={styles.textdevice}>SOSORUN POD V2</Text>
+                  <View
+                    style={{ position: "absolute", right: 25, top: 5 }}
+                    name="check"
+                    size={32}
+                    color="#55AB68"
+                  >
+                    {devicsI == 0 && (
+                      <TouchableOpacity
+                        disabled={devicsI == 1}
+                        onPress={() => {
+                          Fitblekit.onScanStart((e, i) => {
+                            // console.log(e);
+                            // console.log(i);
+                          });
+                        }}
+                        style={{
+                          backgroundColor: "#ccc",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          paddingHorizontal: 10,
+                          width: 65,
+                          height: 65,
+                          borderRadius: 55,
+                          marginTop: -5,
+                        }}
+                      >
+                        <Text style={[styles.textdevice, { marginLeft: 0 }]}>
+                          sync
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                    {devicsI == 1 && (
+                      <TouchableOpacity
+                        disabled={devicsI != 1}
+                        onPress={async () => {
+                          const res = await apiservice({
+                            path: "/user/syncdistance",
+                            method: "post",
+                            body: {
+                              uid: body?.id,
+                              type: "POD",
+                              date: moment(),
+                              last_count: (pod * body?.height * 0.415) / 100000,
+                            },
+                          });
+
+                          if (res.status == 200) {
+                            Alert.alert("อัพเดทข้อมูลสำเร็จ");
+                            setDeviceI(0);
+
+                            const getuser = await getActionUser(token);
+                            setbody(getuser.data);
+                          }
+                        }}
+                        style={{
+                          backgroundColor: devicsI == 1 ? "#FCC81D" : "#ccc",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          paddingHorizontal: 10,
+                          marginTop: 10,
+                          width: 65,
+                          height: 65,
+                          borderRadius: 55,
+                          marginTop: -5,
+                        }}
+                      >
+                        <Text style={[styles.textdevice, { marginLeft: 0 }]}>
+                          boost
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </View>
+              )}
+              {(devicsI == 0 || devicsI == 1) && <View style={styles.line} />}
+              {(devicsI == 0 ||
+                devicsI == 2 ||
+                devicsI == 3 ||
+                devicsI == 4) && (
+                <Text style={styles.texthead}>Other Devices</Text>
+              )}
+              {(devicsI == 0 ||
+                devicsI == 2 ||
+                devicsI == 3 ||
+                devicsI == 4) && <View style={styles.line} />}
+              {(devicsI == 0 || devicsI == 2) && (
+                <View
+                  onPress={() => {
+                    Linking.openURL(
+                      "https://oauth-login.cloud.huawei.com/oauth2/v3/authorize?response_type=code&state=state_parameter_passthrough_value&client_id=106360789&redirect_uri=https://api.sosorun.com/api/authen/huawei&scope=openid+https://www.huawei.com/healthkit/step.read&access_type=offline&display=touch"
+                    );
+                  }}
+                  style={styles.touch}
+                >
+                  <Image
+                    source={{
+                      uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/113.png",
+                    }}
+                    style={styles.imgsoso2}
+                  />
+                  <Text style={styles.textdevice}>GARMIN</Text>
+                  <View
+                    style={{ position: "absolute", right: 25, top: -7 }}
+                    name="check"
+                    size={32}
+                    color="#55AB68"
+                  >
+                    {devicsI == 0 && (
+                      <TouchableOpacity
+                        onPress={() => {
+                          setModal(true);
+                        }}
+                        style={{
+                          backgroundColor: bodygarmin?.username
+                            ? "#FCC81D"
+                            : "#ccc",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          paddingHorizontal: 10,
+                          width: 65,
+                          height: 65,
+                          borderRadius: 55,
+                          marginTop: -5,
+                        }}
+                      >
+                        <Text style={[styles.textdevice, { marginLeft: 0 }]}>
+                          sync
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                    {devicsI == 2 && (
+                      <TouchableOpacity
+                        onPress={async () => {
+                          let count = 0;
+                          if (bodygarmin?.username) {
+                            setModal1(true);
+                            const res = await apiservice({
+                              path:
+                                "/user/garmin?user=" +
+                                bodygarmin.username +
+                                "&pass=" +
+                                bodygarmin.password +
+                                "&date=" +
+                                moment().add(-2, "hours").format("YYYY-MM-DD"),
+                            });
+
+                            res?.data?.steps?.map((item) => {
+                              count = count + item?.steps;
+                            });
+
+                            const res1 = await apiservice({
+                              path: "/user/syncdistance",
+                              method: "post",
+                              body: {
+                                uid: body?.id,
+                                type: "GARMIN",
+                                date: moment(),
+                                last_count:
+                                  (count * body?.height * 0.415) / 1000,
+                              },
+                            });
+
+                            if (res1.status == 200) {
+                              setModal1(false);
+                              Alert.alert("อัพเดทข้อมูลสำเร็จ");
+                              setDeviceI(0);
+                              const getuser = await getActionUser(token);
+                              setbody(getuser.data);
+                            }
+                          }
+                        }}
+                        style={{
+                          backgroundColor: "#ccc",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          paddingHorizontal: 10,
+                          marginTop: 10,
+                          width: 65,
+                          height: 65,
+                          borderRadius: 55,
+                          marginTop: -5,
+                        }}
+                      >
+                        <Text style={[styles.textdevice, { marginLeft: 0 }]}>
+                          boost
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </View>
+              )}
+              {(devicsI == 0 || devicsI == 2) && Platform.OS == "ios" && (
+                <View style={styles.line} />
+              )}
+              {Platform.OS == "ios" && (devicsI == 0 || devicsI == 3) && (
+                <View style={styles.touch}>
+                  <Image
+                    source={require("../../img/healthkit.png")}
+                    style={styles.imgsoso2}
+                  />
+                  <Text style={styles.textdevice}>Heath Kit</Text>
+                  <View
+                    style={{ position: "absolute", right: 25, top: -7 }}
+                    name="check"
+                    size={32}
+                    color="#55AB68"
+                  >
+                    {devicsI == 0 && (
+                      <TouchableOpacity
+                        onPress={async () => {
+                          try {
+                            // type: "Walking", // one of: ['Walking', 'StairClimbing', 'Running', 'Cycling', 'Workout']
+                            AppleHealthKit.isAvailable((err, available) => {
+                              if (err) {
+                                console.log(
+                                  "error initializing Healthkit: ",
+                                  err
+                                );
+                                return;
+                              }
+
+                              console.log(available);
+                              if (available) {
+                                AppleHealthKit.initHealthKit(
+                                  permissions,
+                                  (err, res) => {
+                                    const sub2 =
+                                      NativeAppEventEmitter.addListener(
+                                        "healthKit:StepCount:new",
+                                        (evt) => {}
+                                      );
+
+                                    if (err) {
+                                      return;
+                                    }
+
+                                    if (res) {
+                                      let options = {
+                                        startDate: new Date(
+                                          parseInt(
+                                            moment()
+                                              .add(-2, "day")
+                                              .format("YYYY")
+                                          ),
+                                          parseInt(
+                                            moment().add(-2, "day").format("M")
+                                          ),
+                                          parseInt(
+                                            moment().add(-2, "day").format("D")
+                                          )
+                                        ).toISOString(),
+                                        endDate: new Date().toISOString(),
+                                      };
+
+                                      AppleHealthKit.getStepCount(
+                                        options,
+                                        (err, results) => {
+                                          if (err) {
+                                            return;
+                                          }
+                                          sethealthkit(results?.value);
+                                        }
+                                      );
+
+                                      setDeviceI(3);
+                                    }
+                                  }
+                                );
+                              } else {
+                              }
+                              // Healthkit is available
+                            });
+                          } catch (error) {}
+                        }}
+                        style={{
+                          backgroundColor: healthkit > 0 ? "#FCC81D" : "#ccc",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          paddingHorizontal: 10,
+                          marginTop: -5,
+                          width: 65,
+                          height: 65,
+                          borderRadius: 55,
+                        }}
+                      >
+                        <Text style={[styles.textdevice, { marginLeft: 0 }]}>
+                          sync
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                    {devicsI == 3 && (
+                      <TouchableOpacity
+                        onPress={async () => {
+                          console.log(healthkit);
+                          const res = await apiservice({
+                            path: "/user/syncdistance",
+                            method: "post",
+                            body: {
+                              uid: body?.id,
+                              type: "HEALTHKIT",
+                              date: moment(),
+                              last_count:
+                                (healthkit * body?.height * 0.415) / 1000,
+                            },
+                          });
+                          console.log(res?.status);
+                          if (res.status == 200) {
+                            Alert.alert("อัพเดทข้อมูลสำเร็จ");
+                            setDeviceI(0);
+
+                            const getuser = await getActionUser(token);
+                            setbody(getuser.data);
+                          }
+                        }}
+                        style={{
+                          backgroundColor: "#ccc",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          paddingHorizontal: 10,
+                          marginTop: -5,
+                          width: 65,
+                          height: 65,
+                          borderRadius: 55,
+                        }}
+                      >
+                        <Text style={[styles.textdevice, { marginLeft: 0 }]}>
+                          boost
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </View>
+              )}
+              {(devicsI == 0 || devicsI == 3) && <View style={styles.line} />}
+              {(devicsI == 0 || devicsI == 5) && Platform.OS == "android" && (
+                <View style={styles.touch}>
+                  <Image
+                    resizeMode="contain"
+                    source={require("../../img/115.png")}
+                    style={styles.imgsoso2}
+                  />
+                  <Text style={styles.textdevice}>Zepp Life(Mi Fit)</Text>
+                  <View
+                    style={{ position: "absolute", right: 25, top: -7 }}
+                    name="check"
+                    size={32}
+                    color="#55AB68"
+                  >
+                    {devicsI == 0 && (
+                      <TouchableOpacity
+                        onPress={async () => {
+                          const options = {
+                            scopes: [
+                              Scopes.FITNESS_ACTIVITY_READ,
+                              Scopes.FITNESS_ACTIVITY_WRITE,
+                              Scopes.FITNESS_BODY_READ,
+                              Scopes.FITNESS_BODY_WRITE,
+                              Scopes.FITNESS_LOCATION_WRITE,
+                              Scopes.FITNESS_LOCATION_READ,
+                            ],
+                          };
+
+                          GoogleFit.authorize(options)
+                            .then((authResult) => {
+                              if (authResult.success) {
+                                GoogleFit.startRecording((callback) => {
+                                  // Process data from Google Fit Recording API (no google fit app needed)
+                                  fetchData();
+                                });
+                              } else {
+                                Alert.alert(authResult.message);
+                              }
+                            })
+                            .catch((err) => {
+                              Alert.alert(err);
+                            });
+                        }}
+                        style={{
+                          backgroundColor: healthkit > 0 ? "#FCC81D" : "#ccc",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          paddingHorizontal: 10,
+                          marginTop: -5,
+                          width: 65,
+                          height: 65,
+                          borderRadius: 55,
+                        }}
+                      >
+                        <Text style={[styles.textdevice, { marginLeft: 0 }]}>
+                          sync
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                    {devicsI == 5 && (
+                      <TouchableOpacity
+                        onPress={async () => {
+                          syncData();
+                        }}
+                        style={{
+                          backgroundColor: "#ccc",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          paddingHorizontal: 10,
+                          marginTop: -5,
+                          width: 65,
+                          height: 65,
+                          borderRadius: 55,
+                        }}
+                      >
+                        <Text style={[styles.textdevice, { marginLeft: 0 }]}>
+                          boost
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </View>
+              )}
+              {(devicsI == 0 || devicsI == 5) && Platform.OS == "android" && (
+                <View style={styles.line} />
+              )}
+              {(devicsI == 0 || devicsI == 4) && Platform.OS == "android" && (
+                <View style={styles.touch}>
+                  <Image
+                    resizeMode="contain"
+                    source={require("../../img/fit.png")}
+                    style={styles.imgsoso2}
+                  />
+                  <Text style={styles.textdevice}>GoogleFit</Text>
+                  <View
+                    style={{ position: "absolute", right: 25, top: -7 }}
+                    name="check"
+                    size={32}
+                    color="#55AB68"
+                  >
+                    {devicsI == 0 && (
+                      <TouchableOpacity
+                        onPress={async () => {
+                          const options = {
+                            scopes: [
+                              Scopes.FITNESS_ACTIVITY_READ,
+                              Scopes.FITNESS_ACTIVITY_WRITE,
+                              Scopes.FITNESS_BODY_READ,
+                              Scopes.FITNESS_BODY_WRITE,
+                              Scopes.FITNESS_LOCATION_WRITE,
+                              Scopes.FITNESS_LOCATION_READ,
+                            ],
+                          };
+
+                          GoogleFit.authorize(options)
+                            .then((authResult) => {
+                              if (authResult.success) {
+                                GoogleFit.startRecording((callback) => {
+                                  // Process data from Google Fit Recording API (no google fit app needed)
+                                  fetchData1();
+                                });
+                              } else {
+                                Alert.alert(authResult.message);
+                              }
+                            })
+                            .catch((err) => {
+                              Alert.alert(err);
+                            });
+                        }}
+                        style={{
+                          backgroundColor: healthkit > 0 ? "#FCC81D" : "#ccc",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          paddingHorizontal: 10,
+                          marginTop: -5,
+                          width: 65,
+                          height: 65,
+                          borderRadius: 55,
+                        }}
+                      >
+                        <Text style={[styles.textdevice, { marginLeft: 0 }]}>
+                          sync
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                    {devicsI == 4 && (
+                      <TouchableOpacity
+                        onPress={async () => {
+                          syncData1();
+                        }}
+                        style={{
+                          backgroundColor: "#ccc",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          paddingHorizontal: 10,
+                          marginTop: -5,
+                          width: 65,
+                          height: 65,
+                          borderRadius: 55,
+                        }}
+                      >
+                        <Text style={[styles.textdevice, { marginLeft: 0 }]}>
+                          boost
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </View>
+              )}
+              {(devicsI == 0 || devicsI == 4) && Platform.OS == "android" && (
+                <View style={styles.line} />
+              )}
+            </View>
+          )}
+          {!page && (
+            <View>
+              <FlatList
+                data={data}
+                extraData={[data]}
+                renderItem={({ item, index }) => {
+                  return (
+                    item?.event_Listt?.Type != "Eventonroad" &&
+                    (item.total_distance / 1000).toFixed(2) >
+                      (item.last_distance / 1000).toFixed(2) && (
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          backgroundColor: "#fff",
+                        }}
+                      >
+                        <Image
+                          style={{
+                            width: width * 0.22,
+                            height: width * 0.22,
+                            marginTop: 15,
+                            marginLeft: 10,
+                          }}
+                          source={{
+                            uri:
+                              "https://api.sosorun.com/api/imaged/get/" +
+                              item?.event_Listt?.Achievement,
+                          }}
+                        />
+                        {
+                          <View>
+                            <View style={styles.view}>
+                              <Text style={styles.nameevent}>
+                                {item.event_name}
+                              </Text>
+                              <TouchableOpacity
+                                onPress={async () =>
+                                  // navigation.navigate("Campaign", { item })
+                                  {
+                                    const res1 = await apiservice({
+                                      path: "/user/distance_subtract",
+                                      method: "post",
+                                      body: {
+                                        uid: body.id,
+                                        distance: body?.distance,
+                                      },
+                                      token: token.accessToken,
+                                    });
+
+                                    console.log(res1?.data);
+
+                                    const response = await apiservice({
+                                      path: "/event/updateuserjoinEvent",
+                                      method: "put",
+                                      body: {
+                                        id: item.id,
+                                        distance:
+                                          body?.distance >
+                                          item?.total_distance / 1000
+                                            ? item?.total_distance
+                                            : body?.distance * 1000,
+                                        running_Time: 0,
+                                        cal: 0,
+                                      },
+                                      token: token.accessToken,
+                                    });
+                                    console.log(response);
+                                    if (response.status == 200) {
+                                      Alert.alert("อัพเดทข้อมูลสำเร็จ");
+                                      setDeviceI(0);
+
+                                      setTimeout(() => {
+                                        getUser();
+                                      }, 1000);
+                                    }
+                                  }
+                                }
+                                style={styles.viewbottom}
+                              >
+                                <Text style={styles.texttail}>Sync</Text>
+                              </TouchableOpacity>
+                            </View>
+
+                            <View style={styles.viewtext}>
+                              <View style={styles.viewsmall}>
+                                <Text style={styles.text1}>ระยะทางทั้งหมด</Text>
+                                <Text style={styles.text2}>
+                                  {(item.total_distance / 1000).toFixed(2)} กม.
+                                </Text>
+                              </View>
+                              <View style={styles.viewsmall}>
+                                <Text style={styles.text1}>
+                                  ระยะทางที่ทำได้
+                                </Text>
+                                <Text style={styles.text2}>
+                                  {(item.last_distance / 1000).toFixed(2)} กม.
+                                </Text>
+                              </View>
+                              <View style={styles.viewsmall}>
+                                <Text style={styles.text1}>
+                                  ระดับความสำเร็จ
+                                </Text>
+                                <Text style={styles.text2}>
+                                  {(
+                                    ((item.last_distance / 1000).toFixed(2) *
+                                      100) /
+                                    (item.total_distance / 1000).toFixed(2)
+                                  ).toFixed(2)}
+                                  %
+                                </Text>
+                              </View>
+                            </View>
+                          </View>
+                        }
+                      </View>
+                    )
+                  );
+                }}
               />
-            )}
-          </TouchableOpacity> */}
-          {/* <View style={styles.line} /> */}
-          {/* <Text style={styles.texthead}>Other Devices</Text> */}
-          <TouchableOpacity
-            onPress={() => {
-              setModal(true);
-            }}
-            style={styles.touch}
-          >
-            <Image
-              source={{
-                uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/113.png",
-              }}
-              style={styles.imgsoso1}
-            />
-            <Text style={styles.textdevice}>GARMIN</Text>
-          </TouchableOpacity>
-          <View style={styles.line} />
-          <TouchableOpacity
-            onPress={() => {
-              Linking.openURL(
-                "https://oauth-login.cloud.huawei.com/oauth2/v3/authorize?response_type=code&state=state_parameter_passthrough_value&client_id=101489619&redirect_uri=http%3A%2F%2Fwww.example.com&scope=openid+https%3A%2F%2Fwww.huawei.com%2Fhealthkit%2Fheightweight.read+https%3A%2F%2Fwww.huawei.com%2Fhealthkit%2Fcalories.read&access_type=offline&display=touch"
-              );
-            }}
-            style={styles.touch}
-          >
-            <Image
-              source={{
-                uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/114.png",
-              }}
-              style={styles.imgsoso2}
-            />
-            <Text style={styles.textdevice}>HUAWEI</Text>
-          </TouchableOpacity>
-          <View style={styles.line} />
-          {/* <TouchableOpacity style={styles.touch}>
-            <Image
-              source={{
-                uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/115.png",
-              }}
-              style={styles.imgsoso2}
-            />
-            <Text style={styles.textdevice}>XIAOMI</Text>
-          </TouchableOpacity>
-          <View style={styles.line} /> */}
+            </View>
+          )}
         </ScrollView>
       </View>
     </View>
   );
 }
 const styles = StyleSheet.create({
+  container: {
+    width: width,
+    height: height,
+  },
+  background: {
+    width: width,
+    backgroundColor: "#FCC81D",
+  },
+  backimg: {
+    width: width,
+    height: height * 0.2,
+    backgroundColor: "#393939",
+  },
+  imgmap: {
+    width: width,
+    height: height * 0.2,
+    alignSelf: "center",
+  },
+  touch: {
+    width: width,
+    height: 30,
+    flexDirection: "row",
+    paddingHorizontal: 10,
+    justifyContent: "space-between",
+    marginTop: 20,
+  },
+  text: {
+    fontFamily: "Prompt-Regular",
+    fontSize: 24,
+    color: "#000",
+    alignSelf: "center",
+  },
+  re: {
+    width: 32,
+    height: 32,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    justifyContent: "center",
+    alignSelf: "center",
+  },
+  line: {
+    width: width,
+    borderBottomWidth: 0.5,
+    borderBottomColor: "#393939",
+    marginVertical: 10,
+  },
+  view: {
+    width: width * 0.75,
+    height: 30,
+    backgroundColor: "#fff",
+    paddingHorizontal: 10,
+    justifyContent: "space-between",
+    flexDirection: "row",
+    marginVertical: 10,
+  },
+  viewbottom: {
+    width: 72,
+    height: 24,
+    alignSelf: "center",
+    backgroundColor: "#393939",
+    justifyContent: "center",
+    borderRadius: 10,
+  },
+  nameevent: {
+    fontFamily: "Prompt-Regular",
+    fontSize: 16,
+    color: "#000",
+    alignSelf: "center",
+    width: width * 0.5,
+  },
+  texttail: {
+    fontFamily: "Prompt-Regular",
+    fontSize: 16,
+    color: "#fff",
+    alignSelf: "center",
+    fontWeight: "bold",
+  },
+  texttime: {
+    fontFamily: "Prompt-Regular",
+    fontSize: 16,
+    color: "#000",
+    marginLeft: 10,
+    marginVertical: 10,
+  },
+  viewtext: {
+    flexDirection: "row",
+    width: width * 0.7,
+    paddingHorizontal: 10,
+    justifyContent: "space-between",
+    marginVertical: 5,
+  },
+  viewsmall: {
+    width: width * 0.24,
+    alignSelf: "center",
+    justifyContent: "space-between",
+    height: width * 0.15,
+  },
+  text1: {
+    fontFamily: "Prompt-Regular",
+    fontSize: 12,
+    color: "#000",
+    alignSelf: "center",
+  },
+  text2: {
+    fontFamily: "Prompt-Regular",
+    fontSize: 16,
+    color: "#000",
+    alignSelf: "center",
+  },
   contalner: {
     flex: 1,
   },

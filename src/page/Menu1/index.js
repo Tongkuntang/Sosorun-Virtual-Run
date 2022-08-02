@@ -20,11 +20,28 @@ import {
 } from "@expo/vector-icons";
 import { useRecoilState } from "recoil";
 import { tokenState, userState } from "../../reducer/reducer/reducer/Atom";
+import { apiservice } from "../../service/service";
 
 const { width, height } = Dimensions.get("window");
 export default function index({ navigation }) {
   const [user, setUser] = useRecoilState(userState);
   const [token, setToken] = useRecoilState(tokenState);
+  const [data, setstate] = useState([]);
+
+  useEffect(() => {
+    callAPi();
+  }, []);
+
+  async function callAPi() {
+    const res = await apiservice({
+      path: "/notification/getnoti_log",
+      token: token.accessToken,
+    });
+
+    if (res?.status == 200) {
+      setstate(res?.data?.data);
+    }
+  }
 
   if (user == null) {
     return <View />;
@@ -127,13 +144,22 @@ export default function index({ navigation }) {
             </TouchableOpacity>
             <View style={styles.line} />
             <TouchableOpacity
+              disabled={token?.role == "VIP"}
               onPress={() => navigation.navigate("Bag")}
               style={styles.touch}
             >
               <FontAwesome5 name="shopping-bag" size={20} color="#717171" />
-              <Text style={styles.textname}>BAG</Text>
+              <Text
+                style={[
+                  styles.textname,
+                  { opacity: token?.role == "VIP" ? 0.2 : 1 },
+                ]}
+              >
+                BAG
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
+              disabled={token?.role == "VIP"}
               onPress={() => navigation.navigate("FreePoint")}
               style={styles.touch}
             >
@@ -143,54 +169,109 @@ export default function index({ navigation }) {
                 color="#fff"
                 style={{ backgroundColor: "#717171", borderRadius: 12 }}
               />
-              <Text style={styles.textname}>FREE POINT</Text>
+              <Text
+                style={[
+                  styles.textname,
+                  { opacity: token?.role == "VIP" ? 0.2 : 1 },
+                ]}
+              >
+                FREE POINT
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
+              disabled={token?.role == "VIP"}
               onPress={() => {
                 navigation.navigate("Discount");
               }}
               style={styles.touch}
             >
               <MaterialIcons name="card-giftcard" size={24} color="#717171" />
-              <Text style={styles.textname}>DISCOUNT</Text>
+              <Text
+                style={[
+                  styles.textname,
+                  { opacity: token?.role == "VIP" ? 0.2 : 1 },
+                ]}
+              >
+                DISCOUNT
+              </Text>
             </TouchableOpacity>
             <View style={styles.line} />
             <TouchableOpacity
+              disabled={token?.role == "VIP"}
               onPress={() => navigation.navigate("HistoryAll")}
               style={styles.touch}
             >
               <FontAwesome5 name="running" size={24} color="#717171" />
-              <Text style={styles.textname}>HISTORY</Text>
+              <Text
+                style={[
+                  styles.textname,
+                  { opacity: token?.role == "VIP" ? 0.2 : 1 },
+                ]}
+              >
+                HISTORY
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
+              disabled={token?.role == "VIP"}
               onPress={() => {
                 navigation.navigate("Achievement");
               }}
               style={[styles.touch]}
             >
               <FontAwesome5 name="trophy" size={20} color="#717171" />
-              <Text style={[styles.textname]}>ACHIEVEMENT</Text>
+              <Text
+                style={[
+                  styles.textname,
+                  { opacity: token?.role == "VIP" ? 0.2 : 1 },
+                ]}
+              >
+                ACHIEVEMENT
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
+              disabled={token?.role == "VIP"}
               onPress={() => {
                 navigation.navigate("Friend");
               }}
               style={styles.touch}
             >
               <Ionicons name="ios-person-add-sharp" size={24} color="#717171" />
-              <Text style={styles.textname}>FRIEND</Text>
+              <Text
+                style={[
+                  styles.textname,
+                  { opacity: token?.role == "VIP" ? 0.2 : 1 },
+                ]}
+              >
+                FRIEND
+              </Text>
             </TouchableOpacity>
             <View style={styles.view}>
               <TouchableOpacity
+                disabled={token?.role == "VIP"}
                 onPress={() => {
                   navigation.navigate("Notification");
                 }}
                 style={styles.touch}
               >
                 <Ionicons name="ios-notifications" size={24} color="#717171" />
-                <Text style={[styles.textname, { opacity: 0.2 }]}>
+                <Text
+                  style={[
+                    styles.textname,
+                    { opacity: token?.role == "VIP" ? 0.2 : 1 },
+                  ]}
+                >
                   NOTIFICATION
                 </Text>
+                {data?.length > 0 && (
+                  <View
+                    style={{
+                      width: 15,
+                      height: 15,
+                      backgroundColor: "#ff0000",
+                      borderRadius: 15,
+                    }}
+                  />
+                )}
               </TouchableOpacity>
               {/* <View style={styles.viewN}>
                 <Text style={styles.textN}>99</Text>

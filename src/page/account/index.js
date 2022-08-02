@@ -41,6 +41,7 @@ export default function index({ navigation }) {
   const [State, setState] = useState(false);
   const toggleSwitch1 = () => setState((previousState) => !previousState);
   const [Visible, setVisible] = useState(false);
+
   const onShare = async () => {
     try {
       viewShot.current.capture().then(async (uri) => {
@@ -71,7 +72,6 @@ export default function index({ navigation }) {
   const [token, setToken] = useRecoilState(tokenState);
   const [lvstate, setlvstate] = useRecoilState(LvState);
   const [user, setuser] = useState(null);
-  console.log(">>>>>", user);
   const [ssc, setssc] = useState(false);
   async function getUser() {
     const getuser = await getActionUser(token);
@@ -103,7 +103,7 @@ export default function index({ navigation }) {
   if (user == null) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <ActivityIndicator size={"large"} />
+        <ActivityIndicator color="#fff" size={"large"} />
       </View>
     );
   }
@@ -164,20 +164,23 @@ export default function index({ navigation }) {
                       marginLeft: 20,
                       justifyContent: "flex-start",
                       height: 55,
+                      overflow: "hidden",
                     }}
                   >
                     {user.name == null ? (
-                      <Text style={styles.textname}>{user.username}</Text>
+                      <Text numberOfLines={1} style={styles.textname}>
+                        {user.username}
+                      </Text>
                     ) : (
-                      <Text style={styles.textname}>{user.name}</Text>
+                      <Text numberOfLines={1} style={styles.textname}>
+                        {user.name}
+                      </Text>
                     )}
                   </View>
                 </View>
                 <Image
                   resizeMode={"contain"}
-                  source={{
-                    uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/logo_sosorun_update_black.png",
-                  }}
+                  source={require("../../img/lo_hor.png")}
                   style={styles.imglogo}
                 />
 
@@ -309,17 +312,19 @@ export default function index({ navigation }) {
                     }}
                   >
                     {user.name == null ? (
-                      <Text style={styles.textname}>{user.username}</Text>
+                      <Text numberOfLines={1} style={styles.textname}>
+                        {user.username}
+                      </Text>
                     ) : (
-                      <Text style={styles.textname}>{user.name}</Text>
+                      <Text numberOfLines={1} style={styles.textname}>
+                        {user.name}
+                      </Text>
                     )}
                   </View>
                 </View>
                 <Image
                   resizeMode={"contain"}
-                  source={{
-                    uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/logo_sosorun_update_black.png",
-                  }}
+                  source={require("../../img/lo_hor.png")}
                   style={[styles.imglogo]}
                 />
 
@@ -434,12 +439,19 @@ export default function index({ navigation }) {
               <View>
                 {/* Saroj Sikarin */}
                 {user.name == null ? (
-                  <Text style={styles.textname}>{user.username}</Text>
+                  <Text numberOfLines={1} style={styles.textname}>
+                    {user.username}
+                  </Text>
                 ) : (
-                  <Text style={styles.textname}>{user.name}</Text>
+                  <Text numberOfLines={1} style={styles.textname}>
+                    {user.name}
+                  </Text>
                 )}
 
-                <Text style={[styles.textemail, { color: "#000" }]}>
+                <Text
+                  numberOfLines={1}
+                  style={[styles.textemail, { color: "#000" }]}
+                >
                   {user.email}
                 </Text>
               </View>
@@ -516,7 +528,7 @@ export default function index({ navigation }) {
                         ((parseInt(user.user_accounts.total_distance) /
                           nextautolize_Lv(
                             parseInt(user.user_accounts.total_distance)
-                          ).exp) *
+                          )?.exp || 1) *
                           0.4),
                     },
                   ]}
@@ -526,7 +538,7 @@ export default function index({ navigation }) {
                 {parseInt(user.user_accounts.total_distance)}/
                 {
                   nextautolize_Lv(parseInt(user.user_accounts.total_distance))
-                    .exp
+                    ?.exp
                 }
               </Text>
               <Text style={[styles.textlv, { marginLeft: -30, marginTop: 5 }]}>
@@ -588,7 +600,7 @@ export default function index({ navigation }) {
         >
           <MaterialIcons name="devices" size={24} color="black" />
           <View style={styles.viewrowsmall}>
-            <Text style={styles.textname}>Add Device</Text>
+            <Text style={styles.textname}>{"Sync Device"}</Text>
             <TouchableOpacity disabled>
               <FontAwesome name="plus" size={24} color="black" />
             </TouchableOpacity>
@@ -612,7 +624,9 @@ export default function index({ navigation }) {
         <View style={styles.viewrow}>
           <MaterialIcons name="notifications" size={24} color="black" />
           <View style={styles.viewrowsmall}>
-            <Text style={styles.textname}>Notification Settings</Text>
+            <Text style={[styles.textname, { width: null }]}>
+              Notification Settings
+            </Text>
             <Switch
               trackColor={{ false: "#767577", true: "#FCC71A50" }}
               thumbColor={State ? "#FCC71A" : "#f4f3f4"}
@@ -690,10 +704,12 @@ const styles = StyleSheet.create({
     fontFamily: "Prompt-Medium",
     fontSize: 20,
     color: "#000",
+    width: width * 0.44,
   },
   textemail: {
     fontFamily: "Prompt-Regular",
     fontSize: 13,
+    width: width * 0.44,
   },
   imgrank: {
     width: 74,

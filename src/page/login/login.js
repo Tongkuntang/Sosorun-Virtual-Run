@@ -99,7 +99,7 @@ export default function register({ navigation }) {
             `https://graph.facebook.com/me?fields=birthday,email,name,picture&access_token=${token}`
           );
           const public_profile = await profile.json();
-          // console.log(public_profile);
+          console.log(public_profile);
           const response = await apiservice({
             method: "post",
             path: "/authen/facebook",
@@ -178,7 +178,6 @@ export default function register({ navigation }) {
         PERMISSIONS.IOS.MOTION,
         PERMISSIONS.IOS.PHOTO_LIBRARY,
         PERMISSIONS.IOS.CAMERA,
-        PERMISSIONS.IOS.MEDIA_LIBRARY,
       ]).then((statuses) => {});
     }
   }, []);
@@ -393,7 +392,21 @@ export default function register({ navigation }) {
           autoCapitalize="none"
           secureTextEntry
         />
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate("Forget");
+          }}
+          style={{
+            height: 35,
+            justifyContent: "center",
+            alignItems: "flex-end",
+            alignSelf: "flex-end",
+          }}
+        >
+          <Text style={styles.textlogin}>ลืมรหัสผ่าน?</Text>
+        </TouchableOpacity>
       </View>
+
       <View style={styles.background1}>
         <TouchableOpacity onPress={login} style={styles.touchlogin}>
           <Text style={styles.textlogin}>เข้าสู่ระบบ</Text>

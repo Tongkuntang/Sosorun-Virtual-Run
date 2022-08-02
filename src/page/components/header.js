@@ -35,9 +35,11 @@ export default function headerHome({ navigation, onPress }) {
           style={{ justifyContent: "center" }}
         >
           <Image
-            source={{
-              uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/logo_sosorun.png",
-            }}
+            // source={{
+            //   uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/logo_sosorun.png",
+            // }}
+            resizeMode="contain"
+            source={require("../../img/lo_hor.png")}
             style={styles.img}
           />
         </TouchableOpacity>

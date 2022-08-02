@@ -13,6 +13,7 @@ import {
   NativeModules,
   LayoutAnimation,
   Alert,
+  AsyncStorage,
 } from "react-native";
 import Start from "./startRun";
 import HeaderHome from "../components/headerHome";
@@ -97,12 +98,29 @@ export default function index({ navigation }) {
 
   const updateApi = async () => {
     const users = await getActionUser(token);
+
     if (users == "data not found") {
       setToken("");
     }
 
     if (users.data == null) {
       setToken("");
+    }
+
+    const notitoken = await AsyncStorage.getItem("notitoken");
+
+    if (notitoken) {
+      const to = await apiservice({
+        path: "/notification/postnotifications",
+        method: "post",
+        body: {
+          uid: users.data.id,
+          user_id: users.data.id,
+          tokenId: notitoken,
+          chack_status: true,
+        },
+        token: token.accessToken,
+      });
     }
 
     setUser(users.data);
@@ -146,44 +164,46 @@ export default function index({ navigation }) {
     }
     setDaily([]);
     let dataMockDaily = ["", "", "", ""];
-    dataMockDaily.map(async (item, index) => {
-      const getAll = await apiservice({
-        path:
-          "/freepoint/getdaily/" +
-          (index + 1) +
-          "?month=" +
-          moment().format("M") +
-          "&year=" +
-          moment().format("YYYY"),
-        method: "get",
-        token: token.accessToken,
-      });
+    await Promise.all(
+      dataMockDaily.map(async (item, index) => {
+        const getAll = await apiservice({
+          path:
+            "/freepoint/getdaily/" +
+            (index + 1) +
+            "?month=" +
+            moment().format("M") +
+            "&year=" +
+            moment().format("YYYY"),
+          method: "get",
+          token: token.accessToken,
+        });
 
-      if (getAll.status == 200) {
-        setDaily((val) => val.concat(getAll?.data?.data?.reward));
-      }
-    });
-    setVisible(true);
+        if (getAll.status == 200) {
+          setDaily((val) => val.concat(getAll?.data?.data?.reward || []));
+        }
+      })
+    );
+
+    setVisible(!(token?.role == "VIP"));
   };
 
   const data = [0, 1, 2, 3, 4, 5, 6];
   const data2 = [7, 8, 9, 10, 11, 12, 13];
   const data3 = [14, 15, 16, 17, 18, 19, 20];
   const data4 = [21, 22, 23, 24, 25, 26, 27];
-  const [mock, setMock] = useState(data2);
+  const [mock, setMock] = useState(data);
 
   useEffect(() => {
     if (user != null) {
-      console.log(user.user_accounts.DAILYBONUS.dailycount);
-      setMock(
-        user.user_accounts.DAILYBONUS.dailycount > 7
-          ? user.user_accounts.DAILYBONUS.dailycount > 14
-            ? user.user_accounts.DAILYBONUS.dailycount > 21
-              ? data4
-              : data3
-            : data2
-          : data
-      );
+      if (user?.user_accounts?.DAILYBONUS?.dailycount > 21) {
+        setMock(data4);
+      } else if (user?.user_accounts?.DAILYBONUS?.dailycount > 14) {
+        setMock(data3);
+      } else if (user?.user_accounts?.DAILYBONUS?.dailycount > 7) {
+        setMock(data2);
+      } else {
+        setMock(data);
+      }
     }
   }, [user]);
 
@@ -192,12 +212,10 @@ export default function index({ navigation }) {
   }
 
   if (user.user_accounts == undefined) {
-    // console.log("user_accounts", user.user_accounts);
     return <View />;
   }
 
   if (user.user_accounts.DAILYBONUS.dailyBonus == undefined) {
-    // console.log("dailyBonus", user.user_accounts.DAILYBONUS.dailyBonus);
     return <View />;
   }
 
@@ -208,7 +226,7 @@ export default function index({ navigation }) {
         style={{
           marginTop: Platform.OS === "ios" ? 0 : 0,
           height: height,
-          backgroundColor: "#FCC81D",
+          backgroundColor: "#FEB50E",
         }}
       >
         <View style={{ position: "absolute", zIndex: 99 }}>
@@ -253,19 +271,21 @@ export default function index({ navigation }) {
                     : 1}
                 </Text>
                 <FlatList
-                  data={daily.filter(
-                    (item, index) =>
-                      mock.filter((itemsss) => {
+                  data={daily.filter((item, index) => {
+                    return (
+                      mock.filter((itemsss, i) => {
                         return itemsss == index;
                       }).length > 0
-                  )}
+                    );
+                  })}
                   style={{ alignSelf: "center" }}
-                  columnWrapperStyle={{
-                    justifyContent: "space-between",
-                    alignSelf: "center",
-                    alignItems: "center",
+                  contentContainerStyle={{
+                    justifyContent: "center",
+                    flexDirection: "row",
+                    flexWrap: "wrap",
+                    width: width * 0.9,
                   }}
-                  numColumns={3}
+                  horizontal
                   scrollEnabled={false}
                   renderItem={({ item, index }) => {
                     return (
@@ -341,7 +361,11 @@ export default function index({ navigation }) {
                           },
                           {
                             width:
-                              mock[index] == Iindex ? state.w : width * 0.2,
+                              mock[index] == Iindex
+                                ? state.w
+                                : index == 6
+                                ? width * 0.75
+                                : width * 0.2,
                             height:
                               mock[index] == Iindex ? state.h : height * 0.1,
                             marginHorizontal: mock[index] == Iindex ? 7.5 : 15,

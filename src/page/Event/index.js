@@ -32,13 +32,13 @@ export default function index({ navigation }) {
   const [banner1, setbanner1] = useState([]);
 
   async function allbanner() {
+    token?.role == "VIP" && setpage(1);
     const getbanner = await getAllbanner(token);
     const page = getbanner.data[0].page;
-    // console.log("36", page);
+
     setbanner(getbanner.data);
     const getbanner1 = await getBanNer({ token, page: page });
     setbanner1(getbanner1.data[0].img_list);
-    // console.log("39", getbanner1.data[0].img_list);
   }
 
   useEffect(() => {
@@ -91,6 +91,7 @@ export default function index({ navigation }) {
         </Modal>
         <View style={styles.viewpage}>
           <TouchableOpacity
+            disabled={token?.role == "VIP"}
             onPress={() => setpage(0)}
             style={[
               styles.touchpage,
@@ -109,6 +110,7 @@ export default function index({ navigation }) {
             <Text style={styles.text}>เวอร์ชวล</Text>
           </TouchableOpacity>
           <TouchableOpacity
+            disabled={token?.role == "VIP"}
             onPress={() => setpage(2)}
             style={[
               styles.touchpage,

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -18,8 +18,30 @@ import {
   Ionicons,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
+import { apiservice } from "../../service/service";
+import { useRecoilState } from "recoil";
+import { tokenState } from "../../reducer/reducer/reducer/Atom";
 const { width, height } = Dimensions.get("window");
 export default function index({}) {
+  const [token, setToken] = useRecoilState(tokenState);
+
+  const [data, setstate] = useState([]);
+
+  useEffect(() => {
+    callAPi();
+  }, []);
+
+  async function callAPi() {
+    const res = await apiservice({
+      path: "/notification/getnoti_log",
+      token: token.accessToken,
+    });
+
+    if (res?.status == 200) {
+      setstate(res?.data?.data);
+    }
+  }
+
   return (
     <View style={{ flex: 1 }}>
       <View style={{ flex: 0.95 }}>
@@ -162,6 +184,16 @@ export default function index({}) {
               >
                 <Ionicons name="ios-notifications" size={24} color="#717171" />
                 <Text style={styles.textname}>NOTIFICATION</Text>
+                {data?.length > 0 && (
+                  <View
+                    style={{
+                      width: 15,
+                      height: 15,
+                      backgroundColor: "#ff0000",
+                      borderRadius: 15,
+                    }}
+                  />
+                )}
               </TouchableOpacity>
               {/* <View style={styles.viewN}>
                 <Text style={styles.textN}>99</Text>

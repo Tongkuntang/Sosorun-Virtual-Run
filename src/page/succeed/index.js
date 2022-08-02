@@ -175,17 +175,17 @@ export default function index({ navigation, route }) {
                   </View>
                   <TouchableOpacity
                     onPress={async () => {
-                      const response = await actionEditwal({
-                        body: {
-                          gold:
-                            story != undefined &&
-                            story.reward_Info != undefined &&
-                            story?.reward_Info?.coin,
-                        },
-                        token,
-                      });
-                      console.log(response);
-                      setModal(!modal);
+                      setTimeout(async () => {
+                        const response = await actionEditwal({
+                          body: {
+                            gold: story?.reward_Info?.coin,
+                            diamond: story?.reward_Info?.diamond,
+                            cal: 0,
+                          },
+                          token,
+                        });
+                      }, 300);
+
                       navigation.navigate("Event");
                     }}
                     style={styles.touchmodal}
@@ -285,8 +285,7 @@ export default function index({ navigation, route }) {
             <View style={styles.viewsmall}>
               <Text style={styles.text1}>ระยะทางทั้งหมด</Text>
               <Text style={styles.text2}>
-                {(story != undefined && story.total_distance / 1000).toFixed(2)}{" "}
-                กม.
+                {route?.params?.dataEV.distance?.[0]} กม.
               </Text>
             </View>
             <View style={styles.viewsmall}>
@@ -301,7 +300,7 @@ export default function index({ navigation, route }) {
               <Text style={styles.text2}>
                 {(
                   ((story != undefined && story.last_distance / 1000) /
-                    (story != undefined && story.total_distance / 1000)) *
+                    parseFloat(route?.params?.dataEV.distance?.[0])) *
                   100
                 ).toFixed(2)}{" "}
                 %

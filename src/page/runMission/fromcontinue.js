@@ -13,6 +13,8 @@ import {
   Modal,
   NativeEventEmitter,
   NativeModules,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import Headerdetail from "../components/headerdetail";
 import { useRef } from "react";
@@ -142,7 +144,7 @@ export default function fromcontinue({ navigation, route }) {
           back = callback.steps;
           setState((val) => ({
             ...val,
-            currentStepCount: val.currentStepCount + callback.steps * 2.3,
+            currentStepCount: val.currentStepCount + callback.steps,
           }));
         }
       });
@@ -158,6 +160,8 @@ export default function fromcontinue({ navigation, route }) {
     }
   }, []);
 
+  const [Visible1, setVisible1] = useState(false);
+
   useEffect(() => {
     let dates = null;
     let currentStepCount = 0;
@@ -171,6 +175,8 @@ export default function fromcontinue({ navigation, route }) {
               endDate: new Date().toISOString(),
               type: "Walking", // one of: ['Walking', 'StairClimbing', 'Running', 'Cycling', 'Workout']
             };
+            setVisible1(true);
+
             let valuse = setInterval(() => {
               AppleHealthKit.getSamples(options, (err, results) => {
                 if (err) {
@@ -181,6 +187,7 @@ export default function fromcontinue({ navigation, route }) {
                 if (results.length != 0) {
                   clearInterval(counts.current);
                   results.map((test) => (number = number + test.quantity));
+                  setVisible1(false);
 
                   setState((val) => ({
                     ...val,
@@ -373,6 +380,25 @@ export default function fromcontinue({ navigation, route }) {
   return (
     <View style={styles.container}>
       <SafeAreaView />
+      <Modal
+        animationType="none"
+        transparent={true}
+        visible={Visible1}
+        onRequestClose={() => {
+          Alert.alert("Modal has been closed.");
+          setVisible1(!Visible1);
+        }}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "#000000bb",
+            justifyContent: "center",
+          }}
+        >
+          <ActivityIndicator color="#fff" size={"large"} />
+        </View>
+      </Modal>
       <Modal
         animationType="none"
         transparent={true}

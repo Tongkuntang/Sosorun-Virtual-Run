@@ -5,21 +5,16 @@ import android.content.Context;
 import android.content.res.Configuration;
 import androidx.annotation.NonNull;
 
-// import com.pilloxa.backgroundjob.BackgroundJobPackage;
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
-// import com.xebia.activityrecognition.RNActivityRecognitionPackage;
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.soloader.SoLoader;
-
 import expo.modules.ApplicationLifecycleDispatcher;
 import expo.modules.ReactNativeHostWrapper;
-
 import com.facebook.react.bridge.JSIModulePackage;
 import com.swmansion.reanimated.ReanimatedJSIModulePackage;
-// import com.xebia.activityrecognition.RNActivityRecognitionPackage;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 

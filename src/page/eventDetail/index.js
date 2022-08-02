@@ -21,19 +21,18 @@ import { getalleventid, getmyeventid } from "../../action/actiongetall";
 import { useRecoilState } from "recoil";
 import { tokenState, userState } from "../../reducer/reducer/reducer/Atom";
 import { set } from "react-native-reanimated";
+import moment from "moment";
 const { width, height } = Dimensions.get("window");
 export default function index({ navigation, route }) {
   const [state, setstate] = useState(true);
   const dataEV = route.params.item;
-  // console.log("<<<<<<<<<datadetail>>>>>>>>", dataEV);
   const carouselRef = useRef();
   const [data, setdata] = useState([]);
-  // console.log("data", data);
   const [token, setToken] = useRecoilState(tokenState);
   const [user, setuser] = useRecoilState(userState);
   const [event, setevent] = useState([]);
-  // const [dataEV, setdataEV] = useState({});
   const [BIB, setBIB] = useState("");
+  const [visible, setvisible] = useState(false);
   const [price, setprice] = useState("");
   const [premium, setpremium] = useState("");
 
@@ -46,14 +45,109 @@ export default function index({ navigation, route }) {
 
   useEffect(() => {
     allevent();
+    if (dataEV?.Type == "Eventonroad") {
+      setvisible(true);
+    }
   }, [token]);
+
+  console.log(dataEV);
 
   return (
     <View style={styles.container}>
       <SafeAreaView />
+      <Modal visible={visible} transparent style={{ flex: 1 }}>
+        <View
+          style={{ width: width, height: height, backgroundColor: "#000000" }}
+        >
+          <SafeAreaView />
+          <TouchableOpacity
+            onPress={() => {
+              setvisible((val) => !val);
+            }}
+            style={{ alignSelf: "flex-end", padding: 20 }}
+          >
+            <Text style={[styles.textrank, { color: "#FBC71C", fontSize: 14 }]}>
+              SKIP
+            </Text>
+          </TouchableOpacity>
+          <Text style={[styles.textrank, { color: "#fff", fontSize: 16 }]}>
+            เงื่อนไขในการเข้าร่วมการแข่งขัน
+          </Text>
+          <Text
+            style={[
+              styles.textrank,
+              { color: "#fff", fontSize: 14, marginTop: 10 },
+            ]}
+          >
+            ในการเข้าร่วมการแข่งขัน จำเป็นจะต้องมีอุปกรณ์ เสริม ในการเชื่อมต่อ
+            กับตัวแอพพลิเคชั่นเพื่อทำ การส่งผลการวิ่ง
+          </Text>
+          <Text style={[styles.textrank, { color: "#fff", fontSize: 14 }]}>
+            อุปกรณ์ที่ใช้ในการเชื่อมต่อ
+          </Text>
+          <Text style={[styles.textrank, { color: "#fff", fontSize: 14 }]}>
+            1. เชื่อมต่อกับ อุปกรณ์ SOSORUN POD
+          </Text>
+          <Image
+            style={{
+              width: 90,
+              height: 90,
+              marginVertical: 25,
+              alignSelf: "center",
+            }}
+            source={require("../../img/112.png")}
+          />
+          <Text style={[styles.textrank, { color: "#fff", fontSize: 14 }]}>
+            2. เชื่อมต่อกับ นาฬิกาในแบรนด์ที่รองรับ
+          </Text>
+          <View style={{ flexDirection: "row", alignSelf: "center" }}>
+            <Image
+              resizeMode="contain"
+              style={{
+                width: 55,
+                height: 55,
+                marginVertical: 25,
+                alignSelf: "center",
+                marginHorizontal: 25,
+              }}
+              source={require("../../img/113.png")}
+            />
+            <Image
+              resizeMode="contain"
+              style={{
+                width: 55,
+                height: 55,
+                marginVertical: 25,
+                alignSelf: "center",
+                marginHorizontal: 25,
+              }}
+              source={require("../../img/114.png")}
+            />
+            <Image
+              resizeMode="contain"
+              style={{
+                width: 55,
+                height: 55,
+                marginVertical: 25,
+                alignSelf: "center",
+                marginHorizontal: 25,
+              }}
+              source={require("../../img/115.png")}
+            />
+          </View>
+          <Text style={[styles.textrank, { color: "#fff", fontSize: 14 }]}>
+            กรุณาตรวจสอบการรองรับของอุปกรณ์ในแต่ละรุ่นได้ที่
+          </Text>
+          <Text style={[styles.textrank, { color: "#fff", fontSize: 14 }]}>
+            www.sosorun.com/Device
+          </Text>
+        </View>
+      </Modal>
       <View
         style={{
           marginTop: Platform.OS === "ios" ? 0 : 0,
+          backgroundColor: "#FBC71C",
+          flex: 1,
         }}
       >
         <Headerdetail item={dataEV.titel} navigation={navigation} />
@@ -165,7 +259,6 @@ export default function index({ navigation, route }) {
                             <View
                               style={{
                                 flexDirection: "row",
-                                width: 35,
                               }}
                             >
                               {item.type == "โกลด์" && (
@@ -245,34 +338,44 @@ export default function index({ navigation, route }) {
                     />
                     <Text style={styles.textrank}>จัดอันดับ</Text>
                   </TouchableOpacity>
-                  {data.filter((e, i) => e.event_id == dataEV.id).length > 0 ? (
+                  {data.filter((e, i) => {
+                    return e.event_id == dataEV.id;
+                  }).length > 0 ? (
                     <TouchableOpacity
+                      disabled={
+                        moment(dataEV?.startDate)?.valueOf() >
+                        moment()?.valueOf()
+                      }
                       onPress={() => {
-                        console.log(
-                          data.filter(
-                            (item) => item?.event_id == dataEV.id
-                          )?.[0]?.pay_status
+                        navigation.navigate(
+                          dataEV?.Type == "Eventonroad"
+                            ? "SelectDevice"
+                            : "RunEvant",
+                          {
+                            dataEV: {
+                              ...dataEV,
+                              distance: dataEV.distance
+                                .filter((items) => {
+                                  return (
+                                    items.price ==
+                                    data.filter(
+                                      (item) => item?.event_id == dataEV.id
+                                    )?.[0]?.pay_status
+                                  );
+                                })
+                                .map((items) => items.distance),
+                            },
+                            BIB: data.filter(
+                              (e, i) => e.event_id == dataEV.id
+                            )[0].bib,
+                            ...data.filter(
+                              (e, i) => e.event_id == dataEV.id
+                            )[0],
+                            id: data.filter(
+                              (e, i) => e.event_id == dataEV.id
+                            )[0].id,
+                          }
                         );
-                        navigation.navigate("RunEvant", {
-                          dataEV: {
-                            ...dataEV,
-                            distance: dataEV.distance
-                              .filter((items) => {
-                                return (
-                                  items.price ==
-                                  data.filter(
-                                    (item) => item?.event_id == dataEV.id
-                                  )?.[0]?.pay_status
-                                );
-                              })
-                              .map((items) => items.distance),
-                          },
-                          BIB: data.filter((e, i) => e.event_id == dataEV.id)[0]
-                            .bib,
-                          ...data.filter((e, i) => e.event_id == dataEV.id)[0],
-                          id: data.filter((e, i) => e.event_id == dataEV.id)[0]
-                            .id,
-                        });
                       }}
                       style={styles.touchstart}
                     >
@@ -350,7 +453,6 @@ export default function index({ navigation, route }) {
                             <View
                               style={{
                                 flexDirection: "row",
-                                width: 35,
                               }}
                             >
                               {item.type == "โกลด์" && (
@@ -432,22 +534,35 @@ export default function index({ navigation, route }) {
                   </TouchableOpacity>
                   {data.filter((e, i) => e.event_id == dataEV.id).length > 0 ? (
                     <TouchableOpacity
+                      disabled={
+                        moment(dataEV?.startDate)?.valueOf() >
+                        moment()?.valueOf()
+                      }
                       onPress={() =>
-                        navigation.navigate("RunEvant", {
-                          dataEV: {
-                            ...dataEV,
-                            distance: dataEV.distance
-                              .filter((items) => {
-                                return items.price == dataEV.pay_status;
-                              })
-                              .map((items) => items.distance),
-                          },
-                          BIB: data.filter((e, i) => e.event_id == dataEV.id)[0]
-                            .bib,
-                          ...data.filter((e, i) => e.event_id == dataEV.id)[0],
-                          id: data.filter((e, i) => e.event_id == dataEV.id)[0]
-                            .id,
-                        })
+                        navigation.navigate(
+                          dataEV?.Type == "Eventonroad"
+                            ? "SelectDevice"
+                            : "RunEvant",
+                          {
+                            dataEV: {
+                              ...dataEV,
+                              distance: dataEV.distance
+                                .filter((items) => {
+                                  return items.price == dataEV.pay_status;
+                                })
+                                .map((items) => items.distance),
+                            },
+                            BIB: data.filter(
+                              (e, i) => e.event_id == dataEV.id
+                            )[0].bib,
+                            ...data.filter(
+                              (e, i) => e.event_id == dataEV.id
+                            )[0],
+                            id: data.filter(
+                              (e, i) => e.event_id == dataEV.id
+                            )[0].id,
+                          }
+                        )
                       }
                       style={styles.touchstart}
                     >

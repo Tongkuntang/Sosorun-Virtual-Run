@@ -45,7 +45,7 @@ export default function index({ navigation, route }) {
               renderItem={({ item, index }) => {
                 return (
                   <TouchableOpacity
-                    onPress={() =>
+                    onPress={() => {
                       navigation.navigate("Bib", {
                         dataEV: {
                           ...dataEV,
@@ -54,9 +54,11 @@ export default function index({ navigation, route }) {
                           distance: item.distance,
                           price:
                             item.price.length > 0 ? parseInt(item.price) : 0,
+                          fee: item?.cost,
                         },
-                      })
-                    }
+                      });
+                      console.log(item?.cost);
+                    }}
                     style={styles.touch}
                   >
                     <View style={styles.viewhead}>

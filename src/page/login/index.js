@@ -30,9 +30,8 @@ export default function index({ navigation }) {
             style={styles.imgbackground}
           />
           <Image
-            source={{
-              uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/logo_sosorun_update_black.png",
-            }}
+            resizeMode="contain"
+            source={require("../../img/lo_hor.png")}
             style={styles.imglogo}
           />
         </View>

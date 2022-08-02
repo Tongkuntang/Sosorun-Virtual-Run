@@ -18,6 +18,11 @@ export const deviceIndex = atom({
   default: 0,
 });
 
+export const deviceRegis = atom({
+  key: "deviceRegis",
+  default: {},
+});
+
 export const userState = atom({
   key: "user",
   default: null,

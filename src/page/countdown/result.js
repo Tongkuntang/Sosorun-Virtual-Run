@@ -72,7 +72,6 @@ export default function result({ navigation, onPress }) {
     var hh0 = timeformet(Math.floor(start0 / 3600));
     var mm0 = timeformet(Math.floor((start0 % 3600) / 60));
     var ss0 = timeformet(Math.floor((start0 % 3600) % 60));
-    console.log("gethistory", dis0);
   }
   if (his[1] != null) {
     const start1 = his[1].info.time;
@@ -83,7 +82,6 @@ export default function result({ navigation, onPress }) {
     var mm1 = timeformet(Math.floor((start1 % 3600) / 60));
     var ss1 = timeformet(Math.floor((start1 % 3600) % 60));
     var createdAt = his[1].createdAt;
-    // console.log("gethistory", AVG1);
   }
 
   return (

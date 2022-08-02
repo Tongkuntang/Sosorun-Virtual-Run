@@ -1,6 +1,7 @@
 import axios from "axios";
 
 // const BaseUrl = "https://api-ssr.wishesexistence.co/api";
+// const BaseUrl = "https://api.sosorun.com/api";
 const BaseUrl = "https://api.sosorun.com/api";
 
 // api.sosorun.com;
@@ -17,7 +18,7 @@ async function apiservice({ url, method, path, body, token }) {
     const response = await axios({
       method: method,
       data: body,
-      url: BaseUrl + path,
+      url: (url || BaseUrl) + path,
       headers: header,
     });
     // console.log("responseAll", response);

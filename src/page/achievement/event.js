@@ -44,7 +44,7 @@ export default function friend({ navigation }) {
     }
   }
 
-  // console.log("gethistory >> ", data);
+  console.log("gethistory >> ", evet);
 
   useEffect(() => {
     event();
@@ -99,7 +99,7 @@ export default function friend({ navigation }) {
                     source={{
                       uri:
                         "https://api.sosorun.com/api/imaged/get/" +
-                        item.event_List.img_title,
+                        item?.event_Listt?.Achievement,
                     }}
                     style={{ width: 70, height: 70, resizeMode: "contain" }}
                   />
@@ -111,7 +111,7 @@ export default function friend({ navigation }) {
                       color: "#434343",
                     }}
                   >
-                    {item.event_List.titel}
+                    {item?.event_name}
                   </Text>
                 </View>
               </TouchableOpacity>

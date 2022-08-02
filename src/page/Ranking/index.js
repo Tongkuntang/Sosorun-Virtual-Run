@@ -46,36 +46,53 @@ export default function index({ navigation, route }) {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            disabled
             onPress={() => setpage(1)}
             style={[
               styles.touchpage,
               { borderBottomColor: page == 1 ? "#000" : "#fff" },
             ]}
           >
-            <Text style={[styles.text, { color: page == 0 ? "#000" : "#fff" }]}>
+            <Text style={[styles.text, { color: page == 1 ? "#000" : "#fff" }]}>
               FRIENDS
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            disabled
             onPress={() => setpage(2)}
             style={[
               styles.touchpage,
               { borderBottomColor: page == 2 ? "#000" : "#fff" },
             ]}
           >
-            <Text style={[styles.text, { color: page == 0 ? "#000" : "#fff" }]}>
+            <Text style={[styles.text, { color: page == 2 ? "#000" : "#fff" }]}>
               VIP
             </Text>
           </TouchableOpacity>
         </View>
         <ScrollView style={{ marginBottom: 90 }}>
           {page == 0 && (
-            <Page0 type={type} navigation={navigation} DataR={DataR} />
+            <Page0
+              type={type}
+              navigation={navigation}
+              DataR={DataR}
+              tab="all"
+            />
           )}
-          {page == 1 && <Page0 />}
-          {page == 2 && <Page0 />}
+          {page == 1 && (
+            <Page0
+              type={type}
+              navigation={navigation}
+              DataR={DataR}
+              tab="friend"
+            />
+          )}
+          {page == 2 && (
+            <Page0
+              type={type}
+              navigation={navigation}
+              DataR={DataR}
+              tab="vip"
+            />
+          )}
         </ScrollView>
       </View>
     </View>

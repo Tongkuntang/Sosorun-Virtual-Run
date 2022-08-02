@@ -159,7 +159,7 @@ export default function friend({ navigation, route }) {
         <View style={styles.view}>
           <View style={{ flexDirection: "row" }}>
             <FontAwesome5 name="running" size={24} color="#5BC3FF" />
-            <Text style={styles.textbold}>{item.condition.cal}</Text>
+            <Text style={styles.textbold}>{user.user_accounts.wallet.cal}</Text>
           </View>
           <View style={styles.view1}>
             <Image
@@ -168,7 +168,9 @@ export default function friend({ navigation, route }) {
               }}
               style={styles.imgpoint}
             />
-            <Text style={styles.textbold}>{item.condition.gold}</Text>
+            <Text style={styles.textbold}>
+              {user.user_accounts.wallet.gold}
+            </Text>
           </View>
         </View>
         {item.code_using.click_date == undefined ||

@@ -29,10 +29,19 @@ export default function friend({ navigation }) {
   console.log("1111", user);
   const [page, setpage] = useState(0);
   const [state, setstate] = useState("");
+  const [data, setdata] = useState([]);
+
   async function allstate() {
     const getstate = await actionMyfriend({ token, uid: user.id });
     if (getstate.status == 200) {
       setstate(getstate.data.data);
+    }
+  }
+
+  async function allstateACC() {
+    const getstate = await getfriendreq(token);
+    if (getstate.status == 200) {
+      setdata(getstate.data.data);
     }
   }
   // console.log("43", state);
@@ -97,6 +106,16 @@ export default function friend({ navigation }) {
             >
               ACCEPT
             </Text>
+            {data?.length > 0 && (
+              <View
+                style={{
+                  width: 15,
+                  height: 15,
+                  backgroundColor: "#ff0000",
+                  borderRadius: 15,
+                }}
+              />
+            )}
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {

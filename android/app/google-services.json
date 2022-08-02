@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "444726653842",
+    "project_id": "sosorun-76063",
+    "storage_bucket": "sosorun-76063.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:444726653842:android:3e6a13bea491e1ed27074b",
+        "android_client_info": {
+          "package_name": "com.sosorun.asia"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "444726653842-k0b76iuu2jsch7npeh6bcd3rr04fvasl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvw9s1VCS3kSVHZmBP99CjJHLJ-uf-v3E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "444726653842-k0b76iuu2jsch7npeh6bcd3rr04fvasl.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "444726653842-ltll3obh0j7jfe2nhna31ruklabihvhn.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.sosorun.io"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

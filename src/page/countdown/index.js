@@ -16,6 +16,7 @@ import {
   NativeAppEventEmitter,
   NativeEventEmitter,
   NativeModules,
+  ActivityIndicator,
 } from "react-native";
 import AppleHealthKit, {
   HealthValue,
@@ -31,10 +32,10 @@ import Level from "./level";
 import { LinearGradient } from "expo-linear-gradient";
 import moment from "moment";
 import { Gyroscope } from "expo-sensors";
-
 import { useRef } from "react";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import {
+  deviceRegis,
   LvState,
   tokenState,
   userState,
@@ -64,18 +65,21 @@ export default function index({ navigation }) {
   const [user, setUser] = useRecoilState(userState);
   const [put, setput] = useState(false);
   const [page, setpage] = useState(0);
-  // const [mainCount, setmainCount] = useState(0);
-
+  const [start_date, setstart_date] = useState(moment());
   const [num, setnum] = useState(5);
   const [detail, setdetail] = useState(true);
   const [chick, setchick] = useState(false);
   const [DO, setDO] = useState(null);
   const [Visible, setVisible] = useState(false);
+  const [Visible1, setVisible1] = useState(false);
+
   const [clear, setClear] = useState(null);
   const [resume, setResume] = useState(false);
   const [lvstate, setlvstate] = useRecoilState(LvState);
   const [timecal, setTime] = useState(0);
   const [back, setBack] = useState(0);
+  const [back1, setBack1] = useState(0);
+
   let counts = useRef();
   const eventEmitter = new NativeEventEmitter(Fitblekit);
 
@@ -100,16 +104,18 @@ export default function index({ navigation }) {
               endDate: new Date().toISOString(),
               type: "Walking", // one of: ['Walking', 'StairClimbing', 'Running', 'Cycling', 'Workout']
             };
+            setVisible1(true);
             let valuse = setInterval(() => {
               AppleHealthKit.getSamples(options, (err, results) => {
                 if (err) {
                   return;
                 }
                 let number = 0;
-                console.log(results);
+
                 if (results.length != 0) {
                   clearInterval(counts.current);
                   results.map((test) => (number = number + test.quantity));
+                  setVisible1(false);
 
                   setState((val) => ({
                     ...val,
@@ -140,6 +146,7 @@ export default function index({ navigation }) {
   const carouselRef = useRef();
   const [banner, setbanner] = useState([]);
   const [banner1, setbanner1] = useState([]);
+  const bodygarmin = useRecoilValue(deviceRegis);
 
   async function allbanner() {
     const getbanner = await getAllbanner(token);
@@ -152,18 +159,33 @@ export default function index({ navigation }) {
   }
 
   NativeAppEventEmitter.addListener("onSendData", onSendData);
-  // console.log('subscribeEmitter', this.subscription)
-  // }
+
   const onSendData = (event) => {
-    console.log("HealthEmitterHandler.onSendData", event);
     const { workouts } = event;
-    console.log(workouts);
-    // this.sendToBackEnd(workouts);
   };
+
+  // async function garmin() {
+  //   if (bodygarmin?.username) {
+  //     const res = await apiservice({
+  //       path:
+  //         "/user/garmin?user=" +
+  //         bodygarmin.username +
+  //         "&pass=" +
+  //         bodygarmin.password +
+  //         "&date=" +
+  //         moment().format("YYYY-MM-DD"),
+  //     });
+
+  //     res?.data?.steps?.map((item) => {
+  //       setBack((val) => val + item?.steps);
+  //     });
+  //   }
+  // }
 
   useEffect(() => {
     allbanner();
     lvlist();
+    // garmin();
   }, [token]);
 
   const [LV, setLV] = useState([]);
@@ -176,30 +198,31 @@ export default function index({ navigation }) {
     let back = 0;
     let Check = 0;
     let mainCount = 0;
-    const newDevice5 = eventEmitter.addListener(
-      "EVENTFBKSTEP",
-      (deviceDiscovered) => {
-        if (mainCount == 0) {
-          mainCount = deviceDiscovered;
-        }
-        if (Check != deviceDiscovered - mainCount) {
-          setState((val) => ({
-            ...val,
-            currentStepCount: deviceDiscovered - mainCount,
-          }));
-          Check = deviceDiscovered - mainCount;
-          console.log("ทำนะ");
-        }
-      }
-    );
+    // const newDevice5 = eventEmitter.addListener(
+    //   "EVENTFBKSTEP",
+    //   (deviceDiscovered) => {
+    //     if (mainCount == 0) {
+    //       mainCount = deviceDiscovered;
+    //     }
+    //     if (Check != deviceDiscovered - mainCount) {
+    //       setState((val) => ({
+    //         ...val,
+    //         currentStepCount: deviceDiscovered - mainCount,
+    //       }));
+    //       Check = deviceDiscovered - mainCount;
+    //     }
+    //   }
+    // );
 
     if (Platform.OS == "android") {
+      callNum();
       GoogleFit.observeSteps((callback) => {
         if (back != callback.steps) {
+          console.log(callback.steps);
           back = callback.steps;
           setState((val) => ({
             ...val,
-            currentStepCount: val.currentStepCount + callback.steps * 2.3,
+            currentStepCount: val.currentStepCount + callback.steps * 1,
           }));
         }
       });
@@ -207,9 +230,7 @@ export default function index({ navigation }) {
       AppleHealthKit.initHealthKit(permissions, (err, res) => {
         const sub2 = NativeAppEventEmitter.addListener(
           "healthKit:StepCount:new",
-          (evt) => {
-            console.log(evt);
-          }
+          (evt) => {}
         );
       });
     }
@@ -225,10 +246,48 @@ export default function index({ navigation }) {
     info: {},
   });
 
+  async function callNum() {
+    const options = {
+      scopes: [
+        Scopes.FITNESS_ACTIVITY_READ,
+        Scopes.FITNESS_ACTIVITY_WRITE,
+        Scopes.FITNESS_BODY_READ,
+        Scopes.FITNESS_BODY_WRITE,
+        Scopes.FITNESS_LOCATION_WRITE,
+        Scopes.FITNESS_LOCATION_READ,
+      ],
+    };
+
+    GoogleFit.authorize(options)
+      .then((authResult) => {
+        if (authResult.success) {
+          GoogleFit.startRecording((callback) => {
+            // Process data from Google Fit Recording API (no google fit app needed)
+            fetchData();
+          });
+        } else {
+          Alert.alert(authResult.message);
+        }
+      })
+      .catch((err) => {
+        Alert.alert(err);
+      });
+  }
+
+  async function fetchData() {
+    const opt = {
+      startDate: "2017-01-01T00:00:17.971Z", // required ISO8601Timestamp
+      endDate: new Date().toISOString(), // required ISO8601Timestamp
+      bucketUnit: BucketUnit.DAY, // optional - default "DAY". Valid values: "NANOSECOND" | "MICROSECOND" | "MILLISECOND" | "SECOND" | "MINUTE" | "HOUR" | "DAY"
+      bucketInterval: 1, // optional - default 1.
+    };
+    const res = await GoogleFit.getDailyStepCountSamples(opt);
+    console.log(res);
+  }
+
   const walkingFactor = 0.57;
   const customerheight = user.height;
   const weight = user.weight;
-  let _subscription = useRef();
   const strip = customerheight * 0.415; // ความสูง
   const CaloriesBurnedPerMile = walkingFactor * (weight * 2.2);
   const stepCountMile = 160934.4 / strip;
@@ -263,10 +322,6 @@ export default function index({ navigation }) {
     };
   }, [chick]);
 
-  useEffect(() => {
-    // requestPermissions();
-  }, []);
-
   const [subscription, setSubscription] = useState(null);
 
   const _unsubscribe = () => {
@@ -275,8 +330,6 @@ export default function index({ navigation }) {
   };
 
   const _subscribe = async () => {
-    console.log(await Gyroscope.isAvailableAsync());
-    // let MagnitudePreviouss = 0;
     let Magnitude = 0;
     setSubscription(
       Gyroscope.addListener((gyroscopeData) => {
@@ -547,6 +600,25 @@ export default function index({ navigation }) {
               </LinearGradient>
             </View>
           </Modal>
+          <Modal
+            animationType="none"
+            transparent={true}
+            visible={Visible1}
+            onRequestClose={() => {
+              Alert.alert("Modal has been closed.");
+              setVisible(!Visible);
+            }}
+          >
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: "#000000bb",
+                justifyContent: "center",
+              }}
+            >
+              <ActivityIndicator color="#fff" size={"large"} />
+            </View>
+          </Modal>
           {detail == false && (
             <Result
               navigation={navigation}
@@ -568,7 +640,6 @@ export default function index({ navigation }) {
                 autoplay={100}
                 loop
                 renderItem={({ item, index }) => {
-                  // console.log("129", item);
                   return (
                     <View>
                       <Image
@@ -672,9 +743,63 @@ export default function index({ navigation }) {
                 </View>
                 {chick ? (
                   <TouchableOpacity
-                    onPress={() => {
-                      clearInterval(Clear.current);
-                      clearInterval(clear);
+                    onPress={async () => {
+                      let count = 0;
+                      // if (bodygarmin?.username) {
+                      //   const res = await apiservice({
+                      //     path:
+                      //       "/user/garmin?user=" +
+                      //       bodygarmin.username +
+                      //       "&pass=" +
+                      //       bodygarmin.password +
+                      //       "&date=" +
+                      //       moment().format("YYYY-MM-DD"),
+                      //   });
+
+                      //   res?.data?.steps?.map((item) => {
+                      //     count = count + item?.steps;
+                      //   });
+                      //   setState((val) => ({
+                      //     ...val,
+                      //     currentStepCount: count - back,
+                      //   }));
+                      // }
+
+                      // const gethw = await apiservice({
+                      //   path: "/authen/gethw?uid=" + user?.id,
+                      // });
+
+                      // if (gethw?.status == 200) {
+
+                      //   setTimeout(async () => {
+                      //     let header = {
+                      //       "Content-Type": "application/json",
+                      //     };
+                      //     header.Authorization =
+                      //       "Bearer " +
+                      //       gethw?.data?.data?.[0]?.info?.access_token;
+
+                      //     const resposne = await axios({
+                      //       method: "get",
+                      //       url: "https://health-api.cloud.huawei.com/healthkit/v1/sampleSets/latestSamplePoint?dataType=com.huawei.continuous.steps.delta",
+                      //       headers: header,
+                      //     });
+
+                      //     console.log(resposne?.data);
+                      //     if (resposne.status == 200) {
+                      //       resposne?.data?.group?.map((item) => {
+                      //         console.log(moment(item.endTime));
+
+                      //         console.log(moment(item.startTime));
+
+                      //         item?.sampleSet?.map((e) => console.log(e));
+                      //       });
+                      //     }
+                      //   }, 5000);
+                      // }
+
+                      // clearInterval(Clear.current);
+                      // clearInterval(clear);
                       setchick((val) => !val);
                     }}
                     style={styles.bottompause}
@@ -822,7 +947,8 @@ export default function index({ navigation }) {
                   <Text style={styles.sec}>sec</Text>
                 </View>
                 <TouchableOpacity
-                  onPress={() => {
+                  onPress={async () => {
+                    setstart_date(moment());
                     count();
                     setTimeout(() => {
                       setchick(true);
@@ -881,12 +1007,12 @@ export default function index({ navigation }) {
                               },
                             },
                           });
-                          // console.log("response", response);
+
                           if (response.status == 200) {
                             const get = await getLV(token);
-                            // console.log("get", get);
+
                             const getuser = await getActionUser(token);
-                            // console.log("getuser", getuser);
+
                             setUser(getuser.data);
                           }
                           let gold =
@@ -925,7 +1051,6 @@ export default function index({ navigation }) {
             loop
             inactiveSlideScale={1}
             renderItem={({ item, index }) => {
-              // console.log("129", item);
               return (
                 <View>
                   <Image

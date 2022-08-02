@@ -25,6 +25,7 @@ import {
 } from "@expo/vector-icons";
 import HeaderFree from "../components/headerfree";
 import { timeformet } from "../components/test";
+import moment from "moment";
 
 const { width, height } = Dimensions.get("window");
 
@@ -60,8 +61,8 @@ export default function friend({ navigation, route }) {
         <Image
           source={{
             uri:
-              "https://api.sosorun.com/api/imaged/getGif/" +
-              item.event_List.Achievement,
+              "https://api.sosorun.com/api/imaged/get/" +
+              item?.event_Listt?.Achievement,
           }}
           style={{ width: width, height: 250 }}
         />
@@ -74,7 +75,7 @@ export default function friend({ navigation, route }) {
             marginTop: 10,
           }}
         >
-          {item.event_List.titel}
+          {item.event_name}
         </Text>
         <Text
           style={{
@@ -104,9 +105,8 @@ export default function friend({ navigation, route }) {
           style={{ width: width, height: 180 }}
         >
           <Image
-            source={{
-              uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/logo_sosorun_update_black.png",
-            }}
+            resizeMode="contain"
+            source={require("../../img/lo_hor.png")}
             style={{
               width: 120,
               height: 30,

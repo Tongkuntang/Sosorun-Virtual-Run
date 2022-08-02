@@ -7,7 +7,7 @@
 #import <React/RCTLinkingManager.h>
 #import <React/RCTConvert.h>
 #import <GoogleMaps/GoogleMaps.h>
-
+#import <Firebase.h>
 #if defined(FB_SONARKIT_ENABLED) && __has_include(<FlipperKit/FlipperClient.h>)
 #import <FlipperKit/FlipperClient.h>
 #import <FlipperKitLayoutPlugin/FlipperKitLayoutPlugin.h>
@@ -44,6 +44,9 @@ static void InitializeFlipper(UIApplication *application) {
     rootView.backgroundColor = [UIColor whiteColor];
   }
   
+  if ([FIRApp defaultApp] == nil) {
+      [FIRApp configure];
+    }
   
   [[RCTAppleHealthKit new] initializeBackgroundObservers:bridge];
 

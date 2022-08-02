@@ -55,6 +55,7 @@ export default function index({ navigation }) {
       );
     }
   }
+
   return (
     <View style={styles.container}>
       <SafeAreaView />
@@ -93,7 +94,8 @@ export default function index({ navigation }) {
                           (i) =>
                             i.last_distance < i.total_distance &&
                             i.Type == "EVENT" &&
-                            i.status == null
+                            i.status == null &&
+                            i?.event_Listt?.Type != "Eventonroad"
                         ).length
                       }
                     </Text>
@@ -113,11 +115,16 @@ export default function index({ navigation }) {
                 (i) =>
                   i.last_distance < i.total_distance &&
                   i.Type == "EVENT" &&
-                  i.status == null
+                  i.status == null &&
+                  i?.event_Listt?.Type != "Eventonroad"
               )}
               renderItem={({ item, index }) => {
                 console.log("item", item);
-
+                const total_distance = item.event_Listt.distance
+                  .filter((items) => {
+                    return items.price == item.pay_status;
+                  })
+                  .map((items) => items.distance)?.[0];
                 return (
                   <View>
                     {event == true && (
@@ -130,11 +137,12 @@ export default function index({ navigation }) {
                             onPress={() =>
                               // navigation.navigate("Campaign", { item })
                               {
+                                console.log(item);
                                 navigation.navigate("RunEvant", {
                                   BIB: item.bib,
                                   dataEV: {
                                     ...item.event_List,
-                                    distance: item.event_List.distance
+                                    distance: item.event_Listt.distance
                                       .filter((items) => {
                                         return items.price == item.pay_status;
                                       })
@@ -165,7 +173,7 @@ export default function index({ navigation }) {
                           <View style={styles.viewsmall}>
                             <Text style={styles.text1}>ระยะทางทั้งหมด</Text>
                             <Text style={styles.text2}>
-                              {(item.total_distance / 1000).toFixed(2)} กม.
+                              {parseFloat(total_distance).toFixed(2)} กม.
                             </Text>
                           </View>
                           <View style={styles.viewsmall}>
@@ -179,7 +187,7 @@ export default function index({ navigation }) {
                             <Text style={styles.text2}>
                               {(
                                 ((item.last_distance / 1000).toFixed(2) * 100) /
-                                (item.total_distance / 1000).toFixed(2)
+                                parseFloat(total_distance).toFixed(2)
                               ).toFixed(2)}
                               %
                             </Text>

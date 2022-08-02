@@ -60,12 +60,11 @@ export async function actionregister(body) {
     });
     return response.data;
   } catch (error) {
-    throw error;
+    return false;
   }
 }
 
 export async function actionEditwal({ body, token }) {
-  console.log(">>>>", body);
   try {
     const response = await apiservice({
       path: "/user/edit_wallet",

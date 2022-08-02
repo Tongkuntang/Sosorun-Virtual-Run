@@ -59,7 +59,7 @@ export default function index({ navigation, route }) {
   if (user == null) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <ActivityIndicator size={"large"} />
+        <ActivityIndicator color="#fff" size={"large"} />
       </View>
     );
   }
@@ -126,29 +126,33 @@ export default function index({ navigation, route }) {
                 Class
               </Text>
             </View>
-            <TouchableOpacity
-              onPress={async () => {
-                let id = { ...body, uid: user.id, friend_id: data.id };
-                const response = await RequestFriend({ body: id, token });
-                console.log("77", response);
-                setTimeout(() => {
-                  navigation.navigate("Friend");
-                }, 500);
-              }}
-              style={styles.touch}
-            >
-              <Text style={styles.textouch}>เพิ่มเพื่อน</Text>
-            </TouchableOpacity>
+            {!route?.params?.userfriend && (
+              <TouchableOpacity
+                onPress={async () => {
+                  let id = { ...body, uid: user.id, friend_id: data.id };
+                  const response = await RequestFriend({ body: id, token });
+                  console.log("77", response);
+                  setTimeout(() => {
+                    navigation.navigate("Friend");
+                  }, 500);
+                }}
+                style={styles.touch}
+              >
+                <Text style={styles.textouch}>เพิ่มเพื่อน</Text>
+              </TouchableOpacity>
+            )}
           </View>
-          <TouchableOpacity
-            onPress={() => navigation.navigate("Friend")}
-            style={[
-              styles.touch,
-              { alignSelf: "flex-end", marginRight: 20, marginTop: 10 },
-            ]}
-          >
-            <Text style={styles.textouch}>ยกเลิก</Text>
-          </TouchableOpacity>
+          {!route?.params?.userfriend && (
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Friend")}
+              style={[
+                styles.touch,
+                { alignSelf: "flex-end", marginRight: 20, marginTop: 10 },
+              ]}
+            >
+              <Text style={styles.textouch}>ยกเลิก</Text>
+            </TouchableOpacity>
+          )}
         </ScrollView>
       </View>
     </View>

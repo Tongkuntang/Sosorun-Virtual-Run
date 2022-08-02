@@ -41,12 +41,14 @@ export default function friend({ navigation }) {
   const [user, setuser] = useRecoilState(userState);
   const focus = useIsFocused();
   const [data, setdata] = useState([]);
+
   async function allstate() {
     const getstate = await getfriendreq(token);
     if (getstate.status == 200) {
       setdata(getstate.data.data);
     }
   }
+
   useEffect(() => {
     allstate();
   }, [token, focus]);
@@ -209,15 +211,14 @@ export default function friend({ navigation }) {
                             ...body,
                             id: item.friend_id,
                           };
-                          // console.log("251", data1);
+
                           const response = await Delfriend({
                             body: data1,
                             token,
                           });
-                          // console.log("256", response);
+
                           if (response.status == 200) {
                             const getstate = await getfriendreq(token);
-                            // console.log("221", getstate);
                           }
                           navigation.goBack("");
                         }}

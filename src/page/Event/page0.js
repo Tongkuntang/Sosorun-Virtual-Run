@@ -42,22 +42,7 @@ export default function page0({ onPress, navigation }) {
         });
       const getevent = await getallmission(token);
       if (getevent.status == 200) {
-        setevent(
-          getevent.data.data.filter((item) => {
-            return (
-              item.id != rep[0] &&
-              item.id != rep[1] &&
-              item.id != rep[2] &&
-              item.id != rep[3] &&
-              item.id != rep[4] &&
-              item.id != rep[5] &&
-              item.id != rep[6] &&
-              item.id != rep[7] &&
-              item.id != rep[8] &&
-              item.id != rep[9]
-            );
-          })
-        );
+        setevent(getevent.data.data);
       }
     }
   }

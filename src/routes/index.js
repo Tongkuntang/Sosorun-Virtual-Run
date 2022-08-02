@@ -1,6 +1,4 @@
 import React, { useCallback, useEffect } from "react";
-import { useFocusEffect } from "@react-navigation/native";
-
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import Drawer from "./drawer";
@@ -22,6 +20,9 @@ import RunEvant from "../page/runEvent/index";
 import FreePoint from "../page/freePoint/index";
 import HomeEvent from "../page/Homeevent/index";
 import Countdown from "../page/countdown/index";
+import SendResults from "../page/sendOnRoad/index";
+import SelectDevice from "../page/SelectDevice/index";
+
 import WebView from "../page/WebView/index";
 import RunMission from "../page/runMission/index";
 import EventInfor from "../page/eventInfor/index";
@@ -60,12 +61,37 @@ import EditAdd from "../page/editadd/flat";
 import EditAddra from "../page/editadd/editadd";
 import MissionSucc from "../page/succeed/missionsucc";
 import LevelScc from "../page/succeed/levelscc";
-import { BackHandler, Alert, Linking } from "react-native";
-import { apiservice } from "../service/service";
+import Forget from "../page/login/forget";
+import { AsyncStorage } from "react-native";
+import messaging from "@react-native-firebase/messaging";
 
 function App() {
   const Stack = createStackNavigator();
   const token = useRecoilValue(tokenState);
+
+  useEffect(() => {
+    requestUserPermission();
+  }, []);
+
+  const requestUserPermission = async () => {
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+    if (enabled) {
+      getFcmToken();
+    }
+  };
+
+  const getFcmToken = async () => {
+    const fcmToken = await messaging().getToken();
+    if (fcmToken) {
+      const notitoken = await AsyncStorage.setItem("notitoken", fcmToken);
+    } else {
+      console.log("Failed", "No token received");
+    }
+  };
 
   function screen() {
     return (
@@ -126,6 +152,8 @@ function App() {
         <Stack.Screen name="EditAddra" component={EditAddra} />
         <Stack.Screen name="MissionSucc" component={MissionSucc} />
         <Stack.Screen name="LevelScc" component={LevelScc} />
+        <Stack.Screen name="SelectDevice" component={SelectDevice} />
+        <Stack.Screen name="SendResults" component={SendResults} />
       </Stack.Navigator>
     );
   }
@@ -138,7 +166,9 @@ function App() {
         screenOptions={{ gestureEnabled: false }}
       >
         <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="Forget" component={Forget} />
         <Stack.Screen name="Intro" component={Intro} />
+        <Stack.Screen name="WebView" component={WebView} />
       </Stack.Navigator>
     );
   }

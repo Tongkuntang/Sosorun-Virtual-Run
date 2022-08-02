@@ -34,8 +34,7 @@ export default function index({ navigation, route }) {
   // console.log(user);
   async function getUser() {
     const getuser = await getActionUser(token);
-    // console.log("user", getuser.data);
-    // user.user_accounts.total_distance;
+
     setuser((val) => ({
       ...getuser.data,
       user_accounts: {
@@ -51,10 +50,11 @@ export default function index({ navigation, route }) {
     getUser();
     // getresultsrunning()
   }, [token, focus]);
+
   if (user == null) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <ActivityIndicator size={"large"} />
+        <ActivityIndicator color="#fff" size={"large"} />
       </View>
     );
   }

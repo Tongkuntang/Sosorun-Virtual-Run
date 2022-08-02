@@ -163,12 +163,12 @@ export default function levelscc({ navigation, route }) {
                   </View>
                   <TouchableOpacity
                     onPress={async () => {
-                      const response = await actionEditwal({
-                        body: {
-                          gold: story?.reward_Info?.coin,
-                        },
-                        token,
-                      });
+                      // const response = await actionEditwal({
+                      //   body: {
+                      //     gold: story?.reward_Info?.coin,
+                      //   },
+                      //   token,
+                      // });
                       setModal(!modal);
                       navigation.navigate("Event");
                     }}

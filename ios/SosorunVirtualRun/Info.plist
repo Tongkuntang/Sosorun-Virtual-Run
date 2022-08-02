@@ -51,6 +51,16 @@
 				<string>com.googleusercontent.apps.197447765241-90budiq3gj15ujn2vnf0m3u09meq4h02</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>sosorun</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>sosorun</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
@@ -76,41 +86,39 @@
 		</dict>
 	</dict>
 	<key>NSAppleMusicUsageDescription</key>
-	<string>Allow $(PRODUCT_NAME) to access your Library</string>
+	<string>Allow $(PRODUCT_NAME) to access your Library for edit profile</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>Allow $(PRODUCT_NAME) to access your bluetooth</string>
+	<string>Allow $(PRODUCT_NAME) to access your bluetooth for connect to device</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>Allow $(PRODUCT_NAME) to access your bluetooth</string>
+	<string>Allow $(PRODUCT_NAME) to access your bluetooth for connect to device</string>
 	<key>NSCalendarsUsageDescription</key>
 	<string>Allow $(PRODUCT_NAME) to access your Calendar</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Allow $(PRODUCT_NAME) to access your camera</string>
+	<string>Allow $(PRODUCT_NAME) to access your camera  for edit profile</string>
 	<key>NSContactsUsageDescription</key>
-	<string>NSContactsUsageDescription</string>
+	<string>Allow $(PRODUCT_NAME) to access your bluetooth  for connect to device</string>
 	<key>NSHealthClinicalHealthRecordsShareUsageDescription</key>
-	<string>Read and understand clinical health data.</string>
+	<string>Allow $(PRODUCT_NAME) to access your Read and understand clinical health data.</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>Read and understand health data.</string>
+	<string>Allow $(PRODUCT_NAME) to access your Read and understand health data.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>Share workout data with other apps.</string>
+	<string>Allow $(PRODUCT_NAME) to access your Share workout data with other apps.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Allow $(PRODUCT_NAME) to access your location</string>
+	<string>Allow $(PRODUCT_NAME) to access your location  to record health</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Allow $(PRODUCT_NAME) to access your location</string>
+	<string>Allow $(PRODUCT_NAME) to access your location  to record health</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Allow $(PRODUCT_NAME) to access your location</string>
+	<string>Allow $(PRODUCT_NAME) to access your location  to record health</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Allow $(PRODUCT_NAME) to access your microphone</string>
+	<string>Allow $(PRODUCT_NAME) to access your microphone to library for edit profile</string>
 	<key>NSMotionUsageDescription</key>
-	<string>Allow $(PRODUCT_NAME) to access your device motion</string>
+	<string>Allow $(PRODUCT_NAME) to access your device motion to record health</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Allow $(PRODUCT_NAME) to access your photos</string>
+	<string>Allow $(PRODUCT_NAME) to access your photos  for edit profile</string>
 	<key>NSSiriUsageDescription</key>
 	<string>Allow $(PRODUCT_NAME) to access your SIRI</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Allow $(PRODUCT_NAME) to access your recognition</string>
-	<key>NSUserTrackingUsageDescription</key>
-	<string>This identifier will be used to deliver personalized ads to you.</string>
+	<string>Allow $(PRODUCT_NAME) to access your recognition  to record health</string>
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,11 +9,12 @@ import {
   Dimensions,
   TouchableOpacity,
   Modal,
+  Linking,
 } from "react-native";
 import { actionregister, getActionUser } from "../../action/actionauth";
 import Input from "./textinput";
 import * as Google from "expo-google-app-auth";
-// import * as Facebook from "expo-facebook";
+import * as Facebook from "expo-facebook";
 import { LinearGradient } from "expo-linear-gradient";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { useRecoilState } from "recoil";
@@ -37,62 +38,68 @@ export default function register({ navigation, setpage }) {
     password: "",
     email: "",
   });
-  // console.log(body);
+  const [page, setPage] = useState(false);
 
   async function logInfacebook() {
-    try {
-      await Facebook.initializeAsync({
-        appId: "2976408192604356",
-      });
-      const { type, token, expirationDate, permissions, declinedPermissions } =
-        await Facebook.logInWithReadPermissionsAsync({
-          permissions: ["public_profile"],
-          behavior: "web",
-        });
-      if (type === "success") {
-        // Get the user's name using Facebook's Graph API
-        const profile = await fetch(
-          `https://graph.facebook.com/me?fields=birthday,email,name,picture&access_token=${token}`
-        );
-        const public_profile = await profile.json();
-        // console.log(public_profile);
-        const response = await apiservice({
-          method: "post",
-          path: "/authen/facebook",
-          body: {
-            telephoneNo: null,
-            image_Profile: public_profile.picture.data.url,
-            fullname: public_profile.name,
-            email: public_profile.email,
-            password: public_profile.id,
-            gender: null,
-            birthday: null,
-            username: public_profile.id,
-            Type: "FACEBOOK",
-          },
+    if (Platform.OS == "ios") {
+      try {
+        const { type, token } = await Facebook.logInWithReadPermissionsAsync({
+          permissions: ["public_profile", "email"],
         });
 
-        // console.log(response);
-        if (response.status == 200) {
-          // console.log(response.data);
-          setToken(response.data);
-          setTimeout(() => {
-            navigation.navigate("Home");
-          }, 300);
+        if (type === "success") {
+          // Get the user's name using Facebook's Graph API
+          const profile = await fetch(
+            `https://graph.facebook.com/me?fields=birthday,email,name,picture&access_token=${token}`
+          );
+          const public_profile = await profile.json();
+          console.log(public_profile);
+          const response = await apiservice({
+            method: "post",
+            path: "/authen/facebook",
+            body: {
+              telephoneNo: null,
+              fullname: public_profile.name,
+              email: public_profile.email,
+              password: public_profile.id,
+              gender: null,
+              birthday: null,
+              username: public_profile.id,
+              Type: "FACEBOOK",
+            },
+          });
+
+          if (response.status == 200) {
+            const getuser = await getActionUser(response.data);
+            const data = getuser.data;
+            if (!data?.link) {
+              setmodal1(true);
+              return;
+            }
+            if (data.height == null) {
+              setmodal(true);
+              setTokenvisible(response.data);
+            } else {
+              setAuth({
+                auth: true,
+              });
+              setUser(data);
+              setToken(response.data);
+            }
+          } else {
+            setTimeout(() => {}, 300);
+          }
         } else {
-          // setPage(0);
-          // setheightSheet(200);
-          setTimeout(() => {
-            RBSheets.current.open();
-          }, 300);
+          // type === 'cancel'
         }
-      } else {
-        // type === 'cancel'
+      } catch ({ message }) {
+        alert(`Facebook Login Error: ${message}`);
       }
-    } catch ({ message }) {
-      alert(`Facebook Login Error: ${message}`);
+    } else {
+      Linking.openURL("https://api.sosorun.com/api/authen/auth/facebook");
     }
   }
+
   async function logInApple() {
     try {
       const credential = await AppleAuthentication.signInAsync({
@@ -146,6 +153,32 @@ export default function register({ navigation, setpage }) {
       return emailValid.test(value);
     }
   }
+
+  useEffect(() => {
+    const onReceiveURL = async ({ url }) => {
+      const re = url.split("=");
+
+      const tokens = {
+        accessToken: re[1].replace("?refreshToken", ""),
+        refreshToken: re[2].replace("?role", ""),
+        role: re[3].split("?sawadeeja")[0],
+      };
+      const getuser = await getActionUser(tokens);
+      const data = getuser.data;
+      if (data.height == null) {
+        setmodal(true);
+        setTokenvisible(tokens);
+      } else {
+        setAuth({
+          auth: true,
+        });
+        setUser(data);
+        setToken(tokens);
+      }
+    };
+    Linking.addEventListener("url", onReceiveURL);
+  }, []);
+
   return (
     <View style={styles.background}>
       <Modal
@@ -231,13 +264,11 @@ export default function register({ navigation, setpage }) {
           icon={"user"}
           placeholder="User name"
           autoCapitalize="none"
-          autoCapitalize="none"
         />
         <Input
           onChangeText={(text) => setbody({ ...body, email: text })}
           icon={"Email"}
           placeholder="Email address"
-          autoCapitalize="none"
           autoCapitalize="none"
         />
         {body.email != "" && !errors({ value: body.email, type: "email" }) && (
@@ -258,8 +289,47 @@ export default function register({ navigation, setpage }) {
           icon={"lock"}
           placeholder="Password"
           autoCapitalize="none"
-          secureTextEntry
         />
+      </View>
+
+      <View
+        onPress={async () => {
+          const response = await actionregister(body);
+          if (response) {
+            setmodal1(!modal1);
+          }
+        }}
+        style={[
+          styles.touchlogin,
+          {
+            flexDirection: "row",
+            alignItems: "center",
+            backgroundColor: "transparent",
+            justifyContent: "flex-start",
+          },
+        ]}
+      >
+        <TouchableOpacity
+          onPress={() => setPage((val) => !val)}
+          style={[
+            styles.touch,
+            {
+              backgroundColor: page ? "#FCC81D" : "#fff",
+            },
+          ]}
+        />
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate("WebView", {
+              url: "http://www.sosorun.com/?page_id=107",
+              title: "ยอมรับเงื่อนไขและข้อตกลง",
+            });
+          }}
+        >
+          <Text style={[styles.textlogin, { color: "#393939" }]}>
+            ยอมรับเงื่อนไขและข้อตกลง
+          </Text>
+        </TouchableOpacity>
       </View>
       <View style={styles.background1}>
         <TouchableOpacity
@@ -453,5 +523,14 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: "#fff",
     alignSelf: "center",
+  },
+  touch: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    zIndex: 99,
+    borderWidth: 5,
+    borderColor: "#EEEEEE",
+    marginRight: 10,
   },
 });
