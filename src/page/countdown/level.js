@@ -20,12 +20,13 @@ import {
   userState,
 } from "../../reducer/reducer/reducer/Atom";
 import Carousel from "react-native-snap-carousel";
+import { apiservice } from "../../service/service";
 const { width, height } = Dimensions.get("window");
 export default function level() {
   const [user, setUser] = useState(null);
   const [token, setToken] = useRecoilState(tokenState);
   const carouselRef = useRef();
-  const [lvstate, setlvstate] = useRecoilState(LvState);
+  const [lvstate, setlvstate] = useState(null);
   const [banner, setbanner] = useState([]);
   const [banner1, setbanner1] = useState([]);
   async function allbanner() {
@@ -44,10 +45,63 @@ export default function level() {
     getUser();
   }, []);
 
+  async function uplevel(users) {
+    const d_arr = [
+      10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160,
+      170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 290, 300,
+    ];
+
+    const response = await apiservice({
+      path: "/event/getchackrank",
+      method: "get",
+      token: token.accessToken,
+    });
+
+    if (response.status == 200) {
+      const lv = autolize_Lv(parseInt(users.user_accounts.total_distance)).lv;
+
+      const checl_list = d_arr?.map((e) => {
+        if (e < lv) {
+          if (
+            response.data.data?.filter((el) => {
+              return (
+                el?.mission_List?.request_ranking == e &&
+                el?.total_distance <= el?.last_distance
+              );
+            })?.length > 0
+          ) {
+            return {
+              lv: e,
+              status: true,
+            };
+          } else {
+            return {
+              lv: e,
+              status: false,
+            };
+          }
+        }
+      });
+
+      for (
+        let index = 0;
+        index < checl_list?.filter((e) => e).length;
+        index++
+      ) {
+        const data = checl_list?.filter((e) => e);
+        if (data?.[index]?.status == false) {
+          setlvstate(data?.[index]?.lv);
+          return;
+        }
+      }
+    }
+  }
+
   async function getUser() {
     const useracc = await getActionUser(token);
 
     setUser(useracc.data);
+    uplevel(useracc.data);
   }
 
   if (user == null) {
@@ -61,41 +115,41 @@ export default function level() {
           <Text style={styles.textlv}>
             Lv
             <Text style={styles.text}>
-              {autolize_Lv(parseInt(user.user_accounts.total_distance)).lv > 60
-                ? lvstate.length == 0
-                  ? 60
-                  : lvstate[0].status == true
-                  ? autolize_Lv(parseInt(user.user_accounts.total_distance)).lv
-                  : 60
-                : autolize_Lv(parseInt(user.user_accounts.total_distance)).lv}
+              {
+                autolize_Lv(
+                  parseInt(
+                    lvstate
+                      ? parseInt(lvstate * 2000) - 2000
+                      : parseInt(user.user_accounts.total_distance)
+                  )
+                ).lv
+              }
             </Text>
           </Text>
           <Text style={styles.textrank}>
             Rank :{" "}
-            {autolize_Lv(parseInt(user.user_accounts.total_distance)).lv > 60
-              ? lvstate.length == 0
-                ? "D"
-                : lvstate[0].status == true
-                ? autolize_Lv(parseInt(user.user_accounts.total_distance)).rank
-                : "D"
-              : "D"}{" "}
+            {
+              autolize_Lv(
+                parseInt(
+                  lvstate
+                    ? parseInt(lvstate * 2000) - 2000
+                    : parseInt(user.user_accounts.total_distance)
+                )
+              ).rank
+            }{" "}
             Class
           </Text>
         </View>
         <Image
           // resizeMode={"stretch"}
           source={
-            autolize_Lv(parseInt(user.user_accounts.total_distance)).lv > 60
-              ? lvstate.length == 0
-                ? {
-                    uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/rank/D/50.png",
-                  }
-                : lvstate[0].status == true
-                ? autolize_Lv(parseInt(user.user_accounts.total_distance)).grid
-                : {
-                    uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/rank/D/50.png",
-                  }
-              : autolize_Lv(parseInt(user.user_accounts.total_distance)).grid
+            autolize_Lv(
+              parseInt(
+                lvstate
+                  ? parseInt(lvstate * 2000) - 2000
+                  : parseInt(user.user_accounts.total_distance)
+              )
+            ).grid
           }
           style={{ width: 90, height: 98 }}
         />

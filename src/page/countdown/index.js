@@ -50,6 +50,7 @@ import Carousel from "react-native-snap-carousel";
 import { getLV } from "../../action/actionLV";
 const { width, height } = Dimensions.get("window");
 import { timeformet } from "../components/test";
+import { apiservice } from "../../service/service";
 
 const permissions = {
   permissions: {
@@ -75,7 +76,7 @@ export default function index({ navigation }) {
 
   const [clear, setClear] = useState(null);
   const [resume, setResume] = useState(false);
-  const [lvstate, setlvstate] = useRecoilState(LvState);
+  const [lvstate, setlvstate] = useState(null);
   const [timecal, setTime] = useState(0);
   const [back, setBack] = useState(0);
   const [back1, setBack1] = useState(0);
@@ -87,6 +88,58 @@ export default function index({ navigation }) {
   let Clear = useRef();
   const appState = useRef(AppState.currentState);
   const [appStateVisible, setAppStateVisible] = useState(appState.current);
+
+  async function uplevel(users) {
+    const d_arr = [
+      10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160,
+      170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 290, 300,
+    ];
+
+    const response = await apiservice({
+      path: "/event/getchackrank",
+      method: "get",
+      token: token.accessToken,
+    });
+
+    if (response.status == 200) {
+      const lv = autolize_Lv(parseInt(users.user_accounts.total_distance)).lv;
+
+      const checl_list = d_arr?.map((e) => {
+        if (e < lv) {
+          if (
+            response.data.data?.filter((el) => {
+              return (
+                el?.mission_List?.request_ranking == e &&
+                el?.total_distance <= el?.last_distance
+              );
+            })?.length > 0
+          ) {
+            return {
+              lv: e,
+              status: true,
+            };
+          } else {
+            return {
+              lv: e,
+              status: false,
+            };
+          }
+        }
+      });
+
+      for (
+        let index = 0;
+        index < checl_list?.filter((e) => e).length;
+        index++
+      ) {
+        const data = checl_list?.filter((e) => e);
+        if (data?.[index]?.status == false) {
+          setlvstate(data?.[index]?.lv);
+          return;
+        }
+      }
+    }
+  }
 
   useEffect(() => {
     let dates = null;
@@ -185,6 +238,7 @@ export default function index({ navigation }) {
   useEffect(() => {
     allbanner();
     lvlist();
+    uplevel(user);
     // garmin();
   }, [token]);
 
@@ -331,6 +385,9 @@ export default function index({ navigation }) {
 
   const _subscribe = async () => {
     let Magnitude = 0;
+    let currentStepCount = 0;
+    let prevcurrentStepCount = 0;
+
     setSubscription(
       Gyroscope.addListener((gyroscopeData) => {
         Magnitude =
@@ -344,10 +401,17 @@ export default function index({ navigation }) {
 
         if (Magnitude > 8) {
           Magnitude = 0;
+
+          currentStepCount = currentStepCount + 1;
+        }
+
+        if (currentStepCount > 20) {
           setState((val) => ({
             ...val,
-            currentStepCount: val.currentStepCount + 1,
+            currentStepCount: val?.currentStepCount + currentStepCount / 3,
           }));
+          currentStepCount = 0;
+          prevcurrentStepCount = 0;
         }
       })
     );
@@ -392,7 +456,7 @@ export default function index({ navigation }) {
     const resposne = await getActionUser(token);
     setUser(resposne.data);
   }
-
+  console.log(user.user_accounts);
   return (
     <View style={{ flex: 1 }}>
       <SafeAreaView />
@@ -501,6 +565,12 @@ export default function index({ navigation }) {
                       total_distance:
                         parseInt(user.user_accounts.total_distance) +
                         ((state.currentStepCount * strip) / 100000) * 1000,
+                      wallet: {
+                        ...user.user_accounts?.wallet,
+                        cal:
+                          (user?.user_accounts?.cal || 0) +
+                          parseInt(state.currentStepCount * conversationFactor),
+                      },
                     },
                     token,
                   });
@@ -798,8 +868,8 @@ export default function index({ navigation }) {
                       //   }, 5000);
                       // }
 
-                      // clearInterval(Clear.current);
-                      // clearInterval(clear);
+                      clearInterval(Clear.current);
+                      clearInterval(clear);
                       setchick((val) => !val);
                     }}
                     style={styles.bottompause}
@@ -836,65 +906,33 @@ export default function index({ navigation }) {
                 <View style={styles.viewlv}>
                   <Text style={styles.textRun}>
                     Lv
-                    {parseFloat(
-                      nextautolize_Lv(
-                        (parseFloat(user.user_accounts.total_distance / 1000) +
-                          (state.currentStepCount * strip) / 100000) *
-                          1000
-                      ).lv
-                    ) -
-                      1 >
-                    60
-                      ? lvstate.length == 0
-                        ? 60
-                        : lvstate[0].status == true
-                        ? parseFloat(
-                            nextautolize_Lv(
-                              (parseFloat(
+                    {
+                      autolize_Lv(
+                        parseInt(
+                          lvstate
+                            ? parseInt(lvstate * 2000) - 2000
+                            : (parseFloat(
                                 user.user_accounts.total_distance / 1000
                               ) +
                                 (state.currentStepCount * strip) / 100000) *
                                 1000
-                            ).lv
-                          ) - 1
-                        : 60
-                      : parseFloat(
-                          nextautolize_Lv(
-                            (parseFloat(
-                              user.user_accounts.total_distance / 1000
-                            ) +
-                              (state.currentStepCount * strip) / 100000) *
-                              1000
-                          ).lv
-                        ) - 1}
+                        )
+                      ).lv
+                    }
                   </Text>
                   <Text style={styles.textRun}>
                     Lv
-                    {nextautolize_Lv(
-                      (parseFloat(user.user_accounts.total_distance / 1000) +
-                        (state.currentStepCount * strip) / 100000) *
-                        1000
-                    ).lv > 60
-                      ? lvstate.length == 0
-                        ? 61
-                        : lvstate[0].status == true
-                        ? nextautolize_Lv(
-                            (parseFloat(
+                    {autolize_Lv(
+                      parseInt(
+                        lvstate
+                          ? parseInt(lvstate * 2000) - 2000
+                          : (parseFloat(
                               user.user_accounts.total_distance / 1000
                             ) +
                               (state.currentStepCount * strip) / 100000) *
                               1000
-                          ).lv
-                        : 61
-                      : parseFloat(
-                          nextautolize_Lv(
-                            (parseFloat(
-                              user.user_accounts.total_distance / 1000
-                            ) +
-                              (state.currentStepCount * strip) / 100000) *
-                              1000
-                          ).lv
-                        )}
+                      )
+                    ).lv + 1}
                   </Text>
                 </View>
                 <View style={styles.linelevel}>

@@ -68,7 +68,16 @@ export default function index({ navigation, route }) {
             </View>
             <View>
               <View>
-                <Text style={styles.textnum}>ของรางวัลที่จะได้รับ</Text>
+                <Text
+                  style={[
+                    styles.textnum,
+                    {
+                      marginTop: 15,
+                    },
+                  ]}
+                >
+                  ของรางวัลที่จะได้รับ
+                </Text>
                 <View style={styles.viewprice}>
                   <View
                     style={{ alignItems: "center", justifyContent: "center" }}

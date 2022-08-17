@@ -47,7 +47,7 @@ const { width, height } = Dimensions.get("window");
 export default function index({ navigation, route }) {
   const dataEV = route.params.dataEV;
   const datamis = route.params.datamis;
-  const [lvstate, setlvstate] = useRecoilState(LvState);
+  const [lvstate, setlvstate] = useState(null);
   const [num, setnum] = useState(5);
   const eventEmitter = new NativeEventEmitter(Fitblekit);
   const [chick, setchick] = useState(true);
@@ -61,7 +61,58 @@ export default function index({ navigation, route }) {
   const carouselRef = useRef();
   const [banner, setbanner] = useState([]);
   const [banner1, setbanner1] = useState([]);
-  // const [MagnitudePrevious, setMagnitudePrevious] = useState(0);
+
+  async function uplevel(users) {
+    const d_arr = [
+      10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160,
+      170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 290, 300,
+    ];
+
+    const response = await apiservice({
+      path: "/event/getchackrank",
+      method: "get",
+      token: token.accessToken,
+    });
+
+    if (response.status == 200) {
+      const lv = autolize_Lv(parseInt(users.user_accounts.total_distance)).lv;
+
+      const checl_list = d_arr?.map((e) => {
+        if (e < lv) {
+          if (
+            response.data.data?.filter((el) => {
+              return (
+                el?.mission_List?.request_ranking == e &&
+                el?.total_distance <= el?.last_distance
+              );
+            })?.length > 0
+          ) {
+            return {
+              lv: e,
+              status: true,
+            };
+          } else {
+            return {
+              lv: e,
+              status: false,
+            };
+          }
+        }
+      });
+
+      for (
+        let index = 0;
+        index < checl_list?.filter((e) => e).length;
+        index++
+      ) {
+        const data = checl_list?.filter((e) => e);
+        if (data?.[index]?.status == false) {
+          setlvstate(data?.[index]?.lv);
+          return;
+        }
+      }
+    }
+  }
 
   async function allbanner() {
     const getbanner = await getAllbanner(token);
@@ -82,6 +133,7 @@ export default function index({ navigation, route }) {
   };
 
   useEffect(() => {
+    uplevel(user);
     let back = 0;
     let Check = 0;
     let mainCount = 0;
@@ -282,8 +334,11 @@ export default function index({ navigation, route }) {
     setSubscription(null);
   };
 
-  const _subscribe = () => {
+  const _subscribe = async () => {
     let Magnitude = 0;
+    let currentStepCount = 0;
+    let prevcurrentStepCount = 0;
+
     setSubscription(
       Gyroscope.addListener((gyroscopeData) => {
         Magnitude =
@@ -297,10 +352,17 @@ export default function index({ navigation, route }) {
 
         if (Magnitude > 8) {
           Magnitude = 0;
+
+          currentStepCount = currentStepCount + 1;
+        }
+
+        if (currentStepCount > 20) {
           setState((val) => ({
             ...val,
-            currentStepCount: val.currentStepCount + 1,
+            currentStepCount: val?.currentStepCount + currentStepCount / 3,
           }));
+          currentStepCount = 0;
+          prevcurrentStepCount = 0;
         }
       })
     );
@@ -385,6 +447,7 @@ export default function index({ navigation, route }) {
       if (upwal.status == 200) {
         const getuser = await getActionUser(token);
         setUser(getuser.data);
+        uplevel(getuser.data);
       }
       const response = await apiservice({
         path: "/event/updateuserjoinEvent",
@@ -704,21 +767,17 @@ export default function index({ navigation, route }) {
               <View style={styles.viewrank}>
                 <Image
                   source={
-                    autolize_Lv(parseInt(user.user_accounts.total_distance))
-                      .lv > 60
-                      ? lvstate.length == 0
-                        ? {
-                            uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/rank/D/50.png",
-                          }
-                        : lvstate[0].status == true
-                        ? autolize_Lv(
-                            parseInt(user.user_accounts.total_distance)
-                          ).grid
-                        : {
-                            uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/rank/D/50.png",
-                          }
-                      : autolize_Lv(parseInt(user.user_accounts.total_distance))
-                          .grid
+                    autolize_Lv(
+                      parseInt(
+                        lvstate
+                          ? parseInt(lvstate * 2000) - 2000
+                          : (parseFloat(
+                              user.user_accounts.total_distance / 1000
+                            ) +
+                              (state.currentStepCount * strip) / 100000) *
+                              1000
+                      )
+                    ).grid
                   }
                   style={{ width: 35, height: 40, alignSelf: "center" }}
                 />
@@ -731,16 +790,19 @@ export default function index({ navigation, route }) {
                 >
                   <Text style={styles.textrank}>
                     Rank :{" "}
-                    {autolize_Lv(parseInt(user.user_accounts.total_distance))
-                      .lv > 60
-                      ? lvstate.length == 0
-                        ? "D"
-                        : lvstate[0].status == true
-                        ? autolize_Lv(
-                            parseInt(user.user_accounts.total_distance)
-                          ).rank
-                        : "D"
-                      : "D"}{" "}
+                    {
+                      autolize_Lv(
+                        parseInt(
+                          lvstate
+                            ? parseInt(lvstate * 2000) - 2000
+                            : (parseFloat(
+                                user.user_accounts.total_distance / 1000
+                              ) +
+                                (state.currentStepCount * strip) / 100000) *
+                                1000
+                        )
+                      ).rank
+                    }{" "}
                     Class
                   </Text>
                   <View style={{ flexDirection: "row" }}>
@@ -785,37 +847,19 @@ export default function index({ navigation, route }) {
                 </View>
                 <Text style={styles.textlv}>
                   Lv
-                  {parseFloat(
-                    nextautolize_Lv(
-                      (parseFloat(user.user_accounts.total_distance / 1000) +
-                        (state.currentStepCount * strip) / 100000) *
-                        1000
-                    ).lv
-                  ) -
-                    1 >
-                  60
-                    ? lvstate.length == 0
-                      ? 60
-                      : lvstate[0].status == true
-                      ? parseFloat(
-                          nextautolize_Lv(
-                            (parseFloat(
+                  {
+                    autolize_Lv(
+                      parseInt(
+                        lvstate
+                          ? parseInt(lvstate * 2000) - 2000
+                          : (parseFloat(
                               user.user_accounts.total_distance / 1000
                             ) +
                               (state.currentStepCount * strip) / 100000) *
                               1000
-                          ).lv
-                        ) - 1
-                      : 60
-                    : parseFloat(
-                        nextautolize_Lv(
-                          (parseFloat(
-                            user.user_accounts.total_distance / 1000
-                          ) +
-                            (state.currentStepCount * strip) / 100000) *
-                            1000
-                        ).lv
-                      ) - 1}
+                      )
+                    ).lv
+                  }
                   {"   "}
                 </Text>
               </View>

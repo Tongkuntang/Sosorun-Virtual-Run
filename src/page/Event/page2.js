@@ -96,8 +96,12 @@ export default function page2({ onPress, navigation }) {
 
       <FlatList
         data={event.filter((item) => {
+          console.log(
+            item.request_ranking,
+            autolize_Lv(user.user_accounts.total_distance).lv
+          );
           return (
-            item.request_ranking ==
+            item.request_ranking <=
             autolize_Lv(user.user_accounts.total_distance).lv
           );
         })}

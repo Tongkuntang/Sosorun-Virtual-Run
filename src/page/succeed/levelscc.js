@@ -36,9 +36,9 @@ export default function levelscc({ navigation, route }) {
 
   async function history() {
     const gethistory = await getsucceed(token);
-
-    if (gethistory.status == 200) {
-      setstory(gethistory.data.data[0]);
+    console.log(gethistory);
+    if (gethistory?.status == 200) {
+      setstory(gethistory?.data.data[0]);
     }
   }
   const carouselRef = useRef();
@@ -108,7 +108,7 @@ export default function levelscc({ navigation, route }) {
           goBack={() => {
             navigation.navigate("Event");
           }}
-          item={story.event_name}
+          item={story?.event_name}
           navigation={navigation}
         />
         <Modal
@@ -138,7 +138,7 @@ export default function levelscc({ navigation, route }) {
                       marginTop: 10,
                     }}
                   >
-                    {story.reward_Info != undefined && (
+                    {story?.reward_Info != undefined && (
                       <Image
                         source={{
                           uri:
@@ -220,13 +220,13 @@ export default function levelscc({ navigation, route }) {
                       </View>
                     </View>
                   </View>
-                  <Text style={styles.textcat}>{story.event_name}</Text>
+                  <Text style={styles.textcat}>{story?.event_name}</Text>
                   <Image
                     style={styles.imgcat}
                     source={{
                       uri:
                         "https://api.sosorun.com/api/imaged/get/" +
-                        story.img_event,
+                        story?.img_event,
                     }}
                   />
                   <Text style={styles.textpit}>ขอแสดงความยินดี</Text>
@@ -251,28 +251,30 @@ export default function levelscc({ navigation, route }) {
           style={{ width: width, height: height, backgroundColor: "#FBC71C" }}
         >
           <Text style={styles.texttime}>
-            {timeformet(Math.floor(story.running_Time / 3600))} :{" "}
-            {timeformet(Math.floor((story.running_Time % 3600) / 60))} :{" "}
-            {timeformet(Math.floor((story.running_Time % 3600) % 60))}{" "}
+            {timeformet(Math.floor(story?.running_Time / 3600))} :{" "}
+            {timeformet(Math.floor((story?.running_Time % 3600) / 60))} :{" "}
+            {timeformet(Math.floor((story?.running_Time % 3600) % 60))}{" "}
           </Text>
           <View style={styles.viewtext}>
             <View style={styles.viewsmall}>
               <Text style={styles.text1}>ระยะทางทั้งหมด</Text>
               <Text style={styles.text2}>
-                {(story.total_distance / 1000).toFixed(2)} กม.
+                {(story?.total_distance / 1000).toFixed(2)} กม.
               </Text>
             </View>
             <View style={styles.viewsmall}>
               <Text style={styles.text1}>ระยะทางที่ทำได้</Text>
               <Text style={styles.text2}>
-                {(story.last_distance / 1000).toFixed(2)} กม.
+                {(story?.last_distance / 1000).toFixed(2)} กม.
               </Text>
             </View>
             <View style={styles.viewsmall}>
               <Text style={styles.text1}>ระดับความสำเร็จ</Text>
               <Text style={styles.text2}>
                 {(
-                  (story.last_distance / 1000 / (story.total_distance / 1000)) *
+                  (story?.last_distance /
+                    1000 /
+                    (story?.total_distance / 1000)) *
                   100
                 ).toFixed(2)}{" "}
                 %
@@ -282,7 +284,7 @@ export default function levelscc({ navigation, route }) {
           <View style={styles.view}>
             <Text style={styles.text3}>
               {"    "}ความเร็วเฉลี่ย{" "}
-              {((story.total_distance / story.running_Time) * 3.6).toFixed(2)}{" "}
+              {((story?.total_distance / story?.running_Time) * 3.6).toFixed(2)}{" "}
               กม. / ชม.
             </Text>
           </View>
@@ -372,12 +374,12 @@ export default function levelscc({ navigation, route }) {
                 </View>
               </View>
             </View>
-            <Text style={styles.textcat}>{story.event_name}</Text>
+            <Text style={styles.textcat}>{story?.event_name}</Text>
             <Image
               style={styles.imgcat}
               source={{
                 uri:
-                  "https://api.sosorun.com/api/imaged/get/" + story.img_event,
+                  "https://api.sosorun.com/api/imaged/get/" + story?.img_event,
               }}
             />
             <Text style={styles.textpit}>ขอแสดงความยินดี</Text>

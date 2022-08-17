@@ -237,7 +237,16 @@ export default function index({ navigation, route }) {
               </View>
 
               <View>
-                <Text style={styles.textnum}>ของรางวัลที่จะได้รับ</Text>
+                <Text
+                  style={[
+                    styles.textnum,
+                    {
+                      marginTop: 15,
+                    },
+                  ]}
+                >
+                  ของรางวัลที่จะได้รับ
+                </Text>
 
                 <View
                   style={{
@@ -343,8 +352,29 @@ export default function index({ navigation, route }) {
                   }).length > 0 ? (
                     <TouchableOpacity
                       disabled={
-                        moment(dataEV?.startDate)?.valueOf() >
-                        moment()?.valueOf()
+                        moment(
+                          dataEV?.Type != "Eventonroad"
+                            ? dataEV?.startDate
+                            : moment(dataEV?.startDate).format(
+                                "YYYY-MM-DDT" +
+                                  dataEV?.distance
+                                    ?.filter((e) => {
+                                      console.log(
+                                        data.filter((e, i) => {
+                                          return e.event_id == dataEV.id;
+                                        })?.[0]?.total_distance
+                                      );
+                                      return (
+                                        parseFloat(e?.distance) * 1000 ==
+                                        data.filter((e, i) => {
+                                          return e.event_id == dataEV.id;
+                                        })?.[0]?.total_distance
+                                      );
+                                    })?.[0]
+                                    ?.time?.replace(".", ":") +
+                                  ":ssZ"
+                              )
+                        )?.valueOf() > moment()?.valueOf()
                       }
                       onPress={() => {
                         navigation.navigate(
@@ -379,7 +409,7 @@ export default function index({ navigation, route }) {
                       }}
                       style={styles.touchstart}
                     >
-                      <Text style={styles.textnum}>เริ่ม</Text>
+                      <Text style={[styles.textnum]}>เริ่ม</Text>
                     </TouchableOpacity>
                   ) : (
                     <TouchableOpacity
@@ -432,7 +462,16 @@ export default function index({ navigation, route }) {
                 >
                   <Text style={styles.textnum}>ดูรายละเอียดเพิ่มเติม</Text>
                 </TouchableOpacity>
-                <Text style={styles.textnum}>ของรางวัลที่จะได้รับ</Text>
+                <Text
+                  style={[
+                    styles.textnum,
+                    {
+                      marginTop: 15,
+                    },
+                  ]}
+                >
+                  ของรางวัลที่จะได้รับ
+                </Text>
                 <View
                   style={{
                     alignItems: "center",
@@ -535,35 +574,42 @@ export default function index({ navigation, route }) {
                   {data.filter((e, i) => e.event_id == dataEV.id).length > 0 ? (
                     <TouchableOpacity
                       disabled={
-                        moment(dataEV?.startDate)?.valueOf() >
-                        moment()?.valueOf()
+                        moment(
+                          dataEV?.Type != "Eventonroad"
+                            ? moment(dataEV?.startDate)
+                            : moment(dataEV?.startDate)?.format(
+                                "YYYY-MM-DDTHH:mm:ss"
+                              ) + "Z"
+                        )?.valueOf() > moment()?.valueOf()
                       }
-                      onPress={() =>
-                        navigation.navigate(
-                          dataEV?.Type == "Eventonroad"
-                            ? "SelectDevice"
-                            : "RunEvant",
-                          {
-                            dataEV: {
-                              ...dataEV,
-                              distance: dataEV.distance
-                                .filter((items) => {
-                                  return items.price == dataEV.pay_status;
-                                })
-                                .map((items) => items.distance),
-                            },
-                            BIB: data.filter(
-                              (e, i) => e.event_id == dataEV.id
-                            )[0].bib,
-                            ...data.filter(
-                              (e, i) => e.event_id == dataEV.id
-                            )[0],
-                            id: data.filter(
-                              (e, i) => e.event_id == dataEV.id
-                            )[0].id,
-                          }
-                        )
-                      }
+                      onPress={() => {
+                        console.log(data);
+
+                        // navigation.navigate(
+                        //   dataEV?.Type == "Eventonroad"
+                        //     ? "SelectDevice"
+                        //     : "RunEvant",
+                        //   {
+                        //     dataEV: {
+                        //       ...dataEV,
+                        //       distance: dataEV.distance
+                        //         .filter((items) => {
+                        //           return items.price == dataEV.pay_status;
+                        //         })
+                        //         .map((items) => items.distance),
+                        //     },
+                        //     BIB: data.filter(
+                        //       (e, i) => e.event_id == dataEV.id
+                        //     )[0].bib,
+                        //     ...data.filter(
+                        //       (e, i) => e.event_id == dataEV.id
+                        //     )[0],
+                        //     id: data.filter(
+                        //       (e, i) => e.event_id == dataEV.id
+                        //     )[0].id,
+                        //   }
+                        // );
+                      }}
                       style={styles.touchstart}
                     >
                       <Text style={styles.textnum}>เริ่ม</Text>

@@ -221,7 +221,7 @@ export default function index({ navigation }) {
                 <FlatList
                   data={data}
                   renderItem={({ item, index }) => {
-                    // console.log(">>>>>>>>>>>>", item);
+                    console.log(">>>>>>>>>>>>", item);
                     return (
                       <View>
                         {detail1 != index ? (
@@ -231,9 +231,9 @@ export default function index({ navigation }) {
                             }}
                             style={styles.touch}
                           >
-                            {item.event_List != null && (
+                            {item.event_Listt != null && (
                               <Text style={styles.textmain}>
-                                {item.event_List.titel}
+                                {item.event_Listt.titel}
                               </Text>
                             )}
 

@@ -34,6 +34,7 @@ export default function index({ navigation, route }) {
   const [his, sethis] = useState([]);
   const [state, setstate] = useState([]);
   const time = state[0] != undefined && state[0].running_Time;
+
   async function history() {
     const resposne = await apiservice({
       path: "/event/findidjoinEvent_id/" + dataEV.id,
@@ -48,7 +49,7 @@ export default function index({ navigation, route }) {
         sethis(gethistory.data.data);
       }
     }
-    console.log(">>>>>", his);
+
     const response1 = await apiservice({
       path: "/event/getmyEvent/" + user.id,
       token: token.accessToken,
@@ -78,8 +79,6 @@ export default function index({ navigation, route }) {
     var hh0 = timeformet(Math.floor(start0 / 3600));
     var mm0 = timeformet(Math.floor((start0 % 3600) / 60));
     var ss0 = timeformet(Math.floor((start0 % 3600) % 60));
-
-    // console.log("gethistory", AVG0);
   }
   if (his[1] != null) {
     const start1 = his[1].info.time.toFixed(2);
@@ -90,7 +89,6 @@ export default function index({ navigation, route }) {
     var mm1 = timeformet(Math.floor((start1 % 3600) / 60));
     var ss1 = timeformet(Math.floor((start1 % 3600) % 60));
     var createdAt = his[1].createdAt;
-    // console.log("gethistory", AVG1);
   }
   return (
     <View style={styles.container}>

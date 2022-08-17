@@ -1,6 +1,7 @@
 package com.sosorun.asia; // replace com.your-app-name with your app’s name
 
 import android.content.Intent;
+import android.util.Log;
 import android.widget.BaseAdapter;
 import android.widget.Toast;
 
@@ -38,7 +39,7 @@ public class Fitblekit extends ReactContextBaseJavaModule {
         super(context);
         this.applicationContext = context;
     }
-
+    private static final String TAG = "MyActivity";
     private static List<FBKBleDevice> m_deviceArray = new ArrayList<>();
     private FBKApiScan m_scanner;
     private FBKApiOldTracker m_apiOldTracker;
@@ -63,8 +64,21 @@ public class Fitblekit extends ReactContextBaseJavaModule {
             @Override
             public void bleScanResult(List<FBKBleDevice> deviceArray, FBKApiScan apiScan) {
                 m_deviceArray = deviceArray;
+                deviceArray.size();
 
-                sendEvent(applicationContext, "EVENTFBK", deviceArray.toString());
+                int x = deviceArray.size();
+                int y = 0;
+                String rendx = "[";
+
+                while (x > y) {
+                    if(y == x - 1){
+                        rendx = rendx  +  deviceArray.get(y).getDeviceName() + "]";
+                    }else{
+                        rendx = rendx  +  deviceArray.get(y).getDeviceName();
+                    }
+                    y++;
+                }
+                sendEvent(applicationContext, "EVENTFBK", rendx);
                 m_scanner.stopScan();
             }
 
@@ -153,13 +167,16 @@ public class Fitblekit extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void onScanStop() {
+        m_apiOldTracker = new FBKApiOldTracker(applicationContext, m_apiOldTrackerCallBack);
+//        m_apiOldTracker.unregisterBleListenerReceiver();
+        m_apiOldTracker.disconnectBle();
 
     }
 
     @ReactMethod
-    public void onConnect(String name, String location, Callback callBack) {
+    public void onConnect(int name, String location, Callback callBack) {
         m_apiOldTracker = new FBKApiOldTracker(applicationContext, m_apiOldTrackerCallBack);
-        FBKBleDevice myBleDevice = m_deviceArray.get(0);
+        FBKBleDevice myBleDevice = m_deviceArray.get(name);
         sendEvent(applicationContext, "EVENTFBKSTEP1",myBleDevice.getDeviceName());
         m_apiOldTracker.connecBluetooth(myBleDevice.getMacAddress());
         m_apiOldTracker.registerBleListenerReceiver();

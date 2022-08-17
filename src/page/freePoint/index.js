@@ -35,32 +35,29 @@ const { width, height } = Dimensions.get("window");
 export default function index({ navigation }) {
   const [Visible, setVisible] = useState(false);
   const [running, setrunning] = useState(false);
-
   const [modal, setModal] = useState(false);
   const [shouldPlay, setShouldPlay] = useState(false);
-
   const [token, setToken] = useRecoilState(tokenState);
   const [user, setUser] = useRecoilState(userState);
   const [state, setstate] = useState(null);
-  // console.log("::::::::::", state);
   const focus = useIsFocused();
   const [banner, setbanner] = useState([]);
   async function allpoint() {
     const getpoint = await getAllfreepoint(token);
-    console.log("getpoint", getpoint);
     setbanner(getpoint);
     setTimeout(() => {
       setrunning(true);
     }, 1000);
   }
+
   useEffect(() => {
     allpoint();
   }, [token]);
+
   const video = useRef(null);
   const videos = state != null && state.link_url;
   const golds = state != null && state.reward[0].coin;
   const ID = state != null && state.id;
-
   const [num, setnum] = useState(30);
   function count() {
     setTimeout(() => {
@@ -201,10 +198,7 @@ export default function index({ navigation }) {
           animationType="none"
           transparent={true}
           visible={Visible}
-          onRequestClose={() => {
-            Alert.alert("Modal has been closed.");
-            setVisible(!Visible);
-          }}
+          onRequestClose={() => {}}
         >
           <View
             style={{ width: width, height: height, backgroundColor: "#393939" }}

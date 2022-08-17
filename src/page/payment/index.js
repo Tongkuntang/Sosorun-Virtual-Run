@@ -123,7 +123,7 @@ export default function index({ navigation, route }) {
           event_name: dataEV.titel,
           Type: "EVENT",
           uid: user.id,
-          total_distance: dataEV.distance[0] * 1000,
+          total_distance: dataEV.distance * 1000,
           last_distance: 0,
           reward_Info: dataEV.reward,
           fullAddress: state2,
@@ -191,6 +191,7 @@ export default function index({ navigation, route }) {
         });
 
         if (check.status == 200) {
+          console.log(dataEV.distance);
           const resposne = await apiservice({
             path: "/event/postjoinEvent",
             method: "post",
@@ -335,15 +336,15 @@ export default function index({ navigation, route }) {
                 <title>Payment Demo</title>
                 </head>
                 <body>
-                <form id="payment-form" action="https://sandbox-cdnv3.chillpay.co/Payment/" method="post" role="form" class="form-horizontal">
+                <form id="payment-form" action="https://cdn.chillpay.co/Payment/" method="post" role="form" class="form-horizontal">
                 <modernpay:widget id="modernpay-widget-container" 
-                data-merchantid="M032746" data-amount="${route.params.price}00" data-orderno="00000001" data-customerid="123456" 
+                data-merchantid="M031203" data-amount="${route.params.price}00" data-orderno="00000001" data-customerid="123456" 
                 data-mobileno="0889999999" data-clientip="183.89.110.23" data-routeno="1" data-currency="764" 
-                data-description="Sosorun Payment" data-apikey="4wSW26BJzRMQbNRAlosseuin4FooeUNEtk4Fd6bjubedQ7X8rZgIKezL09MSWcaO">
+                data-description="Sosorun Payment" data-apikey="J8tqCToy4RYJGwZ3lbSSA2fDOFsPcEMZ3W0ZTCNxYAXBiuScWzaMDEfZQpnrZqCc">
                 </modernpay:widget>
                 <button type="submit" id="btnSubmit" value="Submit" class="btn">Payment</button>
                 </form>
-                <script async src="https://sandbox-cdnv3.chillpay.co/js/widgets.js?v=1.00" charset="utf-8"></script>
+                <script async src="https://cdn.chillpay.co/js/widgets.js?v=1.00" charset="utf-8"></script>
                 </body>
                 </html>,`,
                 }}
@@ -384,13 +385,18 @@ export default function index({ navigation, route }) {
                   <TouchableOpacity
                     onPress={() => {
                       setmodalVisible(!modalVisible);
-                      navigation.navigate("PayStart", {
-                        dataEV,
-                        price,
-                        BIB,
-                        premium,
-                        id,
-                      });
+
+                      if (dataEV?.Type != "EVENT") {
+                        navigation.navigate("Event");
+                      } else {
+                        navigation.navigate("PayStart", {
+                          dataEV,
+                          price,
+                          BIB,
+                          premium,
+                          id,
+                        });
+                      }
                     }}
                     style={{ alignSelf: "center" }}
                   >
@@ -674,7 +680,7 @@ export default function index({ navigation, route }) {
                 <TouchableOpacity
                   disabled={!state2}
                   onPress={async () => {
-                    if (route.params.totalssprice == 0) {
+                    if (route.params.price == 0) {
                       if (num == 0) {
                         setnum({ num: num + 1 });
                         const check = await apiservice({
@@ -699,7 +705,7 @@ export default function index({ navigation, route }) {
                               event_name: dataEV.titel,
                               Type: "EVENT",
                               uid: user.id,
-                              total_distance: dataEV.distance[0] * 1000,
+                              total_distance: dataEV.distance * 1000,
                               last_distance: 0,
                               reward_Info: dataEV.reward,
                               fullAddress: state2,
@@ -967,6 +973,7 @@ const styles = StyleSheet.create({
     width: width,
     // height: height,
     backgroundColor: "#FBC71C",
+    minHeight: height,
   },
   view: {
     width: width,

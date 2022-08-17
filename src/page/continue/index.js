@@ -137,19 +137,46 @@ export default function index({ navigation }) {
                             onPress={() =>
                               // navigation.navigate("Campaign", { item })
                               {
-                                console.log(item);
+                                console.log(item?.distance);
+                                const dataEV = item?.event_Listt;
                                 navigation.navigate("RunEvant", {
-                                  BIB: item.bib,
                                   dataEV: {
-                                    ...item.event_List,
-                                    distance: item.event_Listt.distance
+                                    ...dataEV,
+                                    distance: dataEV.distance
                                       .filter((items) => {
-                                        return items.price == item.pay_status;
+                                        return (
+                                          items.price ==
+                                          data.filter(
+                                            (item) =>
+                                              item?.event_id == dataEV.id
+                                          )?.[0]?.pay_status
+                                        );
                                       })
                                       .map((items) => items.distance),
                                   },
-                                  ...item,
+                                  BIB: data.filter(
+                                    (e, i) => e.event_id == dataEV.id
+                                  )[0].bib,
+                                  ...data.filter(
+                                    (e, i) => e.event_id == dataEV.id
+                                  )[0],
+                                  id: data.filter(
+                                    (e, i) => e.event_id == dataEV.id
+                                  )[0].id,
                                 });
+
+                                // navigation.navigate("RunEvant", {
+                                //   BIB: item.bib,
+                                //   dataEV: {
+                                //     ...item.event_List,
+                                //     distance: item.event_Listt.distance
+                                //       .filter((items) => {
+                                //         return items.price == item.pay_status;
+                                //       })
+                                //       .map((items) => items.distance),
+                                //   },
+                                //   ...item,
+                                // });
                               }
                             }
                             style={styles.viewbottom}

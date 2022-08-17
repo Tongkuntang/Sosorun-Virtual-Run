@@ -146,7 +146,10 @@ export default function page0({ onPress, navigation }) {
                 </View>
               </View>
               <View style={{ marginBottom: 10 }}>
-                <Text style={[styles.textdetail, { width: width * 0.65 }]}>
+                <Text
+                  numberOfLines={5}
+                  style={[styles.textdetail, { width: width * 0.65 }]}
+                >
                   {item.discription}
                 </Text>
               </View>

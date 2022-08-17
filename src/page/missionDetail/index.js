@@ -52,152 +52,173 @@ export default function index({ navigation, item, route }) {
         }}
       >
         <Headerdetail item={dataEV.titel} navigation={navigation} />
-        <ScrollView style={{ marginBottom: 50 }}>
-          <View
-            style={{
-              width: width,
-              height: height * 0.27,
-              backgroundColor: "#00272C",
-            }}
+        <View style={{ width: width, height: height }}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            style={{ marginBottom: 50 }}
           >
-            <Carousel
-              ref={carouselRef}
-              data={dataEV.img_List}
-              sliderWidth={1000}
-              itemWidth={1000}
-              autoplay
-              loop
-              renderItem={({ item, index }) => {
-                // console.log(item);
-                return (
-                  <Image
-                    // resizeMode={"stretch"}
-                    style={{ width: width, height: height * 0.27 }}
-                    source={{
-                      uri: "https://api.sosorun.com/api/imaged/get/" + item,
-                    }}
-                  />
-                );
+            <View
+              style={{
+                width: width,
+                height: height * 0.27,
+                backgroundColor: "#00272C",
               }}
-            />
-          </View>
-          <View style={styles.viewhead}>
-            <View>
-              <Text style={styles.textopic}>{dataEV.titel}</Text>
-              <Text style={styles.textdetail}>{dataEV.discription}</Text>
-            </View>
-            <View>
-              <View>
-                <Text style={styles.textnum}>ของรางวัลที่จะได้รับ</Text>
-                <View style={styles.viewprice}>
-                  <View
-                    style={{
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexDirection: "row",
-                    }}
-                  >
-                    <FlatList
-                      data={dataEV?.reward}
-                      horizontal
-                      contentContainerStyle={{ justifyContent: "center" }}
-                      renderItem={({ item, index }) => {
-                        return (
-                          <View style={{ justifyContent: "center" }}>
-                            <View
-                              style={{
-                                flexDirection: "row",
-                                width: null,
-                              }}
-                            >
-                              {item.type == "โกลด์" && (
-                                <Image
-                                  style={{
-                                    width: 35,
-                                    height: 35,
-                                    alignSelf: "center",
-                                    marginHorizontal: 10,
-                                  }}
-                                  source={{
-                                    uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/Group.png",
-                                  }}
-                                />
-                              )}
-                              {item.type == "โกลด์" && (
-                                <Text style={styles.textnum}>{item?.coin}</Text>
-                              )}
-                            </View>
-                            <View
-                              style={{
-                                flexDirection: "row",
-                                width: null,
-                              }}
-                            >
-                              {item.type == "ไดมอนด์" && (
-                                <Image
-                                  style={{
-                                    width: 35,
-                                    height: 35,
-                                    alignSelf: "center",
-                                    marginHorizontal: 10,
-                                  }}
-                                  source={{
-                                    uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/Group2835.png",
-                                  }}
-                                />
-                              )}
-                              {item.type == "ไดมอนด์" && (
-                                <Text style={styles.textnum}>
-                                  {item?.diamond}
-                                </Text>
-                              )}
-                            </View>
-                          </View>
-                        );
+            >
+              <Carousel
+                ref={carouselRef}
+                data={dataEV.img_List}
+                sliderWidth={1000}
+                itemWidth={1000}
+                autoplay
+                loop
+                renderItem={({ item, index }) => {
+                  // console.log(item);
+                  return (
+                    <Image
+                      // resizeMode={"stretch"}
+                      style={{ width: width, height: height * 0.27 }}
+                      source={{
+                        uri: "https://api.sosorun.com/api/imaged/get/" + item,
                       }}
                     />
-                    <TouchableOpacity style={[styles.touch, { marginTop: 15 }]}>
-                      <Image
-                        source={{
-                          uri:
-                            "https://api.sosorun.com/api/imaged/get/" +
-                            dataEV?.Achievement,
+                  );
+                }}
+              />
+            </View>
+            <View style={styles.viewhead}>
+              <View>
+                <Text style={styles.textopic}>{dataEV.titel}</Text>
+                <Text style={styles.textdetail}>{dataEV.discription}</Text>
+              </View>
+              <View>
+                <View>
+                  <Text
+                    style={[
+                      styles.textnum,
+                      {
+                        marginTop: 15,
+                      },
+                    ]}
+                  >
+                    ของรางวัลที่จะได้รับ
+                  </Text>
+                  <View style={styles.viewprice}>
+                    <View
+                      style={{
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexDirection: "row",
+                      }}
+                    >
+                      <FlatList
+                        data={dataEV?.reward}
+                        horizontal
+                        contentContainerStyle={{ justifyContent: "center" }}
+                        renderItem={({ item, index }) => {
+                          return (
+                            <View style={{ justifyContent: "center" }}>
+                              <View
+                                style={{
+                                  flexDirection: "row",
+                                  width: null,
+                                }}
+                              >
+                                {item.type == "โกลด์" && (
+                                  <Image
+                                    style={{
+                                      width: 35,
+                                      height: 35,
+                                      alignSelf: "center",
+                                      marginHorizontal: 10,
+                                    }}
+                                    source={{
+                                      uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/Group.png",
+                                    }}
+                                  />
+                                )}
+                                {item.type == "โกลด์" && (
+                                  <Text style={styles.textnum}>
+                                    {item?.coin}
+                                  </Text>
+                                )}
+                              </View>
+                              <View
+                                style={{
+                                  flexDirection: "row",
+                                  width: null,
+                                }}
+                              >
+                                {item.type == "ไดมอนด์" && (
+                                  <Image
+                                    style={{
+                                      width: 35,
+                                      height: 35,
+                                      alignSelf: "center",
+                                      marginHorizontal: 10,
+                                    }}
+                                    source={{
+                                      uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/Group2835.png",
+                                    }}
+                                  />
+                                )}
+                                {item.type == "ไดมอนด์" && (
+                                  <Text style={styles.textnum}>
+                                    {item?.diamond}
+                                  </Text>
+                                )}
+                              </View>
+                            </View>
+                          );
                         }}
-                        style={{ width: 60, height: 60, alignSelf: "center" }}
                       />
-                      <Text></Text>
-                    </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.touch, { marginTop: 15 }]}
+                      >
+                        <Image
+                          source={{
+                            uri:
+                              "https://api.sosorun.com/api/imaged/get/" +
+                              dataEV?.Achievement,
+                          }}
+                          style={{ width: 60, height: 60, alignSelf: "center" }}
+                        />
+                        <Text></Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 </View>
-              </View>
-              <View style={styles.view}>
-                <TouchableOpacity
-                  disabled
-                  onPress={() =>
-                    navigation.navigate("Ranking", { dataEV, type: "MISSION" })
-                  }
-                  style={[styles.touchrank, { opacity: 0 }]}
-                >
-                  <MaterialIcons
-                    name="format-list-bulleted"
-                    size={24}
-                    color="black"
-                    style={{ alignSelf: "center" }}
-                  />
-                  <Text style={styles.textrank}>จัดอันดับ</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() =>
-                    navigation.navigate("RunMission", { dataEV, datamis })
-                  }
-                  style={styles.touchstart}
-                >
-                  <Text style={styles.textnum}>เริ่ม</Text>
-                </TouchableOpacity>
+                <View style={styles.view}>
+                  <TouchableOpacity
+                    disabled
+                    onPress={() =>
+                      navigation.navigate("Ranking", {
+                        dataEV,
+                        type: "MISSION",
+                      })
+                    }
+                    style={[styles.touchrank, { opacity: 0 }]}
+                  >
+                    <MaterialIcons
+                      name="format-list-bulleted"
+                      size={24}
+                      color="black"
+                      style={{ alignSelf: "center" }}
+                    />
+                    <Text style={styles.textrank}>จัดอันดับ</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() =>
+                      navigation.navigate("RunMission", { dataEV, datamis })
+                    }
+                    style={styles.touchstart}
+                  >
+                    <Text style={styles.textnum}>เริ่ม</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
-          </View>
-        </ScrollView>
+          </ScrollView>
+        </View>
       </View>
     </View>
   );
@@ -235,7 +256,7 @@ const styles = StyleSheet.create({
   },
   viewhead: {
     width: width,
-    height: height * 0.65,
+    // height: height * 0.65,
     backgroundColor: "#FBC71C",
     paddingVertical: 10,
     justifyContent: "space-between",

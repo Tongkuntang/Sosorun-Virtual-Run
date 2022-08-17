@@ -54,7 +54,7 @@ const permissions = {
 export default function index({ navigation, route }) {
   const [modals, setModal] = useState(false);
   const [modals1, setmodals1] = useState(false);
-
+  const [modals3, setModal3] = useState(false);
   const peripherals = new Map();
   const [list, setList] = useState([]);
   const eventEmitter = new NativeEventEmitter(Fitblekit);
@@ -68,6 +68,7 @@ export default function index({ navigation, route }) {
   const [page, setpage] = useState(true);
   const [data, setData] = useState([]);
   const dataEV = route.params.dataEV;
+  const [list_setrender, setrender] = useState([]);
 
   async function fetchData() {
     setmodals1(true);
@@ -101,19 +102,16 @@ export default function index({ navigation, route }) {
   async function fetchData1() {
     setmodals1(true);
     const opt = {
-      startDate: "2022-06-01T00:00:17.971Z", // required ISO8601Timestamp
+      startDate: moment().add(-1, "days").format("YYYY-MM-DDTHH:mm:ssz"), // required ISO8601Timestamp
       endDate: new Date().toISOString(), // required ISO8601Timestamp
       bucketUnit: BucketUnit.DAY, // optional - default "DAY". Valid values: "NANOSECOND" | "MICROSECOND" | "MILLISECOND" | "SECOND" | "MINUTE" | "HOUR" | "DAY"
       bucketInterval: 1, // optional - default 1.
     };
     const res = await GoogleFit.getDailyStepCountSamples(opt);
     let steps = 0;
-    res?.map((item) => {
-      if (item?.source == "com.xiaomi.hm.health") {
-        console.log(item);
 
-        item.rawSteps.map((e) => (steps = steps + e.steps));
-      }
+    res?.map((item) => {
+      item.rawSteps.map((e) => (steps = steps + e.steps));
     });
 
     setmodals1(false);
@@ -224,9 +222,10 @@ export default function index({ navigation, route }) {
           (deviceDiscovered) => {
             const ress = deviceDiscovered.split(",");
             if (ress.length > 0) {
-              Fitblekit.onConnect("SENIOR", "APPROVE", (e) => {
-                console.log(e);
-              });
+              // Fitblekit.onConnect("SENIOR", "APPROVE", (e) => {
+              //   console.log(e);
+              // });
+              setrender(ress);
             }
           }
         );
@@ -358,8 +357,6 @@ export default function index({ navigation, route }) {
 
       const getuser = await getActionUser(token);
 
-      console.log("getuser", getuser);
-
       const res = await apiservice({
         path: "/authen/createhw",
         method: "post",
@@ -368,8 +365,6 @@ export default function index({ navigation, route }) {
           info: tokens,
         },
       });
-
-      console.log("res", res);
 
       const regis = await apiservice({
         method: "post",
@@ -420,6 +415,102 @@ export default function index({ navigation, route }) {
     <View style={styles.contalner}>
       {/* <StatusBar backgroundColor="#61dafb" /> */}
       <SafeAreaView />
+      <Modal transparent={true} visible={modals3} style={{ flex: 1 }}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "#00000090",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => {
+              setModal3(false);
+            }}
+            style={{
+              paddingHorizontal: 20,
+              paddingVertical: 5,
+              borderRadius: 5,
+              position: "absolute",
+              top: 0,
+              right: 15,
+              marginTop: 15,
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: "Prompt-Regular",
+                fontSize: 19,
+                color: "#fff",
+              }}
+            >
+              Skip
+            </Text>
+          </TouchableOpacity>
+          <View
+            style={{
+              backgroundColor: "#fff",
+              width: width * 0.95,
+              height: width * 0.7,
+            }}
+          >
+            <FlatList
+              data={list_setrender}
+              ListHeaderComponent={
+                <View
+                  style={{
+                    width: width * 0.95,
+                    backgroundColor: "#fff",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "#555",
+                      fontFamily: "Prompt-Regular",
+                      textAlign: "center",
+                      marginTop: 25,
+                      fontSize: 18,
+                    }}
+                  >
+                    {"เลือกอุปกรณ์"}
+                  </Text>
+                </View>
+              }
+              renderItem={({ item, index }) => {
+                return (
+                  <TouchableOpacity
+                    onPress={() => {
+                      Fitblekit.onConnect(index, "APPROVE", (e) => {
+                        console.log(e);
+                      });
+                      setModal3(false);
+                    }}
+                    style={{
+                      width: width * 0.95,
+                      backgroundColor: "#fff",
+                      alignItems: "center",
+                      paddingBottom: 25,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: "#555",
+                        fontFamily: "Prompt-Regular",
+                        textAlign: "center",
+                        marginTop: 25,
+                      }}
+                    >
+                      {item?.replace("[", "").replace("]", "")}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              }}
+            />
+          </View>
+        </View>
+      </Modal>
       <Modal transparent={true} visible={modals1} style={{ flex: 1 }}>
         <View
           style={{
@@ -606,11 +697,10 @@ export default function index({ navigation, route }) {
               <View style={styles.line} />
               <TouchableOpacity
                 onPress={async () => {
-                  setmodals1(true);
-                  Fitblekit.onScanStart((e, i) => {
-                    // console.log(e);
-                    // console.log(i);
-                  });
+                  // setmodals1(true);
+                  Fitblekit.onScanStart((e, i) => {});
+
+                  setModal3(true);
                 }}
                 style={styles.touch}
               >

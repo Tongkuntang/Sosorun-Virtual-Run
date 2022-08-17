@@ -50,7 +50,7 @@ export default function index({ navigation, route }) {
   const dataEV = route.params.dataEV;
   const [token, setToken] = useRecoilState(tokenState);
   const [user, setUser] = useRecoilState(userState);
-  const [lvstate, setlvstate] = useRecoilState(LvState);
+  const [lvstate, setlvstate] = useState(null);
   const [put, setput] = useState(false);
   const [num, setnum] = useState(5);
   const [chick, setchick] = useState(true);
@@ -59,6 +59,58 @@ export default function index({ navigation, route }) {
   const [modalVisible, setmodalVisible] = useState(false);
   const d = Date(Date.now());
   const [pod, setpod] = useState(0);
+
+  async function uplevel(users) {
+    const d_arr = [
+      10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160,
+      170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 290, 300,
+    ];
+
+    const response = await apiservice({
+      path: "/event/getchackrank",
+      method: "get",
+      token: token.accessToken,
+    });
+
+    if (response.status == 200) {
+      const lv = autolize_Lv(parseInt(users.user_accounts.total_distance)).lv;
+
+      const checl_list = d_arr?.map((e) => {
+        if (e < lv) {
+          if (
+            response.data.data?.filter((el) => {
+              return (
+                el?.mission_List?.request_ranking == e &&
+                el?.total_distance <= el?.last_distance
+              );
+            })?.length > 0
+          ) {
+            return {
+              lv: e,
+              status: true,
+            };
+          } else {
+            return {
+              lv: e,
+              status: false,
+            };
+          }
+        }
+      });
+
+      for (
+        let index = 0;
+        index < checl_list?.filter((e) => e).length;
+        index++
+      ) {
+        const data = checl_list?.filter((e) => e);
+        if (data?.[index]?.status == false) {
+          setlvstate(data?.[index]?.lv);
+          return;
+        }
+      }
+    }
+  }
 
   const a = moment(d.toString()).format("YYYY-MM-DD");
   const eventEmitter = new NativeEventEmitter(Fitblekit);
@@ -222,9 +274,9 @@ export default function index({ navigation, route }) {
 
     //   setnum((connt) => connt - 1);
     // }, 5000);
-    let cear;
-    // if (resume == false) {
-    cear = setTimeout(() => setTime((val) => val + 1), 1000);
+    let cear = setTimeout(() => setTime((val) => val + 1), 1000);
+
+    setClear(cear);
     // } else if (resume == true) {
     //   clearTimeout(cear);
     // }
@@ -292,18 +344,6 @@ export default function index({ navigation, route }) {
   useEffect(() => {
     try {
       if (Platform.OS == "android") {
-        const newDevice = eventEmitter.addListener(
-          "EVENTFBK",
-          (deviceDiscovered) => {
-            const ress = deviceDiscovered.split(",");
-            if (ress.length > 0) {
-              Fitblekit.onConnect("SENIOR", "APPROVE", (e) => {
-                console.log(e);
-              });
-            }
-          }
-        );
-
         const newDevice1 = eventEmitter.addListener(
           "EVENTFBKSTEP",
           (deviceDiscovered) => {
@@ -378,7 +418,6 @@ export default function index({ navigation, route }) {
         );
 
         return () => {
-          newDevice.remove();
           newDevice1.remove();
           newDevice2.remove();
           newDevice3.remove();
@@ -433,7 +472,9 @@ export default function index({ navigation, route }) {
       setVisible1(false);
       Alert.alert(
         "ตอนนี้คุณทำได้แค่ " +
-          parseFloat(((steps - route?.params?.last_totals) * strip) / 100000) +
+          parseFloat(
+            ((steps - route?.params?.last_totals) * strip) / 100000
+          )?.toFixed(2) +
           " กม"
       );
     }
@@ -450,16 +491,11 @@ export default function index({ navigation, route }) {
     const res = await GoogleFit.getDailyStepCountSamples(opt);
 
     res?.map((item) => {
-      if (item.source == "com.google.android.gms:estimated_steps") {
-        item.rawSteps.map((e) => (steps = steps + e.steps));
-      }
+      item.rawSteps.map((e) => (steps = steps + e.steps));
     });
 
-    console.log(
-      parseFloat(((steps - route?.params?.last_totals) * strip) / 100000)
-    );
-
-    console.log(dataEV.distance[0]);
+    console.log("steps >> ", steps);
+    console.log("steps >> ", route?.params?.last_totals);
 
     if (
       parseFloat(((steps - route?.params?.last_totals) * strip) / 100000) >=
@@ -471,7 +507,9 @@ export default function index({ navigation, route }) {
       setVisible1(false);
       Alert.alert(
         "ตอนนี้คุณทำได้แค่ " +
-          parseFloat(((steps - route?.params?.last_totals) * strip) / 100000) +
+          parseFloat(
+            ((steps - route?.params?.last_totals) * strip) / 100000
+          )?.toFixed(2) +
           " กม"
       );
     }
@@ -510,6 +548,7 @@ export default function index({ navigation, route }) {
     if (upwal.status == 200) {
       const getuser = await getActionUser(token);
       setUser(getuser.data);
+      uplevel(getuser.data);
     }
     const response = await apiservice({
       path: "/event/updateuserjoinEvent",
@@ -538,45 +577,21 @@ export default function index({ navigation, route }) {
   }
 
   useEffect(() => {
-    // let dates = null;
-    // let currentStepCount = 0;
-    // const subscription = AppState.addEventListener(
-    //   "change",
-    //   async (nextAppState) => {
-    //     if (nextAppState === "active") {
-    //       if (Platform.OS == "ios") {
-    //         let options = {
-    //           startDate: new Date(dates).toISOString(),
-    //           endDate: new Date().toISOString(),
-    //           type: "Walking", // one of: ['Walking', 'StairClimbing', 'Running', 'Cycling', 'Workout']
-    //         };
-    //         setVisible1(true);
-    //         let valuse = setInterval(() => {
-    //           AppleHealthKit.getSamples(options, (err, results) => {
-    //             if (err) {
-    //               return;
-    //             }
-    //             let number = 0;
-    //             console.log(results);
-    //             if (results.length != 0) {
-    //               clearInterval(counts.current);
-    //               results.map((test) => (number = number + test.quantity));
-    //               setVisible1(false);
-    //               setState((val) => ({
-    //                 ...val,
-    //                 currentStepCount: val.currentStepCount + number * 1.5,
-    //               }));
-    //             }
-    //           });
-    //         }, 1000);
-    //         counts.current = valuse;
-    //         setTime((val) => val + (new Date().getTime() - dates) / 1000);
-    //       }
-    //     } else {
-    //       dates = new Date().getTime();
-    //     }
-    //   }
-    // );
+    uplevel(user);
+    let dates = null;
+    let currentStepCount = 0;
+    const subscription = AppState.addEventListener(
+      "change",
+      async (nextAppState) => {
+        if (nextAppState === "active") {
+          count();
+          setTime((val) => val + (new Date().getTime() - dates) / 1000);
+        } else {
+          clearTimeout(Clear);
+          dates = new Date().getTime();
+        }
+      }
+    );
   }, []);
 
   useEffect(() => {
@@ -599,8 +614,11 @@ export default function index({ navigation, route }) {
     setSubscription(null);
   };
 
-  const _subscribe = () => {
+  const _subscribe = async () => {
     let Magnitude = 0;
+    let currentStepCount = 0;
+    let prevcurrentStepCount = 0;
+
     setSubscription(
       Gyroscope.addListener((gyroscopeData) => {
         Magnitude =
@@ -614,10 +632,17 @@ export default function index({ navigation, route }) {
 
         if (Magnitude > 8) {
           Magnitude = 0;
+
+          currentStepCount = currentStepCount + 1;
+        }
+
+        if (currentStepCount > 20) {
           setState((val) => ({
             ...val,
-            currentStepCount: val.currentStepCount + 1,
+            currentStepCount: val?.currentStepCount + currentStepCount / 3,
           }));
+          currentStepCount = 0;
+          prevcurrentStepCount = 0;
         }
       })
     );
@@ -642,6 +667,10 @@ export default function index({ navigation, route }) {
   var h = timeformet(Math.floor(timecal / 3600));
   var m = timeformet(Math.floor((timecal % 3600) / 60));
   var s = timeformet(Math.floor((timecal % 3600) % 60));
+
+  if (h > 1000) {
+    setTime(0);
+  }
 
   function formatTime(params) {
     let Ans = params.toString();
@@ -914,7 +943,19 @@ export default function index({ navigation, route }) {
           marginTop: Platform.OS === "ios" ? 0 : 0,
         }}
       >
-        <Headerdetail item={dataEV.titel} navigation={navigation} />
+        <Headerdetail
+          item={dataEV.titel}
+          navigation={navigation}
+          goBack={() => {
+            if (route?.params?.devices == "SOSORUNPODV2") {
+              navigation.navigate("Event");
+            } else {
+              setTimeout(() => {
+                navigation.goBack();
+              }, 300);
+            }
+          }}
+        />
         <Modal
           animationType="none"
           transparent={true}
@@ -1117,21 +1158,17 @@ export default function index({ navigation, route }) {
                 <Image
                   style={{ width: 35, height: 40, alignSelf: "center" }}
                   source={
-                    autolize_Lv(parseInt(user.user_accounts.total_distance))
-                      .lv > 60
-                      ? lvstate.length == 0
-                        ? {
-                            uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/rank/D/50.png",
-                          }
-                        : lvstate[0].status == true
-                        ? autolize_Lv(
-                            parseInt(user.user_accounts.total_distance)
-                          ).grid
-                        : {
-                            uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/rank/D/50.png",
-                          }
-                      : autolize_Lv(parseInt(user.user_accounts.total_distance))
-                          .grid
+                    autolize_Lv(
+                      parseInt(
+                        lvstate
+                          ? parseInt(lvstate * 2000) - 2000
+                          : (parseFloat(
+                              user.user_accounts.total_distance / 1000
+                            ) +
+                              (state.currentStepCount * strip) / 100000) *
+                              1000
+                      )
+                    ).grid
                   }
                 />
                 <View
@@ -1143,16 +1180,19 @@ export default function index({ navigation, route }) {
                 >
                   <Text style={styles.textrank}>
                     Rank :{" "}
-                    {autolize_Lv(parseInt(user.user_accounts.total_distance))
-                      .lv > 60
-                      ? lvstate.length == 0
-                        ? "D"
-                        : lvstate[0].status == true
-                        ? autolize_Lv(
-                            parseInt(user.user_accounts.total_distance)
-                          ).rank
-                        : "D"
-                      : "D"}{" "}
+                    {
+                      autolize_Lv(
+                        parseInt(
+                          lvstate
+                            ? parseInt(lvstate * 2000) - 2000
+                            : (parseFloat(
+                                user.user_accounts.total_distance / 1000
+                              ) +
+                                (state.currentStepCount * strip) / 100000) *
+                                1000
+                        )
+                      ).rank
+                    }{" "}
                     Class
                   </Text>
                   <View style={{ flexDirection: "row" }}>
@@ -1197,37 +1237,19 @@ export default function index({ navigation, route }) {
                 </View>
                 <Text style={styles.textlv}>
                   Lv
-                  {parseFloat(
-                    nextautolize_Lv(
-                      (parseFloat(user.user_accounts.total_distance / 1000) +
-                        (state.currentStepCount * strip) / 100000) *
-                        1000
-                    ).lv
-                  ) -
-                    1 >
-                  60
-                    ? lvstate.length == 0
-                      ? 60
-                      : lvstate[0].status == true
-                      ? parseFloat(
-                          nextautolize_Lv(
-                            (parseFloat(
+                  {
+                    autolize_Lv(
+                      parseInt(
+                        lvstate
+                          ? parseInt(lvstate * 2000) - 2000
+                          : (parseFloat(
                               user.user_accounts.total_distance / 1000
                             ) +
                               (state.currentStepCount * strip) / 100000) *
                               1000
-                          ).lv
-                        ) - 1
-                      : 60
-                    : parseFloat(
-                        nextautolize_Lv(
-                          (parseFloat(
-                            user.user_accounts.total_distance / 1000
-                          ) +
-                            (state.currentStepCount * strip) / 100000) *
-                            1000
-                        ).lv
-                      ) - 1}
+                      )
+                    ).lv
+                  }
                   {"  "}
                 </Text>
               </View>
@@ -1401,9 +1423,12 @@ export default function index({ navigation, route }) {
                   // count();
                   setVisible1(true);
                   if (route?.params?.devices == "SOSORUNPODV2") {
+                    console.log("====================================");
+                    console.log("gogo");
+                    console.log("====================================");
                     if (
                       parseFloat(
-                        ((steps - route?.params?.last_totals) * strip) / 100000
+                        ((pod - route?.params?.last_totals) * strip) / 100000
                       ) >= dataEV.distance[0]
                     ) {
                       setVisible1(false);
@@ -1417,7 +1442,7 @@ export default function index({ navigation, route }) {
                               state?.currentStepCount) *
                               strip) /
                               100000
-                          ) +
+                          )?.toFixed(2) +
                           " กม"
                       );
                     }
@@ -1452,7 +1477,7 @@ export default function index({ navigation, route }) {
                           parseFloat(
                             ((count - route?.params?.last_totals) * strip) /
                               100000
-                          ) +
+                          )?.toFixed(2) +
                           " กม"
                       );
                     }

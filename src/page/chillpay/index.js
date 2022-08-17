@@ -19,15 +19,15 @@ export default function index({ navigation, route }) {
             <title>Payment Demo</title>
             </head>
             <body>
-            <form id="payment-form" action="https://sandbox-cdnv3.chillpay.co/Payment/" method="post" role="form" class="form-horizontal">
+            <form id="payment-form" action="https://cdn.chillpay.co/Payment/" method="post" role="form" class="form-horizontal">
             <modernpay:widget id="modernpay-widget-container"
-            data-merchantid="M032077" data-amount="${AmountU.Amount}" data-orderno="${AmountU.routeno}" data-customerid="${Doctor}"
+            data-merchantid="M031203" data-amount="${AmountU.Amount}" data-orderno="${AmountU.routeno}" data-customerid="${Doctor}"
             data-mobileno="${user.telNo}" data-clientip="49.228.104.160" data-routeno="1" data-currency="764"
-            data-description="${AmountU.item}" data-apikey="MFSufQZ8jftF8XjwH9sBV5wd9W6RXsER9ZgtIuY7alf8u3HbSYAt33vtORoh3dOz">
+            data-description="${AmountU.item}" data-apikey="J8tqCToy4RYJGwZ3lbSSA2fDOFsPcEMZ3W0ZTCNxYAXBiuScWzaMDEfZQpnrZqCc">
             </modernpay:widget>
             <button type="submit" id="btnSubmit" value="Submit" class="btn">Payment</button>
             </form>
-            <script async src="https://sandbox-cdnv3.chillpay.co/js/widgets.js?v=1.00" charset="utf-8"></script>
+            <script async src="https://cdn.chillpay.co/js/widgets.js?v=1.00" charset="utf-8"></script>
             </body>
             </html>,
             `,

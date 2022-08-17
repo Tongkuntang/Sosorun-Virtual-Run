@@ -14,6 +14,7 @@ import {
   Share,
   ActivityIndicator,
   ImageBackground,
+  Alert,
 } from "react-native";
 import Header from "../components/header";
 import {
@@ -28,14 +29,16 @@ import * as Sharing from "expo-sharing";
 import * as ImageManipulator from "expo-image-manipulator";
 import { LinearGradient } from "expo-linear-gradient";
 import { useIsFocused } from "@react-navigation/native";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useResetRecoilState } from "recoil";
 import { LvState, tokenState } from "../../reducer/reducer/reducer/Atom";
-import { getActionUser } from "../../action/actionauth";
+import { actionEditprofile, getActionUser } from "../../action/actionauth";
 import { apiservice } from "../../service/service";
 import { autolize_Lv, nextautolize_Lv } from "../../json/utils";
 const { width, height } = Dimensions.get("window");
 export default function index({ navigation }) {
   const viewShot = useRef();
+  const resettoken = useResetRecoilState(tokenState);
+
   const [isEnabled, setIsEnabled] = useState(true);
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
   const [State, setState] = useState(false);
@@ -70,12 +73,14 @@ export default function index({ navigation }) {
 
   const focus = useIsFocused();
   const [token, setToken] = useRecoilState(tokenState);
-  const [lvstate, setlvstate] = useRecoilState(LvState);
+  const [lvstate, setlvstate] = useState(null);
   const [user, setuser] = useState(null);
   const [ssc, setssc] = useState(false);
+
   async function getUser() {
     const getuser = await getActionUser(token);
-    // user.user_accounts.total_distance;
+
+    console.log("getuser >> ", getuser?.data?.user_accounts);
     setuser((val) => ({
       ...getuser.data,
       user_accounts: {
@@ -86,6 +91,69 @@ export default function index({ navigation }) {
             : 0,
       },
     }));
+
+    uplevel({
+      ...getuser.data,
+      user_accounts: {
+        ...getuser.data.user_accounts,
+        total_distance:
+          getuser.data.user_accounts.total_distance != null
+            ? getuser.data.user_accounts.total_distance
+            : 0,
+      },
+    });
+  }
+
+  async function uplevel(users) {
+    const d_arr = [
+      10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160,
+      170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 290, 300,
+    ];
+
+    const response = await apiservice({
+      path: "/event/getchackrank",
+      method: "get",
+      token: token.accessToken,
+    });
+
+    if (response.status == 200) {
+      const lv = autolize_Lv(parseInt(users.user_accounts.total_distance)).lv;
+
+      const checl_list = d_arr?.map((e) => {
+        if (e < lv) {
+          if (
+            response.data.data?.filter((el) => {
+              return (
+                el?.mission_List?.request_ranking == e &&
+                el?.total_distance <= el?.last_distance
+              );
+            })?.length > 0
+          ) {
+            return {
+              lv: e,
+              status: true,
+            };
+          } else {
+            return {
+              lv: e,
+              status: false,
+            };
+          }
+        }
+      });
+
+      for (
+        let index = 0;
+        index < checl_list?.filter((e) => e).length;
+        index++
+      ) {
+        const data = checl_list?.filter((e) => e);
+        if (data?.[index]?.status == false) {
+          setlvstate(data?.[index]?.lv);
+          return;
+        }
+      }
+    }
   }
 
   useEffect(() => {
@@ -95,10 +163,8 @@ export default function index({ navigation }) {
   }, [ssc]);
   useEffect(() => {
     getUser();
-    // getresultsrunning()
+    uplevel();
   }, [token, focus]);
-
-  console.log(user?.role);
 
   if (user == null) {
     return (
@@ -188,22 +254,13 @@ export default function index({ navigation }) {
                   <Image
                     resizeMode="stretch"
                     source={
-                      autolize_Lv(parseInt(user.user_accounts.total_distance))
-                        .lv > 60
-                        ? lvstate.length == 0
-                          ? {
-                              uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/rank/D/50.png",
-                            }
-                          : lvstate[0].status == true
-                          ? autolize_Lv(
-                              parseInt(user.user_accounts.total_distance)
-                            ).grid
-                          : {
-                              uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/rank/D/50.png",
-                            }
-                        : autolize_Lv(
-                            parseInt(user.user_accounts.total_distance)
-                          ).grid
+                      autolize_Lv(
+                        parseInt(
+                          lvstate
+                            ? parseInt(lvstate * 2000) - 2000
+                            : user.user_accounts.total_distance
+                        )
+                      ).grid
                     }
                     style={styles.imgrank1}
                   />
@@ -215,15 +272,15 @@ export default function index({ navigation }) {
                   />
                 )}
                 <Text style={[styles.textname, { alignSelf: "center" }]}>
-                  {autolize_Lv(parseInt(user.user_accounts.total_distance)).lv >
-                  60
-                    ? lvstate.length == 0
-                      ? "D"
-                      : lvstate[0].status == true
-                      ? autolize_Lv(parseInt(user.user_accounts.total_distance))
-                          .rank
-                      : "D"
-                    : "D"}{" "}
+                  {
+                    autolize_Lv(
+                      parseInt(
+                        lvstate
+                          ? parseInt(lvstate * 2000) - 2000
+                          : user.user_accounts.total_distance
+                      )
+                    ).rank
+                  }{" "}
                   CLASS
                 </Text>
 
@@ -332,22 +389,13 @@ export default function index({ navigation }) {
                   <Image
                     resizeMode="contain"
                     source={
-                      autolize_Lv(parseInt(user.user_accounts.total_distance))
-                        .lv > 60
-                        ? lvstate.length == 0
-                          ? {
-                              uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/rank/D/50.png",
-                            }
-                          : lvstate[0].status == true
-                          ? autolize_Lv(
-                              parseInt(user.user_accounts.total_distance)
-                            ).grid
-                          : {
-                              uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/rank/D/50.png",
-                            }
-                        : autolize_Lv(
-                            parseInt(user.user_accounts.total_distance)
-                          ).grid
+                      autolize_Lv(
+                        parseInt(
+                          lvstate
+                            ? parseInt(lvstate * 2000) - 2000
+                            : user.user_accounts.total_distance
+                        )
+                      ).grid
                     }
                     style={[
                       styles.imgrank1,
@@ -398,16 +446,15 @@ export default function index({ navigation }) {
                   </View>
                 ) : (
                   <Text style={[styles.textname, { alignSelf: "center" }]}>
-                    {autolize_Lv(parseInt(user.user_accounts.total_distance))
-                      .lv > 60
-                      ? lvstate.length == 0
-                        ? "D"
-                        : lvstate[0].status == true
-                        ? autolize_Lv(
-                            parseInt(user.user_accounts.total_distance)
-                          ).rank
-                        : "D"
-                      : "D"}{" "}
+                    {
+                      autolize_Lv(
+                        parseInt(
+                          lvstate
+                            ? parseInt(lvstate * 2000) - 2000
+                            : user.user_accounts.total_distance
+                        )
+                      ).rank
+                    }{" "}
                     CLASS
                   </Text>
                 )}
@@ -460,22 +507,13 @@ export default function index({ navigation }) {
                   <Image
                     style={styles.imgrank}
                     source={
-                      autolize_Lv(parseInt(user.user_accounts.total_distance))
-                        .lv > 60
-                        ? lvstate.length == 0
-                          ? {
-                              uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/rank/D/50.png",
-                            }
-                          : lvstate[0].status == true
-                          ? autolize_Lv(
-                              parseInt(user.user_accounts.total_distance)
-                            ).grid
-                          : {
-                              uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/rank/D/50.png",
-                            }
-                        : autolize_Lv(
-                            parseInt(user.user_accounts.total_distance)
-                          ).grid
+                      autolize_Lv(
+                        parseInt(
+                          lvstate
+                            ? parseInt(lvstate * 2000) - 2000
+                            : user.user_accounts.total_distance
+                        )
+                      ).grid
                     }
                   />
                 ) : (
@@ -507,15 +545,15 @@ export default function index({ navigation }) {
             >
               <Text style={[styles.textemail, { color: "#fff" }]}>
                 Rank :{" "}
-                {autolize_Lv(parseInt(user.user_accounts.total_distance)).lv >
-                60
-                  ? lvstate.length == 0
-                    ? "D"
-                    : lvstate[0].status == true
-                    ? autolize_Lv(parseInt(user.user_accounts.total_distance))
-                        .rank
-                    : "D"
-                  : "D"}{" "}
+                {
+                  autolize_Lv(
+                    parseInt(
+                      lvstate
+                        ? parseInt(lvstate * 2000) - 2000
+                        : user.user_accounts.total_distance
+                    )
+                  ).rank
+                }{" "}
                 Class
               </Text>
               <View style={styles.linelevel}>
@@ -552,15 +590,15 @@ export default function index({ navigation }) {
               <Text style={styles.textlv}>Lv</Text>
 
               <Text style={styles.textnum}>
-                {autolize_Lv(parseInt(user.user_accounts.total_distance)).lv >
-                60
-                  ? lvstate.length == 0
-                    ? 60
-                    : lvstate[0].status == true
-                    ? autolize_Lv(parseInt(user.user_accounts.total_distance))
-                        .lv
-                    : 60
-                  : autolize_Lv(parseInt(user.user_accounts.total_distance)).lv}
+                {
+                  autolize_Lv(
+                    parseInt(
+                      lvstate
+                        ? parseInt(lvstate * 2000) - 2000
+                        : user.user_accounts.total_distance
+                    )
+                  ).lv
+                }
               </Text>
             </View>
           </View>
@@ -613,10 +651,19 @@ export default function index({ navigation }) {
             <Text style={styles.textname}>Invite Friends</Text>
             <Switch
               trackColor={{ false: "#767577", true: "#FCC71A50" }}
-              thumbColor={isEnabled ? "#FCC71A" : "#f4f3f4"}
+              thumbColor={user?.friends_chack ? "#FCC71A" : "#f4f3f4"}
               ios_backgroundColor="#3e3e3e"
-              onValueChange={toggleSwitch}
-              value={isEnabled}
+              onValueChange={async () => {
+                const res = await actionEditprofile({
+                  body: {
+                    ...user,
+                    friends_chack: !user?.friends_chack,
+                  },
+                  token,
+                });
+                getUser();
+              }}
+              value={user?.friends_chack}
             />
           </View>
         </View>
@@ -629,10 +676,20 @@ export default function index({ navigation }) {
             </Text>
             <Switch
               trackColor={{ false: "#767577", true: "#FCC71A50" }}
-              thumbColor={State ? "#FCC71A" : "#f4f3f4"}
+              thumbColor={user?.noti_chack ? "#FCC71A" : "#f4f3f4"}
               ios_backgroundColor="#3e3e3e"
-              onValueChange={toggleSwitch1}
-              value={State}
+              onValueChange={async () => {
+                const res = await actionEditprofile({
+                  body: {
+                    ...user,
+                    noti_chack: !user?.noti_chack,
+                  },
+                  token,
+                });
+
+                getUser();
+              }}
+              value={user?.noti_chack}
             />
           </View>
         </View>
@@ -654,6 +711,61 @@ export default function index({ navigation }) {
             </View>
           </View>
         </View>
+        <View style={styles.line} />
+        <TouchableOpacity
+          onPress={async () => {
+            console.log("เข้านะ");
+            console.log(user?.id);
+
+            Alert.alert(
+              "Do you want",
+              "Two button alert dialog",
+              [
+                {
+                  text: "Yes",
+                  onPress: async () => {
+                    const res = await apiservice({
+                      path: "/admin/deleteaccount?id=" + user?.id,
+                      method: "delete",
+                      token: token?.accessToken,
+                    });
+
+                    console.log(res);
+
+                    if (res?.status == 200) {
+                      resettoken();
+                    }
+                  },
+                },
+                {
+                  text: "No",
+                  onPress: () => console.log("No button clicked"),
+                  style: "cancel",
+                },
+              ],
+              {
+                cancelable: true,
+              }
+            );
+          }}
+          style={styles.viewrow}
+        >
+          <MaterialIcons name="account-circle" size={24} color="black" />
+          <View style={styles.viewrowsmall}>
+            <Text style={styles.textname}>Delete Account</Text>
+            <View style={{ flexDirection: "row" }}>
+              <Text style={styles.textname}></Text>
+              <View>
+                <MaterialCommunityIcons
+                  name="arrow-right-drop-circle-outline"
+                  size={24}
+                  color="black"
+                  style={{ marginLeft: 5, marginTop: 2 }}
+                />
+              </View>
+            </View>
+          </View>
+        </TouchableOpacity>
         <View style={styles.line} />
       </View>
     </View>

@@ -20,6 +20,8 @@ PODS:
     - UMTaskManagerInterface
   - EXConstants (12.1.3):
     - ExpoModulesCore
+  - EXErrorRecovery (3.0.3):
+    - ExpoModulesCore
   - EXFacebook (12.0.3):
     - ExpoModulesCore
     - FacebookSDK/CoreKit (= 9.2.0)
@@ -545,6 +547,7 @@ DEPENDENCIES:
   - EXAV (from `../node_modules/expo-av/ios`)
   - EXBackgroundFetch (from `../node_modules/expo-background-fetch/ios`)
   - EXConstants (from `../node_modules/expo-constants/ios`)
+  - EXErrorRecovery (from `../node_modules/expo-error-recovery/ios`)
   - EXFacebook (from `../node_modules/expo-facebook/ios`)
   - EXFileSystem (from `../node_modules/expo-file-system/ios`)
   - EXFont (from `../node_modules/expo-font/ios`)
@@ -669,6 +672,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-background-fetch/ios"
   EXConstants:
     :path: "../node_modules/expo-constants/ios"
+  EXErrorRecovery:
+    :path: "../node_modules/expo-error-recovery/ios"
   EXFacebook:
     :path: "../node_modules/expo-facebook/ios"
   EXFileSystem:
@@ -856,6 +861,7 @@ SPEC CHECKSUMS:
   EXAV: 8adf9a1c0161144d77e96149a1e5a5f9358be290
   EXBackgroundFetch: 93e9759b7d6f0d1fa2ffcec2dec4b7283660b7cd
   EXConstants: 6d585d93723b18d7a8c283591a335609e3bc153e
+  EXErrorRecovery: ac2622400a32be84604591f70d0efff416e4b9a2
   EXFacebook: bf6be13a8e7269b095983b1663a7ba1103eeec05
   EXFileSystem: 99aac7962c11c680681819dd9cbca24e20e5b1e7
   EXFont: 2e1c6fe726d008a039db80df95f48b4921b7fe59

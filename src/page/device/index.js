@@ -51,9 +51,12 @@ const permissions = {
 
 export default function index({ navigation }) {
   const [modals, setModal] = useState(false);
+  const [n_device, s_n_device] = useState("");
+  const [list_setrender, setrender] = useState([]);
+
   const [modals1, setModal1] = useState(false);
   const [modals2, setModal2] = useState(Platform.OS == "android");
-
+  const [modals3, setModal3] = useState(false);
   const peripherals = new Map();
   const [list, setList] = useState([]);
   const eventEmitter = new NativeEventEmitter(Fitblekit);
@@ -116,7 +119,7 @@ export default function index({ navigation }) {
         uid: body?.id,
         type: "HEALTHKIT",
         date: moment(),
-        last_count: (steps * body?.height * 0.415) / 1000,
+        last_count: (steps * body?.height * 0.415) / 100000,
       },
     });
 
@@ -127,6 +130,9 @@ export default function index({ navigation }) {
 
       const getuser = await getActionUser(token);
       setbody(getuser.data);
+    } else {
+      setModal1(false);
+      Alert.alert("อัพเดทข้อมูลไม่สำเร็จ");
     }
 
     console.log(steps);
@@ -175,11 +181,9 @@ export default function index({ navigation }) {
         uid: body?.id,
         type: "HEALTHKIT",
         date: moment(),
-        last_count: (steps * body?.height * 0.415) / 1000,
+        last_count: (steps * body?.height * 0.415) / 100000,
       },
     });
-
-    console.log((steps * body?.height * 0.415) / 1000);
 
     if (res1.status == 200) {
       setModal1(false);
@@ -188,6 +192,9 @@ export default function index({ navigation }) {
 
       const getuser = await getActionUser(token);
       setbody(getuser.data);
+    } else {
+      setModal1(false);
+      Alert.alert("อัพเดทข้อมูลไม่สำเร็จ");
     }
 
     console.log(steps);
@@ -270,10 +277,9 @@ export default function index({ navigation }) {
           "EVENTFBK",
           (deviceDiscovered) => {
             const ress = deviceDiscovered.split(",");
+            console.log("deviceDiscovered", ress);
             if (ress.length > 0) {
-              Fitblekit.onConnect("SENIOR", "APPROVE", (e) => {
-                console.log(e);
-              });
+              setrender(ress);
             }
           }
         );
@@ -329,6 +335,9 @@ export default function index({ navigation }) {
           "EVENTFBKSTEP1",
           (deviceDiscovered) => {
             console.log("EVENTFBKSTEP1", deviceDiscovered);
+            if (deviceDiscovered?.includes("MOVE")) {
+              s_n_device(deviceDiscovered);
+            }
             // setDeviceList(deviceList => [...deviceList,deviceDiscovered])
           }
         );
@@ -363,10 +372,12 @@ export default function index({ navigation }) {
         const newDevice2 = eventEmitter.addListener(
           "CONNECT",
           (deviceDiscovered) => {
-            console.log(
-              deviceDiscovered.name.filter((item) => {
-                return item.localName.includes("MOVE");
-              })
+            setrender(
+              deviceDiscovered.name
+                .filter((item) => {
+                  return item.localName.includes("MOVE");
+                })
+                ?.map((e, i) => ({ localName: e.localName, index: i }))
             );
           }
         );
@@ -456,6 +467,110 @@ export default function index({ navigation }) {
   return (
     <View style={styles.contalner}>
       <SafeAreaView />
+      <Modal transparent={true} visible={modals3} style={{ flex: 1 }}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "#00000090",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => {
+              setModal3(false);
+            }}
+            style={{
+              paddingHorizontal: 20,
+              paddingVertical: 5,
+              borderRadius: 5,
+              position: "absolute",
+              top: 0,
+              right: 15,
+              marginTop: 15,
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: "Prompt-Regular",
+                fontSize: 19,
+                color: "#fff",
+              }}
+            >
+              Skip
+            </Text>
+          </TouchableOpacity>
+          <View
+            style={{
+              backgroundColor: "#fff",
+              width: width * 0.95,
+              height: width * 0.7,
+            }}
+          >
+            <FlatList
+              data={list_setrender}
+              ListHeaderComponent={
+                <View
+                  style={{
+                    width: width * 0.95,
+                    backgroundColor: "#fff",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "#555",
+                      fontFamily: "Prompt-Regular",
+                      textAlign: "center",
+                      marginTop: 25,
+                      fontSize: 18,
+                    }}
+                  >
+                    {"เลือกอุปกรณ์"}
+                  </Text>
+                </View>
+              }
+              renderItem={({ item, index }) => {
+                return (
+                  <TouchableOpacity
+                    onPress={() => {
+                      if (Platform.OS == "android") {
+                        Fitblekit.onConnect(index, "APPROVE", (e) => {
+                          console.log(e);
+                        });
+                      } else {
+                        Fitblekit.onConnect(index, (e) => {
+                          console.log(e);
+                        });
+                      }
+
+                      setModal3(false);
+                    }}
+                    style={{
+                      width: width * 0.95,
+                      backgroundColor: "#fff",
+                      alignItems: "center",
+                      paddingBottom: 25,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: "#555",
+                        fontFamily: "Prompt-Regular",
+                        textAlign: "center",
+                        marginTop: 25,
+                      }}
+                    >
+                      {item?.localName ||
+                        item?.replace("[", "").replace("]", "")}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              }}
+            />
+          </View>
+        </View>
+      </Modal>
       <Modal transparent={true} visible={modals2} style={{ flex: 1 }}>
         <View
           style={{
@@ -770,7 +885,13 @@ export default function index({ navigation }) {
                     }}
                     style={styles.imgsoso1}
                   />
-                  <Text style={styles.textdevice}>SOSORUN POD V2</Text>
+                  <View>
+                    <Text style={styles.textdevice}>SOSORUN POD V2</Text>
+                    <Text style={[styles.textdevice, { fontSize: 11 }]}>
+                      {n_device}
+                    </Text>
+                  </View>
+
                   <View
                     style={{ position: "absolute", right: 25, top: 5 }}
                     name="check"
@@ -781,10 +902,16 @@ export default function index({ navigation }) {
                       <TouchableOpacity
                         disabled={devicsI == 1}
                         onPress={() => {
-                          Fitblekit.onScanStart((e, i) => {
-                            // console.log(e);
-                            // console.log(i);
-                          });
+                          if (pod == 0) {
+                            Fitblekit.onScanStart((e, i) => {
+                              if (Platform?.OS == "ios") {
+                                console.log("Platform", e, i);
+                              }
+                            });
+                            setModal3(true);
+                          } else {
+                            setDeviceI(1);
+                          }
                         }}
                         style={{
                           backgroundColor: "#ccc",
@@ -823,6 +950,9 @@ export default function index({ navigation }) {
 
                             const getuser = await getActionUser(token);
                             setbody(getuser.data);
+                          } else {
+                            setModal1(false);
+                            Alert.alert("อัพเดทข้อมูลไม่สำเร็จ");
                           }
                         }}
                         style={{
@@ -929,7 +1059,7 @@ export default function index({ navigation }) {
                                 type: "GARMIN",
                                 date: moment(),
                                 last_count:
-                                  (count * body?.height * 0.415) / 1000,
+                                  (count * body?.height * 0.415) / 100000,
                               },
                             });
 
@@ -939,6 +1069,9 @@ export default function index({ navigation }) {
                               setDeviceI(0);
                               const getuser = await getActionUser(token);
                               setbody(getuser.data);
+                            } else {
+                              setModal1(false);
+                              Alert.alert("อัพเดทข้อมูลไม่สำเร็จ");
                             }
                           }
                         }}
@@ -1073,7 +1206,7 @@ export default function index({ navigation }) {
                               type: "HEALTHKIT",
                               date: moment(),
                               last_count:
-                                (healthkit * body?.height * 0.415) / 1000,
+                                (healthkit * body?.height * 0.415) / 100000,
                             },
                           });
                           console.log(res?.status);
@@ -1083,6 +1216,9 @@ export default function index({ navigation }) {
 
                             const getuser = await getActionUser(token);
                             setbody(getuser.data);
+                          } else {
+                            setModal1(false);
+                            Alert.alert("อัพเดทข้อมูลไม่สำเร็จ");
                           }
                         }}
                         style={{
@@ -1191,7 +1327,7 @@ export default function index({ navigation }) {
               {(devicsI == 0 || devicsI == 5) && Platform.OS == "android" && (
                 <View style={styles.line} />
               )}
-              {(devicsI == 0 || devicsI == 4) && Platform.OS == "android" && (
+              {/* {(devicsI == 0 || devicsI == 4) && Platform.OS == "android" && (
                 <View style={styles.touch}>
                   <Image
                     resizeMode="contain"
@@ -1276,7 +1412,7 @@ export default function index({ navigation }) {
               )}
               {(devicsI == 0 || devicsI == 4) && Platform.OS == "android" && (
                 <View style={styles.line} />
-              )}
+              )} */}
             </View>
           )}
           {!page && (
