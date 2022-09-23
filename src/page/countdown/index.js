@@ -102,7 +102,7 @@ export default function index({ navigation }) {
     });
 
     if (response.status == 200) {
-      const lv = autolize_Lv(parseInt(users.user_accounts.total_distance)).lv;
+      const lv = autolize_Lv(parseInt(users?.user_accounts?.total_distance)).lv;
 
       const checl_list = d_arr?.map((e) => {
         if (e < lv) {
@@ -194,6 +194,7 @@ export default function index({ navigation }) {
     isPedometerAvailable: "checking",
     pastStepCount: 0,
     currentStepCount: 0,
+    prevStepCount: 0,
   });
 
   const carouselRef = useRef();
@@ -217,29 +218,10 @@ export default function index({ navigation }) {
     const { workouts } = event;
   };
 
-  // async function garmin() {
-  //   if (bodygarmin?.username) {
-  //     const res = await apiservice({
-  //       path:
-  //         "/user/garmin?user=" +
-  //         bodygarmin.username +
-  //         "&pass=" +
-  //         bodygarmin.password +
-  //         "&date=" +
-  //         moment().format("YYYY-MM-DD"),
-  //     });
-
-  //     res?.data?.steps?.map((item) => {
-  //       setBack((val) => val + item?.steps);
-  //     });
-  //   }
-  // }
-
   useEffect(() => {
     allbanner();
     lvlist();
     uplevel(user);
-    // garmin();
   }, [token]);
 
   const [LV, setLV] = useState([]);
@@ -252,21 +234,6 @@ export default function index({ navigation }) {
     let back = 0;
     let Check = 0;
     let mainCount = 0;
-    // const newDevice5 = eventEmitter.addListener(
-    //   "EVENTFBKSTEP",
-    //   (deviceDiscovered) => {
-    //     if (mainCount == 0) {
-    //       mainCount = deviceDiscovered;
-    //     }
-    //     if (Check != deviceDiscovered - mainCount) {
-    //       setState((val) => ({
-    //         ...val,
-    //         currentStepCount: deviceDiscovered - mainCount,
-    //       }));
-    //       Check = deviceDiscovered - mainCount;
-    //     }
-    //   }
-    // );
 
     if (Platform.OS == "android") {
       callNum();
@@ -274,10 +241,18 @@ export default function index({ navigation }) {
         if (back != callback.steps) {
           console.log(callback.steps);
           back = callback.steps;
-          setState((val) => ({
-            ...val,
-            currentStepCount: val.currentStepCount + callback.steps * 1,
-          }));
+          if (num == 0) {
+            setState((val) => ({
+              ...val,
+              currentStepCount:
+                val.currentStepCount + callback.steps * 1 - val?.prevStepCount,
+            }));
+          } else {
+            setState((val) => ({
+              ...val,
+              prevStepCount: val.currentStepCount + callback.steps * 1,
+            }));
+          }
         }
       });
     } else {
@@ -316,7 +291,6 @@ export default function index({ navigation }) {
       .then((authResult) => {
         if (authResult.success) {
           GoogleFit.startRecording((callback) => {
-            // Process data from Google Fit Recording API (no google fit app needed)
             fetchData();
           });
         } else {
@@ -568,7 +542,7 @@ export default function index({ navigation }) {
                       wallet: {
                         ...user.user_accounts?.wallet,
                         cal:
-                          (user?.user_accounts?.cal || 0) +
+                          (user?.user_accounts?.wallet?.cal || 0) +
                           parseInt(state.currentStepCount * conversationFactor),
                       },
                     },
@@ -794,7 +768,7 @@ export default function index({ navigation }) {
                 <View style={styles.line} />
                 <Text style={styles.textRun}>Distance</Text>
                 <Text style={styles.numRum1}>
-                  {((state.currentStepCount * strip) / 100000).toFixed(2)}
+                  {((state.currentStepCount * strip) / 100000).toFixed(3)}
                 </Text>
                 <View style={styles.line} />
                 <View style={{ flexDirection: "row" }}>
@@ -813,7 +787,7 @@ export default function index({ navigation }) {
                 </View>
                 {chick ? (
                   <TouchableOpacity
-                    onPress={async () => {
+                    onLongPress={async () => {
                       let count = 0;
                       // if (bodygarmin?.username) {
                       //   const res = await apiservice({
@@ -875,6 +849,9 @@ export default function index({ navigation }) {
                     style={styles.bottompause}
                   >
                     <Text style={styles.textpause}>PAUSE</Text>
+                    <Text style={[styles.textpause, { fontSize: 16 }]}>
+                      กดค้างเพื่อพัก
+                    </Text>
                   </TouchableOpacity>
                 ) : (
                   <View
@@ -894,12 +871,15 @@ export default function index({ navigation }) {
                       <Text style={styles.textpause}>RESUME</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      onPress={() => {
+                      onLongPress={() => {
                         setput(true);
                       }}
                       style={styles.bottomresume}
                     >
                       <Text style={styles.textpause}>BREAK</Text>
+                      <Text style={[styles.textpause, { fontSize: 16 }]}>
+                        กดค้างเพื่อหยุด
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 )}

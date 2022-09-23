@@ -399,6 +399,8 @@ PODS:
     - React-jsi (= 0.64.3)
     - React-perflogger (= 0.64.3)
   - React-jsinspector (0.64.3)
+  - react-native-ble-manager (8.4.3):
+    - React-Core
   - react-native-google-maps (0.28.1):
     - Google-Maps-iOS-Utils (= 2.1.0)
     - GoogleMaps (= 3.5.0)
@@ -604,6 +606,7 @@ DEPENDENCIES:
   - React-jsi (from `../node_modules/react-native/ReactCommon/jsi`)
   - React-jsiexecutor (from `../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
+  - react-native-ble-manager (from `../node_modules/react-native-ble-manager`)
   - react-native-google-maps (from `../node_modules/react-native-maps`)
   - "react-native-keep-awake (from `../node_modules/@sayem314/react-native-keep-awake`)"
   - react-native-maps (from `../node_modules/react-native-maps`)
@@ -782,6 +785,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/jsiexecutor"
   React-jsinspector:
     :path: "../node_modules/react-native/ReactCommon/jsinspector"
+  react-native-ble-manager:
+    :path: "../node_modules/react-native-ble-manager"
   react-native-google-maps:
     :path: "../node_modules/react-native-maps"
   react-native-keep-awake:
@@ -929,6 +934,7 @@ SPEC CHECKSUMS:
   React-jsi: a8b09c29521c798f1783348b37b511ba7b3dbeb3
   React-jsiexecutor: df6abc9fafbecb8e5b7a5fbc5e6d4bd017d594d5
   React-jsinspector: 34e23860273a23695342f58eed3ffd3ba10c31e0
+  react-native-ble-manager: b67db4b4c9f8ce8038b4aad4fe29db98878738ea
   react-native-google-maps: 915cea64470a6e7581b782d8659bf8a7e2dee302
   react-native-keep-awake: e63964d58c890de02bfb6519dedb7d90b5c782de
   react-native-maps: 60a75aa547d576fdb91be1f95113665215b59461

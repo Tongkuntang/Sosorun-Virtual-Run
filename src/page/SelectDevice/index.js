@@ -82,11 +82,11 @@ export default function index({ navigation, route }) {
     const res = await GoogleFit.getDailyStepCountSamples(opt);
     let steps = 0;
     res?.map((item) => {
-      if (item?.source == "com.xiaomi.hm.health") {
+      if (item?.source?.includes("strava")) {
         console.log(item);
 
         item.rawSteps
-          ?.filter((e) => e?.appPackageName == "com.xiaomi.hm.health")
+          ?.filter((e) => e?.appPackageName?.includes("strava"))
           .map((e) => (steps = steps + e.steps));
       }
     });
@@ -163,9 +163,8 @@ export default function index({ navigation, route }) {
     res?.map((item) => {
       if (item.source == "com.google.android.gms:estimated_steps") {
         if (
-          item.rawSteps?.filter(
-            (e) => e?.appPackageName == "com.xiaomi.hm.health"
-          ).length > 0
+          item.rawSteps?.filter((e) => e?.appPackageName?.includes("strava"))
+            .length > 0
         ) {
           setDeviceI(5);
         }
@@ -759,7 +758,7 @@ export default function index({ navigation, route }) {
                     source={require("../../img/115.png")}
                     style={styles.imgsoso2}
                   />
-                  <Text style={styles.textdevice}>Zepp Life(Mi Fit)</Text>
+                  <Text style={styles.textdevice}>Strava</Text>
                 </TouchableOpacity>
               )}
               <View style={styles.line} />

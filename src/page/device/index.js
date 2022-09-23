@@ -17,8 +17,10 @@ import {
   Alert,
   FlatList,
   ActivityIndicator,
+  PermissionsAndroid,
 } from "react-native";
 import { timeformet } from "../components/test";
+import BleManager from "react-native-ble-manager";
 const { Fitblekit } = NativeModules;
 import { useRecoilState, useRecoilValue } from "recoil";
 import AppleHealthKit, {
@@ -29,6 +31,7 @@ import GoogleFit, { Scopes, BucketUnit } from "react-native-google-fit";
 import {
   deviceIndex,
   deviceRegis,
+  n_devices,
   tokenState,
 } from "../../reducer/reducer/reducer/Atom";
 import Header from "../components/header";
@@ -39,6 +42,8 @@ import moment from "moment";
 const { width, height } = Dimensions.get("window");
 import ProgressCircle from "react-native-progress-circle";
 import { useIsFocused } from "@react-navigation/native";
+const BleManagerModule = NativeModules.BleManager;
+const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
 const permissions = {
   permissions: {
@@ -51,7 +56,7 @@ const permissions = {
 
 export default function index({ navigation }) {
   const [modals, setModal] = useState(false);
-  const [n_device, s_n_device] = useState("");
+  const [n_device, s_n_device] = useRecoilState(n_devices);
   const [list_setrender, setrender] = useState([]);
 
   const [modals1, setModal1] = useState(false);
@@ -81,10 +86,10 @@ export default function index({ navigation }) {
 
     res?.map((item) => {
       if (item.source == "com.google.android.gms:estimated_steps") {
+        console.log(item.rawSteps);
         if (
-          item.rawSteps?.filter(
-            (e) => e?.appPackageName == "com.xiaomi.hm.health"
-          ).length > 0
+          item.rawSteps?.filter((e) => e?.appPackageName?.includes("strava"))
+            .length > 0
         ) {
           setDeviceI(5);
         }
@@ -107,7 +112,7 @@ export default function index({ navigation }) {
     res?.map((item) => {
       if (item.source == "com.google.android.gms:estimated_steps") {
         item.rawSteps
-          ?.filter((e) => e?.appPackageName == "com.xiaomi.hm.health")
+          ?.filter((e) => e?.appPackageName?.includes("strava"))
           .map((e) => (steps = steps + e.steps));
       }
     });
@@ -270,16 +275,184 @@ export default function index({ navigation }) {
     );
   };
 
+  const [isScanning, setIsScanning] = useState(false);
+
+  const startScan = () => {
+    if (!isScanning) {
+      BleManager.scan([], 3, true)
+        .then((results) => {
+          console.log("Scanning...");
+          setIsScanning(true);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
+  };
+
+  const handleStopScan = () => {
+    console.log("Scan is stopped");
+    setIsScanning(false);
+  };
+
+  const handleDisconnectedPeripheral = (data) => {
+    let peripheral = peripherals.get(data.peripheral);
+    if (peripheral) {
+      peripheral.connected = false;
+      peripherals.set(peripheral.id, peripheral);
+      setrender(Array.from(peripherals.values()));
+    }
+    console.log("Disconnected from " + data.peripheral);
+  };
+
+  const handleUpdateValueForCharacteristic = (data) => {
+    console.log(
+      "Received data from " +
+        data.peripheral +
+        " characteristic " +
+        data.characteristic,
+      data.value
+    );
+  };
+
+  const retrieveConnected = () => {
+    BleManager.getConnectedPeripherals([]).then((results) => {
+      if (results.length == 0) {
+        console.log("No connected peripherals");
+      }
+      console.log(results);
+      for (var i = 0; i < results.length; i++) {
+        var peripheral = results[i];
+        peripheral.connected = true;
+        peripherals.set(peripheral.id, peripheral);
+        setrender(Array.from(peripherals.values()));
+      }
+    });
+  };
+
+  const handleDiscoverPeripheral = (peripheral) => {
+    console.log("Got ble peripheral", peripheral);
+    if (!peripheral.name) {
+      peripheral.name = "NO NAME";
+    }
+    peripherals.set(peripheral.id, peripheral);
+    setrender(Array.from(peripherals.values()));
+  };
+
+  const testPeripheral = (peripheral) => {
+    if (peripheral) {
+      if (peripheral.connected) {
+        BleManager.disconnect(peripheral.id);
+      } else {
+        BleManager.connect(peripheral.id)
+          .then(() => {
+            let p = peripherals.get(peripheral.id);
+            if (p) {
+              p.connected = true;
+              peripherals.set(peripheral.id, p);
+              setrender(Array.from(peripherals.values()));
+            }
+            console.log("Connected to " + peripheral.id);
+
+            setTimeout(() => {
+              /* Test read current RSSI value */
+              BleManager.retrieveServices(peripheral.id).then(
+                (peripheralData) => {
+                  console.log("Retrieved peripheral services", peripheralData);
+
+                  BleManager.readRSSI(peripheral.id).then((rssi) => {
+                    console.log("Retrieved actual RSSI value", rssi);
+                    let p = peripherals.get(peripheral.id);
+                    if (p) {
+                      p.rssi = rssi;
+                      peripherals.set(peripheral.id, p);
+                      setrender(Array.from(peripherals.values()));
+                    }
+                  });
+                }
+              );
+            }, 900);
+          })
+          .catch((error) => {
+            console.log("Connection error", error);
+          });
+      }
+    }
+  };
+
+  useEffect(() => {
+    BleManager.start({ showAlert: false });
+
+    bleManagerEmitter.addListener(
+      "BleManagerDiscoverPeripheral",
+      handleDiscoverPeripheral
+    );
+    bleManagerEmitter.addListener("BleManagerStopScan", handleStopScan);
+    bleManagerEmitter.addListener(
+      "BleManagerDisconnectPeripheral",
+      handleDisconnectedPeripheral
+    );
+    bleManagerEmitter.addListener(
+      "BleManagerDidUpdateValueForCharacteristic",
+      handleUpdateValueForCharacteristic
+    );
+
+    if (Platform.OS === "android" && Platform.Version >= 23) {
+      PermissionsAndroid.check(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+      ).then((result) => {
+        if (result) {
+          console.log("Permission is OK");
+        } else {
+          PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+          ).then((result) => {
+            if (result) {
+              console.log("User accept");
+            } else {
+              console.log("User refuse");
+            }
+          });
+        }
+      });
+    }
+
+    return () => {
+      console.log("unmount");
+      bleManagerEmitter.removeListener(
+        "BleManagerDiscoverPeripheral",
+        handleDiscoverPeripheral
+      );
+      bleManagerEmitter.removeListener("BleManagerStopScan", handleStopScan);
+      bleManagerEmitter.removeListener(
+        "BleManagerDisconnectPeripheral",
+        handleDisconnectedPeripheral
+      );
+      bleManagerEmitter.removeListener(
+        "BleManagerDidUpdateValueForCharacteristic",
+        handleUpdateValueForCharacteristic
+      );
+    };
+  }, []);
+
   useEffect(() => {
     try {
       if (Platform.OS == "android") {
         const newDevice = eventEmitter.addListener(
           "EVENTFBK",
           (deviceDiscovered) => {
-            const ress = deviceDiscovered.split(",");
+            const ress = deviceDiscovered
+              ?.replace("[", "")
+              ?.replace("]", "")
+              .split("MOVE");
             console.log("deviceDiscovered", ress);
             if (ress.length > 0) {
-              setrender(ress);
+              console.log(ress);
+              setrender(
+                ress
+                  ?.map((e) => (e?.length > 0 ? "MOVE" + e : false))
+                  ?.filter((e) => e)
+              );
             }
           }
         );
@@ -369,16 +542,34 @@ export default function index({ navigation }) {
           batteryPower.remove();
         };
       } else {
+        BleManager.start({ showAlert: false }).then(() => {
+          // Success code
+          console.log("Module initialized");
+
+          BleManager.scan([], 5, true).then((e) => {
+            // Success code
+            console.log("Scan started", e);
+          });
+
+          bleManagerEmitter.addListener(
+            "BleManagerDiscoverPeripheral",
+            (args) => {
+              // The id: args.id
+              // The name: args.name
+            }
+          );
+        });
+
         const newDevice2 = eventEmitter.addListener(
           "CONNECT",
           (deviceDiscovered) => {
-            setrender(
-              deviceDiscovered.name
-                .filter((item) => {
-                  return item.localName.includes("MOVE");
-                })
-                ?.map((e, i) => ({ localName: e.localName, index: i }))
-            );
+            // setrender(
+            //   deviceDiscovered.name
+            //     .filter((item) => {
+            //       return item.localName.includes("MOVE");
+            //     })
+            //     ?.map((e, i) => ({ localName: e.localName, index: i }))
+            // );
           }
         );
         return () => {
@@ -508,7 +699,9 @@ export default function index({ navigation }) {
             }}
           >
             <FlatList
-              data={list_setrender}
+              data={list_setrender?.filter((e) =>
+                Platform.OS == "ios" ? e?.name?.includes("MOVE") : true
+              )}
               ListHeaderComponent={
                 <View
                   style={{
@@ -531,6 +724,7 @@ export default function index({ navigation }) {
                 </View>
               }
               renderItem={({ item, index }) => {
+                console.log(item);
                 return (
                   <TouchableOpacity
                     onPress={() => {
@@ -539,7 +733,7 @@ export default function index({ navigation }) {
                           console.log(e);
                         });
                       } else {
-                        Fitblekit.onConnect(index, (e) => {
+                        Fitblekit.onConnect(item?.id, (e) => {
                           console.log(e);
                         });
                       }
@@ -561,8 +755,7 @@ export default function index({ navigation }) {
                         marginTop: 25,
                       }}
                     >
-                      {item?.localName ||
-                        item?.replace("[", "").replace("]", "")}
+                      {item?.name || item?.replace("[", "").replace("]", "")}
                     </Text>
                   </TouchableOpacity>
                 );
@@ -608,20 +801,16 @@ export default function index({ navigation }) {
             <FlatList
               data={[
                 {
-                  img: require("../../img/mi3.png"),
-                  title: "เข้า Application ZepLife และเชื่อมอุปกรณ์",
-                },
-                {
-                  img: require("../../img/mi4.png"),
-                  title: "เข้าไปที่ตั้งค่า และ กดเพิ่มบัญชี",
-                },
-                {
                   img: require("../../img/mi1.png"),
-                  title: "เลือก GoogleFit และ กดที่ชื่อตนเอง",
+                  title: "เข้า Application Strava และเชื่อมอุปกรณ์",
                 },
                 {
                   img: require("../../img/mi2.png"),
-                  title: "รอ GoogleFit Sync Data เป็นอันเสร็จขั้นตอน",
+                  title: "เข้าไปที่ตั้งค่า และ Link Other services",
+                },
+                {
+                  img: require("../../img/mi3.png"),
+                  title: "เลือก GoogleFit",
                 },
               ]}
               pagingEnabled
@@ -1248,7 +1437,7 @@ export default function index({ navigation }) {
                     source={require("../../img/115.png")}
                     style={styles.imgsoso2}
                   />
-                  <Text style={styles.textdevice}>Zepp Life(Mi Fit)</Text>
+                  <Text style={styles.textdevice}>Strava</Text>
                   <View
                     style={{ position: "absolute", right: 25, top: -7 }}
                     name="check"

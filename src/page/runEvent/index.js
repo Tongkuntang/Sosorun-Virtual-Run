@@ -41,7 +41,11 @@ import { Pedometer, Gyroscope } from "expo-sensors";
 import { autolize_Lv, nextautolize_Lv } from "../../json/utils";
 import { apiservice } from "../../service/service";
 import { timeformet } from "../components/test";
-import { actionEditwal, getActionUser } from "../../action/actionauth";
+import {
+  actionEditwal,
+  getActionUser,
+  actionEditprofile,
+} from "../../action/actionauth";
 const { width, height } = Dimensions.get("window");
 export default function index({ navigation, route }) {
   const viewShot = useRef();
@@ -169,7 +173,7 @@ export default function index({ navigation, route }) {
     });
 
     if (response.status == 200) {
-      const lv = autolize_Lv(parseInt(users.user_accounts.total_distance)).lv;
+      const lv = autolize_Lv(parseInt(users?.user_accounts?.total_distance)).lv;
 
       const checl_list = d_arr?.map((e) => {
         if (e < lv) {
@@ -275,6 +279,7 @@ export default function index({ navigation, route }) {
     isPedometerAvailable: "checking",
     pastStepCount: 0,
     currentStepCount: 0,
+    prevStepCount: 0,
   });
 
   const permissions = {
@@ -312,10 +317,19 @@ export default function index({ navigation, route }) {
       GoogleFit.observeSteps((callback) => {
         if (back != callback.steps) {
           back = callback.steps;
-          setState((val) => ({
-            ...val,
-            currentStepCount: val.currentStepCount + callback.steps,
-          }));
+
+          if (num == 0) {
+            setState((val) => ({
+              ...val,
+              currentStepCount:
+                val.currentStepCount + callback.steps * 1 - val?.prevStepCount,
+            }));
+          } else {
+            setState((val) => ({
+              ...val,
+              prevStepCount: val.currentStepCount + callback.steps * 1,
+            }));
+          }
         }
       });
     } else {
@@ -432,8 +446,6 @@ export default function index({ navigation, route }) {
   const [timecal, setTime] = useState(0);
   const isFocus = useIsFocused();
   let Clear = useRef();
-
-  console.log("dataEV", dataEV);
 
   useEffect(() => {
     let cear;
@@ -668,6 +680,24 @@ export default function index({ navigation, route }) {
                     const getuser = await getActionUser(token);
                     setUser(getuser.data);
                   }
+
+                  const updateCal = await actionEditprofile({
+                    body: {
+                      id: user.id,
+                      total_distance:
+                        parseInt(user.user_accounts.total_distance) +
+                        ((state.currentStepCount * strip) / 100000) * 1000,
+                      wallet: {
+                        ...user.user_accounts?.wallet,
+                        cal:
+                          (user?.user_accounts?.wallet?.cal || 0) +
+                          parseInt(state.currentStepCount * conversationFactor),
+                      },
+                    },
+                    token,
+                  });
+
+                  console.log(updateCal?.data?.User_info);
                   const response = await apiservice({
                     path: "/event/updateuserjoinEvent",
                     method: "put",
@@ -683,7 +713,6 @@ export default function index({ navigation, route }) {
                     },
                     token: token.accessToken,
                   });
-
                   if (response.status == 200) {
                     setput(false);
                     navigation.navigate("EventInfor", { dataEV });
@@ -861,8 +890,8 @@ export default function index({ navigation, route }) {
                   <Text style={styles.text1}>
                     {(
                       dataEV.distance[0] -
-                      (parseFloat(route.params.last_distance) / 1000).toFixed(2)
-                    ).toFixed(2)}{" "}
+                      (parseFloat(route.params.last_distance) / 1000).toFixed(3)
+                    ).toFixed(3)}{" "}
                     กม.
                   </Text>
                 </View>
@@ -870,7 +899,7 @@ export default function index({ navigation, route }) {
                   <Text style={styles.text1}>
                     {parseFloat(
                       (state.currentStepCount * strip) / 100000
-                    ).toFixed(2)}{" "}
+                    ).toFixed(3)}{" "}
                     กม.
                   </Text>
                 </View>
@@ -882,7 +911,7 @@ export default function index({ navigation, route }) {
               </Text>
               {chick ? (
                 <TouchableOpacity
-                  onPress={() => {
+                  onLongPress={() => {
                     setResume(true);
 
                     setchick((val) => !val);
@@ -890,6 +919,9 @@ export default function index({ navigation, route }) {
                   style={styles.bottompause}
                 >
                   <Text style={styles.textpause}>พัก</Text>
+                  <Text style={[styles.textpause, { fontSize: 16 }]}>
+                    กดค้างเพื่อพัก
+                  </Text>
                 </TouchableOpacity>
               ) : (
                 <View
@@ -909,12 +941,15 @@ export default function index({ navigation, route }) {
                     <Text style={styles.textpause}>ดำเนินการต่อ</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    onPress={async () => {
+                    onLongPress={async () => {
                       setput(true);
                     }}
                     style={styles.bottomresume}
                   >
                     <Text style={styles.textpause}>หยุด</Text>
+                    <Text style={[styles.textpause, { fontSize: 16 }]}>
+                      กดค้างเพื่อหยุด
+                    </Text>
                   </TouchableOpacity>
                 </View>
               )}
@@ -1034,100 +1069,6 @@ export default function index({ navigation, route }) {
                   backgroundColor: "#393939",
                 }}
               >
-                {/* <MapView
-                  style={{
-                    width: width,
-                    height: height * 0.5,
-                    backgroundColor: "#393939",
-                  }}
-                  onPress={(e) => {
-                    // console.log(e.nativeEvent.coordinate);
-                  }}
-                  customMapStyle={[
-                    {
-                      featureType: "administrative",
-                      elementType: "geometry",
-                      stylers: [
-                        {
-                          visibility: "off",
-                        },
-                      ],
-                    },
-                    {
-                      featureType: "poi",
-                      stylers: [
-                        {
-                          visibility: "off",
-                        },
-                      ],
-                    },
-                    {
-                      featureType: "road",
-                      elementType: "labels.icon",
-                      stylers: [
-                        {
-                          visibility: "off",
-                        },
-                      ],
-                    },
-                    {
-                      featureType: "road",
-                      elementType: "labels.text",
-                      stylers: [
-                        {
-                          visibility: "off",
-                        },
-                      ],
-                    },
-                    {
-                      featureType: "transit",
-                      stylers: [
-                        {
-                          visibility: "off",
-                        },
-                      ],
-                    },
-                  ]}
-                  provider={"google"}
-                  initialRegion={region}
-                  // onRegionChange={onRegionChange}
-                >
-                  <Polyline
-                    // lineDashPattern={[0]}
-                    coordinates={markers}
-                    strokeColor="#000" // fallback for when `strokeColors` is not supported by the map-provider
-                    strokeColors={[
-                      "#ff0000",
-                      "#ff0000", // no color, creates a "long" gradient between the previous and next coordinate
-                      "#ff0000",
-                      "#ff0000",
-                      "#ff0000",
-                      "#ff0000",
-                    ]}
-                    strokeWidth={6}
-                  />
-                  {markers.map((marker, index) => {
-                    return (
-                      filterDistance * index <=
-                        parseFloat(route.params.last_distance / 1000) +
-                          parseFloat(
-                            (state.currentStepCount * strip) / 100000
-                          ) &&
-                      filterDistance * (index + 1) >=
-                        parseFloat(route.params.last_distance / 1000) +
-                          parseFloat(
-                            (state.currentStepCount * strip) / 100000
-                          ) && (
-                        <Marker
-                          key={index}
-                          coordinate={marker}
-                          title={marker.title}
-                          description={marker.description}
-                        />
-                      )
-                    );
-                  })}
-                </MapView> */}
                 <Image
                   source={{
                     uri:
@@ -1179,13 +1120,15 @@ export default function index({ navigation, route }) {
               <View style={styles.viewtext}>
                 <View style={styles.viewsmall1}>
                   <Text style={styles.text1}>
-                    {dataEV?.distance?.[0] || dataEV?.distance?.[0]?.distance}{" "}
+                    {parseFloat(
+                      dataEV?.distance?.[0] || dataEV?.distance?.[0]?.distance
+                    ).toFixed(3)}{" "}
                     กม.
                   </Text>
                 </View>
                 <View style={styles.viewsmall1}>
                   <Text style={styles.text1}>
-                    {(parseFloat(route.params.last_distance) / 1000).toFixed(2)}{" "}
+                    {(parseFloat(route.params.last_distance) / 1000).toFixed(3)}{" "}
                     กม.
                   </Text>
                 </View>

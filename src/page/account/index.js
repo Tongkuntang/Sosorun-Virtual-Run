@@ -117,7 +117,7 @@ export default function index({ navigation }) {
     });
 
     if (response.status == 200) {
-      const lv = autolize_Lv(parseInt(users.user_accounts.total_distance)).lv;
+      const lv = autolize_Lv(parseInt(users?.user_accounts?.total_distance)).lv;
 
       const checl_list = d_arr?.map((e) => {
         if (e < lv) {

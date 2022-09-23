@@ -7,6 +7,12 @@ const { persistAtom } = recoilPersist({
   storage: AsyncStorage,
 });
 
+export const n_devices = atom({
+  key: "n_devices",
+  default: "",
+  effects_UNSTABLE: [persistAtom],
+});
+
 export const tokenState = atom({
   key: "token",
   default: {},

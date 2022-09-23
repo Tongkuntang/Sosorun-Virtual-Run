@@ -11,7 +11,7 @@ export function autolize_Lv(params) {
         grid: {
           uri:
             "https://ssr-project.s3.ap-southeast-1.amazonaws.com/rank/" +
-            (index > 0 && index < 10
+            (index > -1 && index < 10
               ? "1"
               : index > 9 && index < 20
               ? "10"

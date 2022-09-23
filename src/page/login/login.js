@@ -305,6 +305,25 @@ export default function register({ navigation }) {
               style={styles.input}
               autoCapitalize="none"
             />
+            <TextInput
+              keyboardType={"number-pad"}
+              placeholder="height"
+              onChangeText={(text) => setbody({ ...body, height: text })}
+              style={styles.input}
+              autoCapitalize="none"
+            />
+            <TextInput
+              placeholder="gender"
+              onChangeText={(text) => setbody({ ...body, gender: text })}
+              style={styles.input}
+              autoCapitalize="none"
+            />
+            <TextInput
+              placeholder="age"
+              onChangeText={(text) => setbody({ ...body, birthday: text })}
+              style={styles.input}
+              autoCapitalize="none"
+            />
             <TouchableOpacity
               disabled={
                 body.height == null ||

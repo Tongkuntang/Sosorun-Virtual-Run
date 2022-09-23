@@ -39,7 +39,11 @@ import { apiservice } from "../../service/service";
 import { autolize_Lv, nextautolize_Lv } from "../../json/utils";
 import moment from "moment";
 import { timeformet } from "../components/test";
-import { actionEditwal, getActionUser } from "../../action/actionauth";
+import {
+  actionEditwal,
+  getActionUser,
+  actionEditprofile,
+} from "../../action/actionauth";
 import Carousel from "react-native-snap-carousel";
 const { width, height } = Dimensions.get("window");
 export default function index({ navigation, route }) {
@@ -88,7 +92,7 @@ export default function index({ navigation, route }) {
     });
 
     if (response.status == 200) {
-      const lv = autolize_Lv(parseInt(users.user_accounts.total_distance)).lv;
+      const lv = autolize_Lv(parseInt(users?.user_accounts?.total_distance)).lv;
 
       const checl_list = d_arr?.map((e) => {
         if (e < lv) {
@@ -194,10 +198,19 @@ export default function index({ navigation, route }) {
       GoogleFit.observeSteps((callback) => {
         if (back != callback.steps) {
           back = callback.steps;
-          setState((val) => ({
-            ...val,
-            currentStepCount: val.currentStepCount + callback.steps,
-          }));
+
+          if (num == 0) {
+            setState((val) => ({
+              ...val,
+              currentStepCount:
+                val.currentStepCount + callback.steps * 1 - val?.prevStepCount,
+            }));
+          } else {
+            setState((val) => ({
+              ...val,
+              prevStepCount: val.currentStepCount + callback.steps * 1,
+            }));
+          }
         }
       });
     } else {
@@ -289,6 +302,7 @@ export default function index({ navigation, route }) {
     isPedometerAvailable: "checking",
     pastStepCount: 0,
     currentStepCount: 0,
+    prevStepCount: 0,
   });
   // console.log(state);
   useEffect(() => {
@@ -575,6 +589,22 @@ export default function index({ navigation, route }) {
                     state.currentStepCount * conversationFactor
                   ).toFixed(0);
 
+                  const updateCal = await actionEditprofile({
+                    body: {
+                      id: user.id,
+                      total_distance:
+                        parseInt(user.user_accounts.total_distance) +
+                        ((state.currentStepCount * strip) / 100000) * 1000,
+                      wallet: {
+                        ...user.user_accounts?.wallet,
+                        cal:
+                          (user?.user_accounts?.wallet?.cal || 0) +
+                          parseInt(state.currentStepCount * conversationFactor),
+                      },
+                    },
+                    token,
+                  });
+
                   const upwal = await actionEditwal({
                     body: {
                       cal: Call,
@@ -656,11 +686,13 @@ export default function index({ navigation, route }) {
               </View>
               <View style={styles.viewdistance}>
                 <View style={styles.viewsmall2}>
-                  <Text style={styles.text1}>{datadetail.distance} กม.</Text>
+                  <Text style={styles.text1}>
+                    {parseFloat(datadetail.distance).toFixed(3)} กม.
+                  </Text>
                 </View>
                 <View style={styles.viewsmall}>
                   <Text style={styles.text1}>
-                    {((state.currentStepCount * strip) / 100000).toFixed(2)} กม.
+                    {((state.currentStepCount * strip) / 100000).toFixed(3)} กม.
                   </Text>
                 </View>
               </View>
@@ -671,13 +703,16 @@ export default function index({ navigation, route }) {
               </Text>
               {chick ? (
                 <TouchableOpacity
-                  onPress={() => {
+                  onLongPress={() => {
                     clearInterval(clear);
                     setchick((val) => !val);
                   }}
                   style={styles.bottompause}
                 >
                   <Text style={styles.textpause}>พัก</Text>
+                  <Text style={[styles.textpause, { fontSize: 16 }]}>
+                    กดค้างเพื่อพัก
+                  </Text>
                 </TouchableOpacity>
               ) : (
                 <View
@@ -697,12 +732,15 @@ export default function index({ navigation, route }) {
                     <Text style={styles.textpause}>ดำเนินการต่อ</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    onPress={async () => {
+                    onLongPress={async () => {
                       setput(true);
                     }}
                     style={styles.bottomresume}
                   >
                     <Text style={styles.textpause}>หยุด</Text>
+                    <Text style={[styles.textpause, { fontSize: 16 }]}>
+                      กดค้างเพื่อหยุด
+                    </Text>
                   </TouchableOpacity>
                 </View>
               )}
@@ -865,10 +903,12 @@ export default function index({ navigation, route }) {
               </View>
               <View style={styles.viewtext}>
                 <View style={styles.viewsmall1}>
-                  <Text style={styles.text1}>{datadetail.distance} กม.</Text>
+                  <Text style={styles.text1}>
+                    {parseFloat(datadetail.distance).toFixed(3)} กม.
+                  </Text>
                 </View>
                 <View style={styles.viewsmall1}>
-                  <Text style={styles.text1}>0.00 กม.</Text>
+                  <Text style={styles.text1}>0.000 กม.</Text>
                 </View>
                 <View style={styles.viewsmall}>
                   <Text style={styles.text1}>0.00 %</Text>
