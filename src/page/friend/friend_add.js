@@ -26,8 +26,12 @@ import {
 } from "@expo/vector-icons";
 import HeaderFree from "../components/headerfree";
 import MainModal from "./component/modal";
-import { useRecoilState } from "recoil";
-import { tokenState, userState } from "../../reducer/reducer/reducer/Atom";
+import { useRecoilState, useRecoilValue } from "recoil";
+import {
+  tokenState,
+  userState,
+  lans,
+} from "../../reducer/reducer/reducer/Atom";
 import { useIsFocused } from "@react-navigation/native";
 import { apiservice } from "../../service/service";
 
@@ -39,17 +43,21 @@ export default function friend({ navigation }) {
   const [search, setsearch] = useState("");
   const [visible, setVisible] = useState(false);
   const [user, setUser] = useRecoilState(userState);
+  const lan = useRecoilValue(lans);
   const [data, setData] = useState([]);
   const [selectdata, setselectData] = useState("");
   // console.log("53", selectdata);
-  const ID = parseInt(selectdata) - 100000;
+
   // console.log("55", ID);
   async function apiSearch(selectdata) {
+    const ID = parseInt(selectdata) - 100000;
     const response = await apiservice({
       path: "/friend/searchfriend/" + ID,
       method: "get",
       token: token.accessToken,
     });
+
+    console.log(response);
 
     setsearch(selectdata);
     setData(response.data.data[0]);
@@ -87,7 +95,10 @@ export default function friend({ navigation }) {
             setVisible(!visible);
           }}
         >
-          <View
+          <TouchableOpacity
+            onPress={() => {
+              setVisible(!visible);
+            }}
             style={{
               width: width,
               height: height,
@@ -98,20 +109,19 @@ export default function friend({ navigation }) {
             }}
           >
             <ImageBackground
-              source={{
-                uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/bg.png",
-              }}
+              // source={{
+              //   uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/bg.png",
+              // }}
               style={{
                 width: width * 0.9,
                 alignSelf: "center",
                 borderRadius: 10,
                 height: 350,
+                backgroundColor: "#DBDBDB",
               }}
             >
               <Image
-                source={{
-                  uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/logo_sosorun.png",
-                }}
+                source={require("../../img/lo_hor.png")}
                 style={{
                   width: 250,
                   height: 50,
@@ -205,11 +215,11 @@ export default function friend({ navigation }) {
                     color: "#FFFFFF",
                   }}
                 >
-                  ค้นหา
+                  {lan == "en" ? "Search" : "ค้นหา"}
                 </Text>
               </TouchableOpacity>
             </ImageBackground>
-          </View>
+          </TouchableOpacity>
         </Modal>
 
         <Text
@@ -221,7 +231,7 @@ export default function friend({ navigation }) {
             marginTop: 10,
           }}
         >
-          ADD FRIEND
+          {lan == "en" ? "ADD FRIEND" : "เพื่อเพื่อน"}
         </Text>
         <TouchableOpacity
           style={{ flexDirection: "row", marginTop: 10, marginLeft: 10 }}

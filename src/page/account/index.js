@@ -29,8 +29,8 @@ import * as Sharing from "expo-sharing";
 import * as ImageManipulator from "expo-image-manipulator";
 import { LinearGradient } from "expo-linear-gradient";
 import { useIsFocused } from "@react-navigation/native";
-import { useRecoilState, useResetRecoilState } from "recoil";
-import { LvState, tokenState } from "../../reducer/reducer/reducer/Atom";
+import { useRecoilState, useResetRecoilState, useRecoilValue } from "recoil";
+import { lans, LvState, tokenState } from "../../reducer/reducer/reducer/Atom";
 import { actionEditprofile, getActionUser } from "../../action/actionauth";
 import { apiservice } from "../../service/service";
 import { autolize_Lv, nextautolize_Lv } from "../../json/utils";
@@ -38,7 +38,7 @@ const { width, height } = Dimensions.get("window");
 export default function index({ navigation }) {
   const viewShot = useRef();
   const resettoken = useResetRecoilState(tokenState);
-
+  const [lan, setlan] = useRecoilState(lans);
   const [isEnabled, setIsEnabled] = useState(true);
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
   const [State, setState] = useState(false);
@@ -301,13 +301,17 @@ export default function index({ navigation }) {
                       }}
                       style={styles.touchh}
                     >
-                      <Text style={styles.texttouch}>SHARE</Text>
+                      <Text style={styles.texttouch}>
+                        {lan == "en" ? "SHARE" : "แชร์"}
+                      </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={() => setVisible(!Visible)}
                       style={styles.touchh}
                     >
-                      <Text style={styles.texttouch}>OK</Text>
+                      <Text style={styles.texttouch}>
+                        {lan == "en" ? "OK" : "ตกลง"}
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 }
@@ -486,7 +490,10 @@ export default function index({ navigation }) {
               <View>
                 {/* Saroj Sikarin */}
                 {user.name == null ? (
-                  <Text numberOfLines={1} style={styles.textname}>
+                  <Text
+                    numberOfLines={1}
+                    style={[styles.textname, { width: width * 0.44 }]}
+                  >
                     {user.username}
                   </Text>
                 ) : (
@@ -532,7 +539,9 @@ export default function index({ navigation }) {
               onPress={() => navigation.navigate("Editproflie")}
               style={styles.touchedit}
             >
-              <Text style={styles.textedit}>EDIT PROFILE</Text>
+              <Text style={styles.textedit}>
+                {lan == "en" ? "EDIT PROFILE" : "แก้ไขโปรไฟล์"}
+              </Text>
             </TouchableOpacity>
 
             <View
@@ -638,7 +647,9 @@ export default function index({ navigation }) {
         >
           <MaterialIcons name="devices" size={24} color="black" />
           <View style={styles.viewrowsmall}>
-            <Text style={styles.textname}>{"Sync Device"}</Text>
+            <Text style={styles.textname}>
+              {lan == "en" ? "Sync Device" : "เชื่อมต่อกับอุปกรณ์"}
+            </Text>
             <TouchableOpacity disabled>
               <FontAwesome name="plus" size={24} color="black" />
             </TouchableOpacity>
@@ -648,7 +659,9 @@ export default function index({ navigation }) {
         <View style={styles.viewrow}>
           <SimpleLineIcons name="envelope-letter" size={24} color="black" />
           <View style={styles.viewrowsmall}>
-            <Text style={styles.textname}>Invite Friends</Text>
+            <Text style={styles.textname}>
+              {lan == "en" ? "Invite Friends" : "เปิด-ปิด การส่งคำเชิญเพื่อน"}
+            </Text>
             <Switch
               trackColor={{ false: "#767577", true: "#FCC71A50" }}
               thumbColor={user?.friends_chack ? "#FCC71A" : "#f4f3f4"}
@@ -672,7 +685,7 @@ export default function index({ navigation }) {
           <MaterialIcons name="notifications" size={24} color="black" />
           <View style={styles.viewrowsmall}>
             <Text style={[styles.textname, { width: null }]}>
-              Notification Settings
+              {lan == "en" ? "Notification Settings" : "เปิด-ปิด การแจ้งเตือน"}
             </Text>
             <Switch
               trackColor={{ false: "#767577", true: "#FCC71A50" }}
@@ -696,10 +709,17 @@ export default function index({ navigation }) {
         <View style={styles.line} />
         <View style={styles.viewrow}>
           <MaterialIcons name="language" size={24} color="black" />
-          <View style={styles.viewrowsmall}>
-            <Text style={styles.textname}>Language</Text>
+          <TouchableOpacity
+            onPress={() => {
+              setlan(lan == "en" ? "th" : "en");
+            }}
+            style={styles.viewrowsmall}
+          >
+            <Text style={styles.textname}>
+              {lan == "en" ? "Language" : "เปลี่ยนภาษา"}
+            </Text>
             <View style={{ flexDirection: "row" }}>
-              <Text style={styles.textname}>EN</Text>
+              <Text style={styles.textname}>{lan?.toUpperCase()}</Text>
               <TouchableOpacity>
                 <MaterialCommunityIcons
                   name="arrow-right-drop-circle-outline"
@@ -709,7 +729,7 @@ export default function index({ navigation }) {
                 />
               </TouchableOpacity>
             </View>
-          </View>
+          </TouchableOpacity>
         </View>
         <View style={styles.line} />
         <TouchableOpacity
@@ -752,7 +772,9 @@ export default function index({ navigation }) {
         >
           <MaterialIcons name="account-circle" size={24} color="black" />
           <View style={styles.viewrowsmall}>
-            <Text style={styles.textname}>Delete Account</Text>
+            <Text style={styles.textname}>
+              {lan == "en" ? "Delete Account" : "ลบบัญชี"}
+            </Text>
             <View style={{ flexDirection: "row" }}>
               <Text style={styles.textname}></Text>
               <View>
@@ -816,7 +838,7 @@ const styles = StyleSheet.create({
     fontFamily: "Prompt-Medium",
     fontSize: 20,
     color: "#000",
-    width: width * 0.44,
+    width: width * 0.55,
   },
   textemail: {
     fontFamily: "Prompt-Regular",

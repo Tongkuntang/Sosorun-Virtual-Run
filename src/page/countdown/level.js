@@ -10,11 +10,12 @@ import {
   TouchableOpacity,
   FlatList,
 } from "react-native";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { getActionUser } from "../../action/actionauth";
 import { getAllbanner, getBanNer } from "../../action/actionbanner";
 import { autolize_Lv, nextautolize_Lv } from "../../json/utils";
 import {
+  lans,
   LvState,
   tokenState,
   userState,
@@ -29,14 +30,14 @@ export default function level() {
   const [lvstate, setlvstate] = useState(null);
   const [banner, setbanner] = useState([]);
   const [banner1, setbanner1] = useState([]);
+  const lan = useRecoilValue(lans);
+
   async function allbanner() {
     const getbanner = await getAllbanner(token);
     const page = getbanner.data[2].page;
-    // console.log("36", page);
-    // setbanner(getbanner.data);
+
     const getbanner1 = await getBanNer({ token, page: page });
     setbanner1(getbanner1.data[0].img_list);
-    // console.log("39", getbanner1.data[0].img_list);
   }
   useEffect(() => {
     allbanner();
@@ -127,7 +128,7 @@ export default function level() {
             </Text>
           </Text>
           <Text style={styles.textrank}>
-            Rank :{" "}
+            {lan == "en" ? "Rank" : "ระดับ"} :{" "}
             {
               autolize_Lv(
                 parseInt(
@@ -174,7 +175,7 @@ export default function level() {
           {(parseInt(user.user_accounts.total_distance) / 1000).toFixed(2)}/
           {nextautolize_Lv(parseInt(user.user_accounts.total_distance)).exp /
             1000}{" "}
-          km
+          {lan == "en" ? "km" : "กม."}
         </Text>
       </View>
     </View>

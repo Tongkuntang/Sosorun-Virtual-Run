@@ -15,9 +15,12 @@ import {
 import Headerdetail from "../components/headerdetail";
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
 import moment from "moment";
+import { useRecoilValue } from "recoil";
+import { lans } from "../../reducer/reducer/reducer/Atom";
 const { width, height } = Dimensions.get("window");
 export default function index({ navigation, route }) {
   const dataEV = route.params.event;
+  const lan = useRecoilValue(lans);
 
   return (
     <View style={styles.container}>
@@ -64,9 +67,13 @@ export default function index({ navigation, route }) {
                     <View style={styles.viewhead}>
                       <View style={{ width: width * 0.7 }}>
                         <Text style={styles.texthead}>
-                          {"ระยะทาง " + item.distance + " กม."}
+                          {(lan == "en" ? "Distance " : "ระยะทาง ") +
+                            item.distance +
+                            (lan == "en" ? " km" : " กม.")}
                         </Text>
-                        <Text style={styles.textdetail}>ระยะเวลา</Text>
+                        <Text style={styles.textdetail}>
+                          {lan == "en" ? "Duration " : "ระยะเวลา "}
+                        </Text>
                         <Text style={styles.textdetail}>
                           ตั้งแต่วันที่
                           {moment(dataEV.startDate).format("DD/MM/YYYY")} -{" "}
@@ -77,7 +84,9 @@ export default function index({ navigation, route }) {
                         <View style={styles.viewprice}>
                           <Text style={styles.textprice}>
                             {item.price.length > 0
-                              ? parseInt(item.price) + "บาท"
+                              ? lan == "en"
+                                ? "฿ " + parseInt(item.price)
+                                : parseInt(item.price) + "บาท"
                               : "ฟรี"}
                           </Text>
                         </View>
@@ -90,7 +99,7 @@ export default function index({ navigation, route }) {
                           <Text
                             style={[styles.texthead, { alignSelf: "center" }]}
                           >
-                            กม.
+                            {lan == "en" ? " km" : " กม."}
                           </Text>
                         </View>
                       </View>

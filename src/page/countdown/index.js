@@ -36,6 +36,7 @@ import { useRef } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import {
   deviceRegis,
+  lans,
   LvState,
   tokenState,
   userState,
@@ -62,6 +63,7 @@ const permissions = {
 };
 
 export default function index({ navigation }) {
+  const lan = useRecoilValue(lans);
   const [token, setToken] = useRecoilState(tokenState);
   const [user, setUser] = useRecoilState(userState);
   const [put, setput] = useState(false);
@@ -237,24 +239,24 @@ export default function index({ navigation }) {
 
     if (Platform.OS == "android") {
       callNum();
-      GoogleFit.observeSteps((callback) => {
-        if (back != callback.steps) {
-          console.log(callback.steps);
-          back = callback.steps;
-          if (num == 0) {
-            setState((val) => ({
-              ...val,
-              currentStepCount:
-                val.currentStepCount + callback.steps * 1 - val?.prevStepCount,
-            }));
-          } else {
-            setState((val) => ({
-              ...val,
-              prevStepCount: val.currentStepCount + callback.steps * 1,
-            }));
-          }
-        }
-      });
+      // GoogleFit.observeSteps((callback) => {
+      //   if (back != callback.steps) {
+      //     console.log(callback.steps);
+      //     back = callback.steps;
+      //     if (num == 0) {
+      //       setState((val) => ({
+      //         ...val,
+      //         currentStepCount:
+      //           val.currentStepCount + callback.steps * 1 - val?.prevStepCount,
+      //       }));
+      //     } else {
+      //       setState((val) => ({
+      //         ...val,
+      //         prevStepCount: val.currentStepCount + callback.steps * 1,
+      //       }));
+      //     }
+      //   }
+      // });
     } else {
       AppleHealthKit.initHealthKit(permissions, (err, res) => {
         const sub2 = NativeAppEventEmitter.addListener(
@@ -309,8 +311,19 @@ export default function index({ navigation }) {
       bucketUnit: BucketUnit.DAY, // optional - default "DAY". Valid values: "NANOSECOND" | "MICROSECOND" | "MILLISECOND" | "SECOND" | "MINUTE" | "HOUR" | "DAY"
       bucketInterval: 1, // optional - default 1.
     };
+    let steps = 0;
     const res = await GoogleFit.getDailyStepCountSamples(opt);
-    console.log(res);
+
+    res
+      ?.filter((e) => e.source == "com.google.android.gms:estimated_steps")?.[0]
+      ?.rawSteps?.filter(
+        (e) =>
+          moment(e?.startDate)?.format("DD-MM-YYYY") ==
+          moment()?.format("DD-MM-YYYY")
+      )
+      ?.map((e) => (steps = steps + e?.steps));
+
+    console.log("now step >>", steps);
   }
 
   const walkingFactor = 0.57;
@@ -467,7 +480,7 @@ export default function index({ navigation }) {
                 marginTop: 35,
               }}
             >
-              Are you sure ?
+              {lan == "en" ? "Are you sure ?" : "ต้องการหยุดวิ่ง"}
             </Text>
             <Text
               style={{
@@ -478,7 +491,9 @@ export default function index({ navigation }) {
                 textAlign: "center",
               }}
             >
-              Are you sure you went to discard this run ?
+              {lan == "en"
+                ? "Are you sure you went to discard this run ?"
+                : "คุณต้องการที่จะสิ้นสุดการวิ่ง"}
             </Text>
             <View
               style={{
@@ -512,7 +527,7 @@ export default function index({ navigation }) {
                     alignSelf: "center",
                   }}
                 >
-                  Cancel
+                  {lan == "en" ? "Cancel" : "ยกเลิก"}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -577,7 +592,7 @@ export default function index({ navigation }) {
                     alignSelf: "center",
                   }}
                 >
-                  Confirm
+                  {lan == "en" ? "Confirm" : "ยืนยัน"}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -607,7 +622,9 @@ export default function index({ navigation }) {
                 colors={["#FCC81D", "#EFD98F", "#EEE6CB", "#C29709"]}
                 style={styles.backgroundmodal}
               >
-                <Text style={styles.texttopicmodal}>COMPLETED</Text>
+                <Text style={styles.texttopicmodal}>
+                  {lan == "en" ? "COMPLETED" : "สำเร็จแล้ว"}
+                </Text>
                 <Image
                   // resizeMode={"stretch"}
                   source={require("../../img/pooop.png")}
@@ -618,19 +635,26 @@ export default function index({ navigation }) {
                     lv {data != null && data.lv}
                   </Text>
                   <Text style={styles.texttopic1}>
-                    {data != null && data.reward.coinlv} Gold
+                    {data != null && data.reward.coinlv}{" "}
+                    {lan == "en" ? "Gold" : "เหรียญ"}
                   </Text>
                 </View>
                 <View style={styles.modall}>
-                  <Text style={styles.texttopic}>Distance</Text>
+                  <Text style={styles.texttopic}>
+                    {lan == "en" ? "Distance" : "ระยะทาง"}
+                  </Text>
                   <Text style={styles.texttopic1}>
-                    {data != null && data.reward.coindis} Gold
+                    {data != null && data.reward.coindis}{" "}
+                    {lan == "en" ? "Gold" : "เหรียญ"}
                   </Text>
                 </View>
                 <View style={styles.modall}>
-                  <Text style={styles.texttopic}>Calories</Text>
+                  <Text style={styles.texttopic}>
+                    {lan == "en" ? "Calories" : "พลังงาน"}
+                  </Text>
                   <Text style={styles.texttopic1}>
-                    {data != null && data.reward.cal} kcl
+                    {data != null && data.reward.cal}{" "}
+                    {lan == "en" ? "kcl" : "แคลอรี่"}
                   </Text>
                 </View>
                 <TouchableOpacity
@@ -639,7 +663,7 @@ export default function index({ navigation }) {
                   }}
                   style={styles.touchmodal}
                 >
-                  <Text style={styles.go}>ตกลง</Text>
+                  <Text style={styles.go}>{lan == "en" ? "Ok" : "ตกลง"}</Text>
                 </TouchableOpacity>
               </LinearGradient>
             </View>
@@ -720,7 +744,7 @@ export default function index({ navigation }) {
                     },
                   ]}
                 >
-                  Run
+                  {lan == "en" ? "Run" : "วิ่ง"}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -736,7 +760,7 @@ export default function index({ navigation }) {
                     },
                   ]}
                 >
-                  Level
+                  {lan == "en" ? "Level" : "ระดับ"}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -752,7 +776,7 @@ export default function index({ navigation }) {
                     },
                   ]}
                 >
-                  Point
+                  {lan == "en" ? "Point" : "แต้ม"}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -761,25 +785,34 @@ export default function index({ navigation }) {
             page == 0 &&
             (num == 0 ? (
               <View>
-                <Text style={styles.textRun}>Time</Text>
+                <Text style={styles.textRun}>
+                  Time
+                  {lan == "en" ? "Point" : "เวลา"}
+                </Text>
                 <Text style={styles.numRum}>
                   {formatTime(h)}:{formatTime(m)}:{formatTime(s)}
                 </Text>
                 <View style={styles.line} />
-                <Text style={styles.textRun}>Distance</Text>
+                <Text style={styles.textRun}>
+                  {lan == "en" ? "Distance" : "ระยะทาง"}
+                </Text>
                 <Text style={styles.numRum1}>
                   {((state.currentStepCount * strip) / 100000).toFixed(3)}
                 </Text>
                 <View style={styles.line} />
                 <View style={{ flexDirection: "row" }}>
                   <View style={styles.viewspeed}>
-                    <Text style={styles.textRun}>Speed</Text>
+                    <Text style={styles.textRun}>
+                      {lan == "en" ? "Speed" : "ความเร็ว"}
+                    </Text>
                     <Text style={styles.numRum}>
                       {(state.currentStepCount / timecal).toFixed(2)}
                     </Text>
                   </View>
                   <View style={styles.viewcalories}>
-                    <Text style={styles.textRun}>Calories</Text>
+                    <Text style={styles.textRun}>
+                      {lan == "en" ? "Calories" : "แคลอรี่"}
+                    </Text>
                     <Text style={styles.numRum}>
                       {(state.currentStepCount * conversationFactor).toFixed(2)}
                     </Text>
@@ -848,9 +881,11 @@ export default function index({ navigation }) {
                     }}
                     style={styles.bottompause}
                   >
-                    <Text style={styles.textpause}>PAUSE</Text>
+                    <Text style={styles.textpause}>
+                      {lan == "en" ? "PAUSE" : "พัก"}
+                    </Text>
                     <Text style={[styles.textpause, { fontSize: 16 }]}>
-                      กดค้างเพื่อพัก
+                      {lan == "en" ? "press and hold" : "กดค้างเพื่อพัก"}
                     </Text>
                   </TouchableOpacity>
                 ) : (
@@ -868,7 +903,9 @@ export default function index({ navigation }) {
                       }}
                       style={styles.bottomresume}
                     >
-                      <Text style={styles.textpause}>RESUME</Text>
+                      <Text style={styles.textpause}>
+                        {lan == "en" ? "RESUME" : "วิ่งต่อ"}
+                      </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       onLongPress={() => {
@@ -876,9 +913,11 @@ export default function index({ navigation }) {
                       }}
                       style={styles.bottomresume}
                     >
-                      <Text style={styles.textpause}>BREAK</Text>
+                      <Text style={styles.textpause}>
+                        {lan == "en" ? "BREAK" : "หยุดวิ่ง"}
+                      </Text>
                       <Text style={[styles.textpause, { fontSize: 16 }]}>
-                        กดค้างเพื่อหยุด
+                        {lan == "en" ? "press and hold" : "กดค้างเพื่อหยุด"}
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -959,10 +998,14 @@ export default function index({ navigation }) {
               </View>
             ) : (
               <View style={{ padding: 20 }}>
-                <Text style={styles.text}>Internal Timer Start</Text>
+                <Text style={styles.text}>
+                  {lan == "en" ? "Internal Timer Start" : "เริ่มจับเวลา"}
+                </Text>
                 <View style={styles.viewnumber}>
                   <Text style={styles.number}>{num}</Text>
-                  <Text style={styles.sec}>sec</Text>
+                  <Text style={styles.sec}>
+                    {lan == "en" ? "sec" : "วินาที"}
+                  </Text>
                 </View>
                 <TouchableOpacity
                   onPress={async () => {
@@ -976,7 +1019,7 @@ export default function index({ navigation }) {
                   style={styles.bottongo}
                 >
                   {num == 5 ? (
-                    <Text style={styles.go}>GO</Text>
+                    <Text style={styles.go}>{lan == "en" ? "GO" : "วิ่ง"}</Text>
                   ) : (
                     <TouchableOpacity
                       onPress={() => {
@@ -985,7 +1028,9 @@ export default function index({ navigation }) {
                       }}
                       style={{ justifyContent: "center" }}
                     >
-                      <Text style={styles.go}>CANCEL</Text>
+                      <Text style={styles.go}>
+                        {lan == "en" ? "CANCEL" : "ยกเลิก"}
+                      </Text>
                     </TouchableOpacity>
                   )}
                 </TouchableOpacity>

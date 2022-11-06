@@ -19,13 +19,14 @@ import {
   Ionicons,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
-import { useRecoilState } from "recoil";
-import { tokenState } from "../../reducer/reducer/reducer/Atom";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { lans, tokenState } from "../../reducer/reducer/reducer/Atom";
 import { getbibevent, updatebib } from "../../action/actionbib";
 import { apiservice } from "../../service/service";
 const { width, height } = Dimensions.get("window");
 export default function index({ navigation, route }) {
   const [token, setToken] = useRecoilState(tokenState);
+  const lan = useRecoilValue(lans);
   const dataEV = route.params.dataEV;
   const body = route.params.body;
   const [bib, setbib] = useState([]);
@@ -82,7 +83,9 @@ export default function index({ navigation, route }) {
         <Headerdetail item={dataEV.titel} navigation={navigation} />
         <ScrollView>
           <View style={styles.background}>
-            <Text style={styles.texthead}>E-BIB ของคุณ</Text>
+            <Text style={styles.texthead}>
+              {lan == "en" ? "Your E-BIB number" : "E-BIB ของคุณ"}
+            </Text>
             <View
               style={{
                 width: width,
@@ -123,9 +126,13 @@ export default function index({ navigation, route }) {
             <View style={styles.view}>
               <View style={{ flexDirection: "row" }}>
                 <Ionicons name="ios-cart-outline" size={24} color="black" />
-                <Text style={styles.textpre}>Order summary</Text>
+                <Text style={styles.textpre}>
+                  {lan == "en" ? "Order summary" : "E-BIB ของคุณ"}
+                </Text>
               </View>
-              <Text style={styles.textpall}>Remove all</Text>
+              <Text style={styles.textpall}>
+                {lan == "en" ? "Remove all" : "ลบทั้งหมด"}
+              </Text>
             </View>
             <View style={styles.view}>
               <View style={styles.viewbigframe}>
@@ -149,7 +156,9 @@ export default function index({ navigation, route }) {
                   x 1
                 </Text> */}
                 <Text style={[styles.textpall, { alignSelf: "center" }]}>
-                  {dataEV.price} บาท
+                  {lan != "en" ? "" : "฿ "}
+                  {dataEV.price}
+                  {lan != "en" ? "บาท" : ""}
                 </Text>
               </View>
               <TouchableOpacity onPress={() => navigation.navigate("Event")}>
@@ -194,7 +203,7 @@ export default function index({ navigation, route }) {
                     x 1
                   </Text> */}
                   <Text style={[styles.textpall, { alignSelf: "center" }]}>
-                    35 บาท
+                    {lan != "en" ? "" : "฿ "} 35 {lan != "en" ? "บาท" : ""}
                   </Text>
                 </View>
                 <TouchableOpacity
@@ -212,24 +221,34 @@ export default function index({ navigation, route }) {
               </View>
             )}
             <View style={styles.view}>
-              <Text style={styles.textpall}>ยอดรวมทั้งหมด</Text>
               <Text style={styles.textpall}>
-                {dataEV.price + (premium ? 35 : 0)} บาท
+                {lan != "en" ? "ยอดรวมทั้งหมด" : "Merchandise Subtotal"}
+              </Text>
+              <Text style={styles.textpall}>
+                {lan != "en" ? "" : "฿ "} {dataEV.price + (premium ? 35 : 0)}{" "}
+                {lan != "en" ? "บาท" : ""}
               </Text>
             </View>
             <View style={styles.view}>
-              <Text style={styles.textpall}>ค่าส่ง</Text>
+              <Text style={styles.textpall}>
+                {" "}
+                {lan != "en" ? "ค่าจัดส่ง" : "Shipping Fee"}
+              </Text>
               <Text style={styles.textpall}>
                 {dataEV.fee ? dataEV.fee : "ฟรี"}
               </Text>
             </View>
             <View style={styles.view}>
-              <Text style={styles.texttotle}>รวมทั้งสิ้น</Text>
               <Text style={styles.texttotle}>
+                {" "}
+                {lan != "en" ? "รวมทั้งสิ้น" : "Oder Amount"}
+              </Text>
+              <Text style={styles.texttotle}>
+                {lan != "en" ? "" : "฿ "}
                 {dataEV.price +
                   (dataEV.fee ? parseInt(dataEV.fee) : 0) +
                   (premium ? 35 : 0)}{" "}
-                บาท
+                {lan != "en" ? "บาท" : ""}
               </Text>
             </View>
             <View style={[styles.view, { marginVertical: 20 }]}>
@@ -258,13 +277,17 @@ export default function index({ navigation, route }) {
                 }
                 style={styles.touch}
               >
-                <Text style={styles.texttouch}>ชำระเงิน</Text>
+                <Text style={styles.texttouch}>
+                  {lan != "en" ? "ชำระเงิน" : "Purchase"}
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => navigation.goBack()}
                 style={styles.touch}
               >
-                <Text style={styles.texttouch}>ยกเลิก</Text>
+                <Text style={styles.texttouch}>
+                  {lan != "en" ? "ยกเลิก" : "Cancel"}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>

@@ -396,13 +396,20 @@ export default function index({ navigation, route }) {
   }
 
   useEffect(() => {
-    completeRunning();
+    if (
+      dataEV.distance[0] <=
+      parseInt(parseFloat(parseFloat(route.params.last_distance) / 1000))
+    ) {
+      navigation.navigate("LevelScc");
+    } else {
+      completeRunning();
+    }
   }, [state]);
 
   async function completeRunning() {
     if (
       datadetail.distance <=
-      parseFloat((state.currentStepCount * strip) / 100000).toFixed(3)
+      parseInt(parseFloat((state.currentStepCount * strip) / 100000).toFixed(3))
     ) {
       const response1 = await apiservice({
         path: "/event/resultsrunning",
@@ -451,10 +458,8 @@ export default function index({ navigation, route }) {
         },
         token: token.accessToken,
       });
-      console.log("resultsrunning", response1);
-      console.log("updateuserjoinEvent", response);
+
       if (response.status == 200) {
-        console.log("updateuserjoinEvent", response);
         navigation.navigate("LevelScc");
       }
     }

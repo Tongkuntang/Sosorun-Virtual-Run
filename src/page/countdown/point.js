@@ -10,13 +10,18 @@ import {
   TouchableOpacity,
   FlatList,
 } from "react-native";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { getLV } from "../../action/actionLV";
 import { autolize_Lv } from "../../json/utils";
-import { tokenState, userState } from "../../reducer/reducer/reducer/Atom";
+import {
+  lans,
+  tokenState,
+  userState,
+} from "../../reducer/reducer/reducer/Atom";
 const { width, height } = Dimensions.get("window");
 export default function point({ item, onPress }) {
   const [user, setUser] = useRecoilState(userState);
+  const lan = useRecoilValue(lans);
 
   if (autolize_Lv(parseInt(user.user_accounts.total_distance)).lv >= item.lv) {
     return (
@@ -25,7 +30,9 @@ export default function point({ item, onPress }) {
           <View style={styles.viewtap}>
             <Text style={styles.textlv}>LV {item.lv}</Text>
             <Text style={styles.text}>
-              คุณได้เลื่อนระดับสำเร็จแล้ว กดที่เหรียญเพื่อรับรางวัล
+              {lan != "en"
+                ? "คุณได้เลื่อนระดับสำเร็จแล้ว กดที่เหรียญเพื่อรับรางวัล"
+                : "You have successfully leveled up. Press on the coin to get rewards."}
             </Text>
           </View>
           <TouchableOpacity onPress={onPress} style={styles.touch}>

@@ -19,8 +19,12 @@ import {
 import Headerdetail from "../components/headerdetail";
 import Input from "./input";
 import { FontAwesome } from "@expo/vector-icons";
-import { useRecoilState } from "recoil";
-import { tokenState, userState } from "../../reducer/reducer/reducer/Atom";
+import { useRecoilState, useRecoilValue } from "recoil";
+import {
+  lans,
+  tokenState,
+  userState,
+} from "../../reducer/reducer/reducer/Atom";
 import WebView from "react-native-webview";
 import { apiservice } from "../../service/service";
 import { logPushNotificationOpenAsync, setUserIDAsync } from "expo-facebook";
@@ -57,6 +61,8 @@ export default function index({ navigation, route }) {
   const [state2, setstate2] = useState(user.user_accounts.full_address);
   const [state3, setstate3] = useState(user.user_accounts.full_address);
   const focus = useIsFocused();
+
+  const lan = useRecoilValue(lans);
   const charec = [
     "A",
     "B",
@@ -379,7 +385,9 @@ export default function index({ navigation, route }) {
                   </View>
                   <View style={styles.viewtext}>
                     <Text style={styles.textmpdal}>
-                      Payment Process is done successfully
+                      {lan == "en"
+                        ? "Payment Process is done successfully"
+                        : "ชำระเงินสำเร็จเรียบร้อยแล้ว"}
                     </Text>
                   </View>
                   <TouchableOpacity
@@ -400,7 +408,9 @@ export default function index({ navigation, route }) {
                     }}
                     style={{ alignSelf: "center" }}
                   >
-                    <Text style={styles.textconti}>Continue</Text>
+                    <Text style={styles.textconti}>
+                      {lan == "en" ? "Continue" : "ดำเนินการต่อ"}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -408,12 +418,18 @@ export default function index({ navigation, route }) {
             {address1 ? (
               <View style={styles.background}>
                 <View style={styles.view}>
-                  <Text style={styles.textaddess}>เลือกที่อยู่ในการจัดส่ง</Text>
+                  <Text style={styles.textaddess}>
+                    {lan != "en"
+                      ? "เลือกที่อยู่ในการจัดส่ง"
+                      : "Choose a delivery address"}
+                  </Text>
                   <TouchableOpacity
                     onPress={() => setaddress1(false)}
                     // style={styles.touchput}
                   >
-                    <Text style={styles.textput}>+ เพิ่มที่อยู่</Text>
+                    <Text style={styles.textput}>
+                      {lan != "en" ? "+ เพิ่มที่อยู่" : "+ Add address"}
+                    </Text>
                   </TouchableOpacity>
                 </View>
                 {user.full_address.ShippingAddress == null ? (
@@ -472,14 +488,20 @@ export default function index({ navigation, route }) {
                           navigation.navigate("EditAddra", { dataEV });
                         }}
                       >
-                        <Text style={styles.textdetailaddess}>แก้ไข</Text>
+                        <Text style={styles.textdetailaddess}>
+                          {lan != "en" ? "แก้ไข" : "Edit"}
+                        </Text>
                       </TouchableOpacity>
                     </View>
                     {dot !== true ? (
                       <View />
                     ) : (
                       <TouchableOpacity style={styles.touch}>
-                        <Text style={styles.texttouch}>ที่อยู่ในการจัดส่ง</Text>
+                        <Text style={styles.texttouch}>
+                          {lan != "en"
+                            ? "ที่อยู่ในการจัดส่ง"
+                            : "delivery address"}{" "}
+                        </Text>
                       </TouchableOpacity>
                     )}
                   </View>
@@ -545,7 +567,9 @@ export default function index({ navigation, route }) {
                                 });
                               }}
                             >
-                              <Text style={styles.textdetailaddess}>แก้ไข</Text>
+                              <Text style={styles.textdetailaddess}>
+                                {lan != "en" ? "แก้ไข" : "Edit"}
+                              </Text>
                             </TouchableOpacity>
                           </View>
                           {dot1 != index ? (
@@ -553,7 +577,9 @@ export default function index({ navigation, route }) {
                           ) : (
                             <TouchableOpacity style={styles.touch}>
                               <Text style={styles.texttouch}>
-                                ที่อยู่ในการจัดส่ง
+                                {lan != "en"
+                                  ? "ที่อยู่ในการจัดส่ง"
+                                  : "delivery address"}
                               </Text>
                             </TouchableOpacity>
                           )}
@@ -576,7 +602,9 @@ export default function index({ navigation, route }) {
                           : require("../../img/rec.png")
                       }
                     />
-                    <Text style={styles.textaddess}>ใบกำกับภาษี</Text>
+                    <Text style={styles.textaddess}>
+                      {lan != "en" ? "ใบกำกับภาษี" : "Tax Invoice"}
+                    </Text>
                   </TouchableOpacity>
                 </View>
                 {vat && (

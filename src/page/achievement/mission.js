@@ -10,8 +10,12 @@ import {
   TouchableOpacity,
   FlatList,
 } from "react-native";
-import { useRecoilState } from "recoil";
-import { tokenState, userState } from "../../reducer/reducer/reducer/Atom";
+import { useRecoilState, useRecoilValue } from "recoil";
+import {
+  tokenState,
+  userState,
+  lans,
+} from "../../reducer/reducer/reducer/Atom";
 import { apiservice } from "../../service/service";
 import HeaderFree from "../components/headerfree";
 import { getallhistory, getHistrory } from "../../action/actionhistrory";
@@ -29,6 +33,8 @@ export default function friend({ navigation }) {
   const [data, setdata] = useState([]);
   const isFocus = useIsFocused();
   const [user, setuser] = useRecoilState(userState);
+  const lan = useRecoilValue(lans);
+
   const [page, setpage] = useState(0);
   const [historyGet, sethistoryGet] = useState("");
   async function allevent() {
@@ -106,7 +112,7 @@ export default function friend({ navigation }) {
               alignSelf: "center",
             }}
           >
-            ภารกิจ
+            {lan == "en" ? "EVENTS" : "ภารกิจ"}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -127,7 +133,7 @@ export default function friend({ navigation }) {
               alignSelf: "center",
             }}
           >
-            เวอร์ชวล
+            {lan == "en" ? "VIRTUAL RUN" : "เวอร์ชวล"}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -148,7 +154,7 @@ export default function friend({ navigation }) {
               alignSelf: "center",
             }}
           >
-            เลื่อนขั้น
+            {lan == "en" ? "NEXT Lv" : "เลื่อนขั้น"}
           </Text>
         </TouchableOpacity>
       </View>

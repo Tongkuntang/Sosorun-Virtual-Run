@@ -25,7 +25,7 @@ import {
 } from "../../reducer/reducer/reducer/Atom";
 import { apiservice } from "../../service/service";
 const { width, height } = Dimensions.get("window");
-export default function register({ navigation, setpage }) {
+export default function register({ navigation, setpage, lan }) {
   const [token, setToken] = useRecoilState(tokenState);
   const [auth, setAuth] = useRecoilState(Authen);
   const [user, setUser] = useRecoilState(userState);
@@ -204,7 +204,9 @@ export default function register({ navigation, setpage }) {
             <Text
               style={[styles.go, { color: "#000" }, { textAlign: "center" }]}
             >
-              กรุณายืนยัน EMAIL เพื่อเข้าสู่ระบบ
+              {lan == "th"
+                ? "กรุณายืนยัน EMAIL เพื่อเข้าสู่ระบบ"
+                : "verify your email"}
             </Text>
 
             <TouchableOpacity
@@ -216,7 +218,7 @@ export default function register({ navigation, setpage }) {
               }}
               style={styles.touchmodal}
             >
-              <Text style={styles.go}>ตกลง</Text>
+              <Text style={styles.go}>{lan == "th" ? "ตกลง" : "OK"}</Text>
             </TouchableOpacity>
           </LinearGradient>
         </View>
@@ -244,7 +246,9 @@ export default function register({ navigation, setpage }) {
             <Text
               style={[styles.go, { color: "#000" }, { textAlign: "center" }]}
             >
-              Username หรือ Email {"\n"} นี้มีผู้ใช้งานแล้วในระบบ
+              {lan == "th"
+                ? `Username หรือ Email {"\n"} นี้มีผู้ใช้งานแล้วในระบบ`
+                : "Username or password is correct."}
             </Text>
 
             <TouchableOpacity
@@ -280,7 +284,7 @@ export default function register({ navigation, setpage }) {
               marginTop: 10,
             }}
           >
-            รูปแบบของอีเมลไม่ถูกต้อง
+            {lan == "th" ? "รูปแบบของอีเมลไม่ถูกต้อง" : "Email is valid"}
           </Text>
         )}
         <Input
@@ -327,7 +331,7 @@ export default function register({ navigation, setpage }) {
           }}
         >
           <Text style={[styles.textlogin, { color: "#393939" }]}>
-            ยอมรับเงื่อนไขและข้อตกลง
+            {lan == "th" ? "ยอมรับเงื่อนไขและข้อตกลง" : "Terms of us"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -341,17 +345,18 @@ export default function register({ navigation, setpage }) {
           }}
           style={styles.touchlogin}
         >
-          <Text style={styles.textlogin}>สมัครสมาชิก</Text>
+          <Text style={styles.textlogin}>
+            {lan == "th" ? "สมัครสมาชิก" : "Sign Up"}
+          </Text>
         </TouchableOpacity>
         <View style={styles.viewline}>
           <View style={styles.line} />
-          <Text style={styles.textline}>หรือ</Text>
+          <Text style={styles.textline}>{lan == "th" ? "หรือ" : "OR"}</Text>
           <View style={styles.line} />
         </View>
         <View style={styles.viewtouch}>
           <TouchableOpacity
             onPress={async () => {
-              // First- obtain access token from Expo's Google API
               const { type, accessToken, user } = await Google.logInAsync({
                 iosClientId: `634243433412-5qavjf5d8mkocnfgdt13q8lstl5086tv.apps.googleusercontent.com`,
                 androidClientId: `634243433412-htpft3vdnlqa08do03va59ntcbasn5rn.apps.googleusercontent.com`,

@@ -20,8 +20,9 @@ import HeaderHome from "../components/headerHome";
 import EvEnt from "./event";
 import Challangse from "./challanees";
 import BottomBar from "./bottombar";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import {
+  lans,
   LvState,
   tokenState,
   userState,
@@ -49,7 +50,7 @@ export default function index({ navigation }) {
   const [user, setUser] = useRecoilState(userState);
   const [token, setToken] = useRecoilState(tokenState);
   const [lvstate, setlvstate] = useRecoilState(LvState);
-
+  const lan = useRecoilValue(lans);
   const carouselRef = useRef();
   const carouselRef1 = useRef();
   const [banner1, setbanner1] = useState([]);
@@ -243,7 +244,9 @@ export default function index({ navigation }) {
           <View activeOpacity={1} style={styles.containermodal}>
             <View style={styles.backgroundmodai}>
               <View style={styles.viewdaily}>
-                <Text style={styles.textdaily}>DAILY BONUS</Text>
+                <Text style={styles.textdaily}>
+                  {lan == "en" ? "DAILY BONUS" : "โบนัสรายวัน"}
+                </Text>
                 <TouchableOpacity
                   onPress={() => {
                     setVisible(false);
@@ -258,10 +261,12 @@ export default function index({ navigation }) {
               </View>
               <View style={styles.viewreward}>
                 <Text style={[styles.textreward, { alignSelf: "center" }]}>
-                  Login every day and earn to reward
+                  {lan == "en"
+                    ? "Login every day and earn to reward"
+                    : "เข้าสู่ระบบทุกวันเพื่อรับของรางวัล"}
                 </Text>
                 <Text style={[styles.textreward, { alignSelf: "center" }]}>
-                  Week{" "}
+                  {lan == "en" ? "Week" : "สัปดาห์ที่"}{" "}
                   {user.user_accounts.DAILYBONUS.dailycount > 7
                     ? user.user_accounts.DAILYBONUS.dailycount > 14
                       ? user.user_accounts.DAILYBONUS.dailycount > 21
@@ -373,7 +378,9 @@ export default function index({ navigation }) {
                         ]}
                       >
                         <Text style={styles.textday}>
-                          {mock[index] + 1} days
+                          {lan == "en"
+                            ? mock[index] + 1 + "days"
+                            : "วันที่ " + (mock[index] + 1)}
                         </Text>
                         <Image
                           source={{

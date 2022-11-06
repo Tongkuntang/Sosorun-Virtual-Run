@@ -23,8 +23,9 @@ import { AntDesign } from "@expo/vector-icons";
 import * as Sharing from "expo-sharing";
 import * as ImageManipulator from "expo-image-manipulator";
 import { useIsFocused } from "@react-navigation/native";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import {
+  lans,
   LvState,
   tokenState,
   userState,
@@ -51,6 +52,7 @@ export default function index({ navigation, route }) {
   const viewShot = useRef();
   const BIB = route.params.BIB;
   const dataEV = route.params.dataEV;
+  const lan = useRecoilValue(lans);
   const [token, setToken] = useRecoilState(tokenState);
   const [user, setUser] = useRecoilState(userState);
   const [lvstate, setlvstate] = useState(null);
@@ -470,17 +472,35 @@ export default function index({ navigation, route }) {
   }
 
   useEffect(() => {
-    completeRunning();
+    if (
+      dataEV.distance[0] <=
+      parseInt(parseFloat(parseFloat(route.params.last_distance) / 1000))
+    ) {
+      navigation.navigate("Succeed", {
+        dataEV,
+        item: {
+          total_distance: dataEV.distance[0],
+          last_distance: (
+            parseFloat(parseFloat(route.params.last_distance) / 1000) +
+            parseFloat((state.currentStepCount * strip) / 100000)
+          ).toFixed(2),
+        },
+      });
+    } else {
+      completeRunning();
+    }
     uplevel(user);
   }, [state]);
 
   async function completeRunning() {
     if (
       dataEV.distance[0] <=
-      (
-        parseFloat((state.currentStepCount * strip) / 100000) +
-        parseFloat(parseFloat(route.params.last_distance) / 1000)
-      ).toFixed(2)
+      parseInt(
+        (
+          parseFloat((state.currentStepCount * strip) / 100000) +
+          parseFloat(parseFloat(route.params.last_distance) / 1000)
+        ).toFixed(2)
+      )
     ) {
       clearInterval(clear);
       setchick((val) => !val);
@@ -1084,10 +1104,13 @@ export default function index({ navigation, route }) {
             </View>
           ) : (
             <View style={styles.viewimg}>
-              <Text style={styles.texthead}>เริ่มจับเวลาภายใน</Text>
+              <Text style={styles.texthead}>
+                {" "}
+                {lan == "en" ? "Internal Timer Start" : "เริ่มจับเวลาภายใน"}
+              </Text>
               <View style={styles.viewnumber}>
                 <Text style={styles.number}>{num}</Text>
-                <Text style={styles.sec}>sec</Text>
+                <Text style={styles.sec}>{lan == "en" ? "sec" : "วิ"}</Text>
               </View>
               <TouchableOpacity
                 onPress={() => {
@@ -1096,7 +1119,7 @@ export default function index({ navigation, route }) {
                 style={styles.bottongo}
               >
                 {num == 5 ? (
-                  <Text style={styles.go}>วิ่ง</Text>
+                  <Text style={styles.go}>{lan == "en" ? "GO" : "วิ่ง"}</Text>
                 ) : (
                   <TouchableOpacity
                     onPress={() => navigation.navigate("Event")}

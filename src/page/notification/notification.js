@@ -74,7 +74,7 @@ export default function notification({ navigation }) {
           marginTop: Platform.OS === "ios" ? 0 : 0,
         }}
       >
-        <Headerevent item="อีเว้นทั้งหมด" navigation={navigation} />
+        <Headerevent item="อีเวนท์ทั้งหมด" navigation={navigation} />
       </View>
       <View>
         <FlatList

@@ -13,8 +13,12 @@ import {
   ScrollView,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRecoilState } from "recoil";
-import { tokenState, userState } from "../../reducer/reducer/reducer/Atom";
+import { useRecoilState, useRecoilValue } from "recoil";
+import {
+  lans,
+  tokenState,
+  userState,
+} from "../../reducer/reducer/reducer/Atom";
 import { getallevent, getmyeventid } from "../../action/actiongetall";
 import moment from "moment";
 import { apiservice } from "../../service/service";
@@ -25,6 +29,7 @@ export default function page1({ onPress, navigation }) {
   const [user, setUser] = useRecoilState(userState);
   const datauser = user.user_accounts;
   const [event, setevent] = useState([]);
+  const lan = useRecoilValue(lans);
 
   async function allevent() {
     const response = await apiservice({
@@ -78,7 +83,9 @@ export default function page1({ onPress, navigation }) {
                         {item.titel}
                       </Text>
                       <View>
-                        <Text style={styles.textlimid}>เข้าร่วมได้</Text>
+                        <Text style={styles.textlimid}>
+                          {lan == "en" ? "Join" : "เข้าร่วมได้"}
+                        </Text>
                         <Image
                           source={{
                             uri:
@@ -87,12 +94,14 @@ export default function page1({ onPress, navigation }) {
                           }}
                           style={[
                             styles.img,
-                            { position: "absolute", top: 65 },
+                            { position: "absolute", top: 65, right: -15 },
                           ]}
                         />
                       </View>
                     </View>
-                    <Text style={styles.texttime}>ระยะเวลา</Text>
+                    <Text style={styles.texttime}>
+                      {lan == "en" ? "Duration" : "ระยะเวลา"}
+                    </Text>
                     <Text style={[styles.texttime, { marginBottom: 5 }]}>
                       ตั้งแต่วันที่ {moment(item.startDate).format("DD")} -{" "}
                       {moment(item.expireDate).format("DD/MMMM/YYYY")}
@@ -105,9 +114,13 @@ export default function page1({ onPress, navigation }) {
                   >
                     <View style={styles.view}>
                       <Text style={styles.texthead}>{item.titel}</Text>
-                      <Text style={styles.textlimid1}>ซื้อล่วงหน้า</Text>
+                      <Text style={styles.textlimid1}>
+                        {lan == "en" ? "Pre order" : "ซื้อล่วงหน้า"}
+                      </Text>
                     </View>
-                    <Text style={styles.texttime}>ระยะเวลา</Text>
+                    <Text style={styles.texttime}>
+                      {lan == "en" ? "Duration" : "ระยะเวลา"}
+                    </Text>
                     <Text style={[styles.texttime, { marginBottom: 5 }]}>
                       ตั้งแต่วันที่ {moment(item.startDate).format("DD")} -{" "}
                       {moment(item.expireDate).format("DD/MMMM/YYYY")}

@@ -9,10 +9,12 @@ import {
   Dimensions,
   TouchableOpacity,
 } from "react-native";
-
+import { lans } from "../../reducer/reducer/reducer/Atom";
+import { useRecoilValue } from "recoil";
 const { width, height } = Dimensions.get("window");
 export default function startRun({ navigation }) {
   const [page, setpage] = useState(0);
+  const lan = useRecoilValue(lans);
   return (
     <View style={{ height: height }}>
       <SafeAreaView />
@@ -33,14 +35,17 @@ export default function startRun({ navigation }) {
       </View>
       <View style={styles.viewdetail}>
         <Text style={styles.textdetail}>
-          สนุกไปกับการวิ่งของคุณในทุกๆวัน เพื่อสุขภาพ และ เก็บสะสมระยะทาง
-          เพื่อรับ GOLD ไว้ใช้แลก ส่วนลดต่างๆ
+          {lan == "th"
+            ? `สนุกไปกับการวิ่งของคุณในทุกๆวัน เพื่อสุขภาพ และ เก็บสะสมระยะทาง เพื่อรับ GOLD ไว้ใช้แลก ส่วนลดต่างๆ`
+            : "Enjoy your running every day for your health. and collect distance to get GOLD to redeem various discounts"}
         </Text>
         <TouchableOpacity
           onPress={() => navigation.navigate("Countdown")}
           style={styles.bottonstart}
         >
-          <Text style={styles.textstart}>START</Text>
+          <Text style={styles.textstart}>
+            {lan == "th" ? "เริ่มวิ่ง" : "START"}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>

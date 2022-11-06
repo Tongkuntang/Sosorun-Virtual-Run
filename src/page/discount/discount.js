@@ -14,10 +14,15 @@ import {
   Share,
   TextInput,
 } from "react-native";
+import RNPickerSelect, { defaultStyles } from "react-native-picker-select";
 import { FontAwesome5, FontAwesome } from "@expo/vector-icons";
 import HeaderFree from "../components/headerfree";
-import { useRecoilState } from "recoil";
-import { tokenState, userState } from "../../reducer/reducer/reducer/Atom";
+import { useRecoilState, useRecoilValue } from "recoil";
+import {
+  tokenState,
+  userState,
+  lans,
+} from "../../reducer/reducer/reducer/Atom";
 import { useIsFocused } from "@react-navigation/core";
 import { apiservice } from "../../service/service";
 import { getalldiscount_list, getdiscount_list } from "../../action/actiondis";
@@ -36,6 +41,8 @@ export default function friend({ navigation }) {
   const [computer, setcomputer] = useState([]);
   const [room, setroom] = useState([]);
   const [elec, setelec] = useState([]);
+  const [state, setstate] = useState("0");
+  const lan = useRecoilValue(lans);
 
   async function getalldiscount() {
     const getall = await getalldiscount_list(token);
@@ -216,7 +223,7 @@ export default function friend({ navigation }) {
                 fontFamily: "Prompt-Regular",
                 color: "#A1949A",
               }}
-              placeholder="SEARCH"
+              placeholder={lan == "en" ? "SEARCH" : "ค้นหา"}
               onChangeText={(search) => setsearch(search)}
               defaultValue={search}
             />
@@ -231,9 +238,46 @@ export default function friend({ navigation }) {
             marginTop: 10,
           }}
         >
-          Categories
+          {lan == "en" ? "Categories" : "หมวดหมู่"}
         </Text>
         <View
+          style={{
+            width: width * 0.9,
+            height: 35,
+            backgroundColor: "#EFEFEF",
+            alignSelf: "center",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <RNPickerSelect
+            value={state}
+            textInputProps={{ style: { fontFamily: "Prompt-Regular" } }}
+            onValueChange={(selectSubDistrict) => {
+              setstate(selectSubDistrict);
+              console.log(selectSubDistrict);
+              setpage(selectSubDistrict);
+            }}
+            style={{
+              inputAndroid: {
+                width: width * 0.9,
+
+                borderBottomWidth: 1,
+                borderBottomColor: "#00000060",
+                color: "#000000",
+                fontFamily: "Prompt-Regular",
+                alignSelf: "center",
+              },
+            }}
+            items={[
+              { label: "All", value: "0" },
+              { label: "Food", value: "1" },
+              { label: "Computer", value: "2" },
+              { label: "Electric", value: "3" },
+            ]}
+          />
+        </View>
+        {/* <View
           style={{
             flexDirection: "row",
             width: width,
@@ -332,7 +376,7 @@ export default function friend({ navigation }) {
               Electric
             </Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
 
         <ScrollView style={{ height: height * 0.65 }}>
           {page == 0 && (
@@ -366,9 +410,6 @@ export default function friend({ navigation }) {
                           item.img_content,
                       }}
                     />
-                    <Text style={[styles.textbold1, { marginLeft: 0 }]}>
-                      {item.name}
-                    </Text>
                     <Text
                       numberOfLines={1}
                       style={{
@@ -377,9 +418,10 @@ export default function friend({ navigation }) {
                         fontSize: 12,
                         color: "#000",
                         marginVertical: 5,
+                        height: 40,
                       }}
                     >
-                      {item.description}
+                      {item.name}
                     </Text>
                     <View
                       style={{
@@ -387,70 +429,81 @@ export default function friend({ navigation }) {
                         justifyContent: "space-between",
                       }}
                     >
-                      <View
-                        style={{
-                          width: "33%",
-                          height: 30,
-                          borderRadius: 10,
-                          borderWidth: 2,
-                          borderColor: "#FBC71C",
-                          justifyContent: "center",
-                        }}
-                      >
+                      <View style={{ flexDirection: "row", width: "50%" }}>
                         <View
-                          style={{ flexDirection: "row", alignSelf: "center" }}
+                          style={{
+                            width: "50%",
+                            height: 20,
+                            borderRadius: 10,
+                            borderWidth: 2,
+                            borderColor: "#FBC71C",
+                            justifyContent: "center",
+                            paddingHorizontal: 2,
+                          }}
                         >
-                          <FontAwesome5
-                            name="running"
-                            size={12}
-                            color="#5BC3FF"
-                            style={{ alignSelf: "center" }}
-                          />
-                          <Text style={styles.textbold1}>
-                            {item.condition.cal}
-                          </Text>
-                        </View>
-                      </View>
-                      <View
-                        style={{
-                          width: "33%",
-                          height: 30,
-                          borderRadius: 10,
-                          borderWidth: 2,
-                          borderColor: "#FBC71C",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <View
-                          style={{ flexDirection: "row", alignSelf: "center" }}
-                        >
-                          <Image
-                            source={{
-                              uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/Group.png",
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              alignSelf: "center",
+                              alignItems: "center",
                             }}
-                            style={styles.imgpoint2}
-                          />
-                          <Text style={styles.textbold1}>
-                            {item.condition.gold}
-                          </Text>
+                          >
+                            <FontAwesome5
+                              name="running"
+                              size={12}
+                              color="#5BC3FF"
+                              style={{ alignSelf: "center" }}
+                            />
+                            <Text style={styles.textbold1}>
+                              {item.condition.cal}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View
+                          style={{
+                            width: "50%",
+                            height: 20,
+                            borderRadius: 10,
+                            borderWidth: 2,
+                            borderColor: "#FBC71C",
+                            justifyContent: "center",
+                            marginLeft: 4,
+                            paddingHorizontal: 2,
+                          }}
+                        >
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              alignSelf: "center",
+                              alignItems: "center",
+                            }}
+                          >
+                            <Image
+                              source={{
+                                uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/Group.png",
+                              }}
+                              style={styles.imgpoint2}
+                            />
+                            <Text style={styles.textbold1}>
+                              {item.condition.gold}
+                            </Text>
+                          </View>
                         </View>
                       </View>
-
                       <View
                         style={{
-                          width: "33%",
-                          height: 30,
+                          width: "23%",
+                          height: 20,
                           justifyContent: "center",
                           backgroundColor: "#393939",
-                          borderRadius: 10,
                         }}
                       >
                         <Text
                           style={{
                             fontFamily: "Prompt-Regular",
-                            fontSize: 18,
+                            fontSize: 10,
                             color: "#FBC71C",
-                            marginLeft: 10,
                           }}
                         >
                           ใช้สิทธิ์
@@ -504,9 +557,6 @@ export default function friend({ navigation }) {
                           item.img_content,
                       }}
                     />
-                    <Text style={[styles.textbold1, { marginLeft: 0 }]}>
-                      {item.name}
-                    </Text>
                     <Text
                       numberOfLines={1}
                       style={{
@@ -515,9 +565,10 @@ export default function friend({ navigation }) {
                         fontSize: 12,
                         color: "#000",
                         marginVertical: 5,
+                        height: 40,
                       }}
                     >
-                      {item.description}
+                      {item.name}
                     </Text>
                     <View
                       style={{
@@ -525,71 +576,81 @@ export default function friend({ navigation }) {
                         justifyContent: "space-between",
                       }}
                     >
-                      <View
-                        style={{
-                          width: "33%",
-                          height: 30,
-                          borderRadius: 10,
-                          borderWidth: 2,
-                          borderColor: "#FBC71C",
-                          justifyContent: "center",
-                        }}
-                      >
+                      <View style={{ flexDirection: "row", width: "50%" }}>
                         <View
-                          style={{ flexDirection: "row", alignSelf: "center" }}
+                          style={{
+                            width: "50%",
+                            height: 20,
+                            borderRadius: 10,
+                            borderWidth: 2,
+                            borderColor: "#FBC71C",
+                            justifyContent: "center",
+                            paddingHorizontal: 2,
+                          }}
                         >
-                          <FontAwesome5
-                            name="running"
-                            size={12}
-                            color="#5BC3FF"
-                            style={{ alignSelf: "center" }}
-                          />
-                          <Text style={styles.textbold1}>
-                            {item.condition.cal}
-                          </Text>
-                        </View>
-                      </View>
-                      <View
-                        style={{
-                          width: "33%",
-                          height: 30,
-                          borderRadius: 10,
-                          borderWidth: 2,
-                          borderColor: "#FBC71C",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <View
-                          style={{ flexDirection: "row", alignSelf: "center" }}
-                        >
-                          <Image
-                            source={{
-                              uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/Group.png",
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              alignSelf: "center",
+                              alignItems: "center",
                             }}
-                            style={styles.imgpoint2}
-                          />
-                          <Text style={styles.textbold1}>
-                            {item.condition.gold}
-                          </Text>
+                          >
+                            <FontAwesome5
+                              name="running"
+                              size={12}
+                              color="#5BC3FF"
+                              style={{ alignSelf: "center" }}
+                            />
+                            <Text style={styles.textbold1}>
+                              {item.condition.cal}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View
+                          style={{
+                            width: "50%",
+                            height: 20,
+                            borderRadius: 10,
+                            borderWidth: 2,
+                            borderColor: "#FBC71C",
+                            justifyContent: "center",
+                            marginLeft: 4,
+                            paddingHorizontal: 2,
+                          }}
+                        >
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              alignSelf: "center",
+                              alignItems: "center",
+                            }}
+                          >
+                            <Image
+                              source={{
+                                uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/Group.png",
+                              }}
+                              style={styles.imgpoint2}
+                            />
+                            <Text style={styles.textbold1}>
+                              {item.condition.gold}
+                            </Text>
+                          </View>
                         </View>
                       </View>
-
                       <View
                         style={{
-                          width: "33%",
-                          height: 30,
+                          width: "23%",
+                          height: 20,
                           justifyContent: "center",
                           backgroundColor: "#393939",
-                          borderRadius: 10,
                         }}
                       >
                         <Text
                           style={{
                             fontFamily: "Prompt-Regular",
-                            fontSize: 18,
+                            fontSize: 10,
                             color: "#FBC71C",
-                            fontWeight: "bold",
-                            marginLeft: 10,
                           }}
                         >
                           ใช้สิทธิ์
@@ -643,9 +704,6 @@ export default function friend({ navigation }) {
                           item.img_content,
                       }}
                     />
-                    <Text style={[styles.textbold1, { marginLeft: 0 }]}>
-                      {item.name}
-                    </Text>
                     <Text
                       numberOfLines={1}
                       style={{
@@ -654,9 +712,10 @@ export default function friend({ navigation }) {
                         fontSize: 12,
                         color: "#000",
                         marginVertical: 5,
+                        height: 40,
                       }}
                     >
-                      {item.description}
+                      {item.name}
                     </Text>
                     <View
                       style={{
@@ -664,71 +723,81 @@ export default function friend({ navigation }) {
                         justifyContent: "space-between",
                       }}
                     >
-                      <View
-                        style={{
-                          width: "33%",
-                          height: 30,
-                          borderRadius: 10,
-                          borderWidth: 2,
-                          borderColor: "#FBC71C",
-                          justifyContent: "center",
-                        }}
-                      >
+                      <View style={{ flexDirection: "row", width: "50%" }}>
                         <View
-                          style={{ flexDirection: "row", alignSelf: "center" }}
+                          style={{
+                            width: "50%",
+                            height: 20,
+                            borderRadius: 10,
+                            borderWidth: 2,
+                            borderColor: "#FBC71C",
+                            justifyContent: "center",
+                            paddingHorizontal: 2,
+                          }}
                         >
-                          <FontAwesome5
-                            name="running"
-                            size={12}
-                            color="#5BC3FF"
-                            style={{ alignSelf: "center" }}
-                          />
-                          <Text style={styles.textbold1}>
-                            {item.condition.cal}
-                          </Text>
-                        </View>
-                      </View>
-                      <View
-                        style={{
-                          width: "33%",
-                          height: 30,
-                          borderRadius: 10,
-                          borderWidth: 2,
-                          borderColor: "#FBC71C",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <View
-                          style={{ flexDirection: "row", alignSelf: "center" }}
-                        >
-                          <Image
-                            source={{
-                              uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/Group.pn",
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              alignSelf: "center",
+                              alignItems: "center",
                             }}
-                            style={styles.imgpoint2}
-                          />
-                          <Text style={styles.textbold1}>
-                            {item.condition.gold}
-                          </Text>
+                          >
+                            <FontAwesome5
+                              name="running"
+                              size={12}
+                              color="#5BC3FF"
+                              style={{ alignSelf: "center" }}
+                            />
+                            <Text style={styles.textbold1}>
+                              {item.condition.cal}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View
+                          style={{
+                            width: "50%",
+                            height: 20,
+                            borderRadius: 10,
+                            borderWidth: 2,
+                            borderColor: "#FBC71C",
+                            justifyContent: "center",
+                            marginLeft: 4,
+                            paddingHorizontal: 2,
+                          }}
+                        >
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              alignSelf: "center",
+                              alignItems: "center",
+                            }}
+                          >
+                            <Image
+                              source={{
+                                uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/Group.png",
+                              }}
+                              style={styles.imgpoint2}
+                            />
+                            <Text style={styles.textbold1}>
+                              {item.condition.gold}
+                            </Text>
+                          </View>
                         </View>
                       </View>
-
                       <View
                         style={{
-                          width: "33%",
-                          height: 30,
+                          width: "23%",
+                          height: 20,
                           justifyContent: "center",
                           backgroundColor: "#393939",
-                          borderRadius: 10,
                         }}
                       >
                         <Text
                           style={{
                             fontFamily: "Prompt-Regular",
-                            fontSize: 14,
+                            fontSize: 10,
                             color: "#FBC71C",
-                            fontWeight: "500",
-                            marginLeft: 10,
                           }}
                         >
                           ใช้สิทธิ์
@@ -739,7 +808,7 @@ export default function friend({ navigation }) {
                       style={{
                         alignSelf: "flex-end",
                         fontFamily: "Prompt-Regular",
-                        fontSize: 10,
+                        fontSize: 8,
                         color: "#000",
                         marginTop: 10,
                       }}
@@ -782,9 +851,6 @@ export default function friend({ navigation }) {
                           item.img_content,
                       }}
                     />
-                    <Text style={[styles.textbold1, { marginLeft: 0 }]}>
-                      {item.name}
-                    </Text>
                     <Text
                       numberOfLines={1}
                       style={{
@@ -793,9 +859,10 @@ export default function friend({ navigation }) {
                         fontSize: 12,
                         color: "#000",
                         marginVertical: 5,
+                        height: 40,
                       }}
                     >
-                      {item.description}
+                      {item.name}
                     </Text>
                     <View
                       style={{
@@ -803,76 +870,86 @@ export default function friend({ navigation }) {
                         justifyContent: "space-between",
                       }}
                     >
-                      <View
-                        style={{
-                          width: "33%",
-                          height: 30,
-                          borderRadius: 10,
-                          borderWidth: 2,
-                          borderColor: "#FBC71C",
-                          justifyContent: "center",
-                        }}
-                      >
+                      <View style={{ flexDirection: "row", width: "50%" }}>
                         <View
-                          style={{ flexDirection: "row", alignSelf: "center" }}
+                          style={{
+                            width: "50%",
+                            height: 20,
+                            borderRadius: 10,
+                            borderWidth: 2,
+                            borderColor: "#FBC71C",
+                            justifyContent: "center",
+                            paddingHorizontal: 2,
+                          }}
                         >
-                          <FontAwesome5
-                            name="running"
-                            size={12}
-                            color="#5BC3FF"
-                            style={{ alignSelf: "center" }}
-                          />
-                          <Text style={styles.textbold1}>
-                            {item.condition.cal}
-                          </Text>
-                        </View>
-                      </View>
-                      <View
-                        style={{
-                          width: "33%",
-                          height: 30,
-                          borderRadius: 10,
-                          borderWidth: 2,
-                          borderColor: "#FBC71C",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <View
-                          style={{ flexDirection: "row", alignSelf: "center" }}
-                        >
-                          <Image
-                            source={{
-                              uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/Group.pn",
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              alignSelf: "center",
+                              alignItems: "center",
                             }}
-                            style={styles.imgpoint2}
-                          />
-                          <Text style={styles.textbold1}>
-                            {item.condition.gold}
-                          </Text>
+                          >
+                            <FontAwesome5
+                              name="running"
+                              size={12}
+                              color="#5BC3FF"
+                              style={{ alignSelf: "center" }}
+                            />
+                            <Text style={styles.textbold1}>
+                              {item.condition.cal}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View
+                          style={{
+                            width: "50%",
+                            height: 20,
+                            borderRadius: 10,
+                            borderWidth: 2,
+                            borderColor: "#FBC71C",
+                            justifyContent: "center",
+                            marginLeft: 4,
+                            paddingHorizontal: 2,
+                          }}
+                        >
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              alignSelf: "center",
+                              alignItems: "center",
+                            }}
+                          >
+                            <Image
+                              source={{
+                                uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/Group.png",
+                              }}
+                              style={styles.imgpoint2}
+                            />
+                            <Text style={styles.textbold1}>
+                              {item.condition.gold}
+                            </Text>
+                          </View>
                         </View>
                       </View>
-
-                      <TouchableOpacity
+                      <View
                         style={{
-                          width: "33%",
-                          height: 30,
+                          width: "23%",
+                          height: 20,
                           justifyContent: "center",
                           backgroundColor: "#393939",
-                          borderRadius: 10,
                         }}
                       >
                         <Text
                           style={{
                             fontFamily: "Prompt-Regular",
-                            fontSize: 18,
+                            fontSize: 10,
                             color: "#FBC71C",
-                            fontWeight: "bold",
-                            marginLeft: 10,
                           }}
                         >
                           ใช้สิทธิ์
                         </Text>
-                      </TouchableOpacity>
+                      </View>
                     </View>
                     <Text
                       style={{
@@ -921,9 +998,6 @@ export default function friend({ navigation }) {
                           item.img_content,
                       }}
                     />
-                    <Text style={[styles.textbold1, { marginLeft: 0 }]}>
-                      {item.name}
-                    </Text>
                     <Text
                       numberOfLines={1}
                       style={{
@@ -932,9 +1006,10 @@ export default function friend({ navigation }) {
                         fontSize: 12,
                         color: "#000",
                         marginVertical: 5,
+                        height: 40,
                       }}
                     >
-                      {item.description}
+                      {item.name}
                     </Text>
                     <View
                       style={{
@@ -942,71 +1017,81 @@ export default function friend({ navigation }) {
                         justifyContent: "space-between",
                       }}
                     >
-                      <View
-                        style={{
-                          width: "33%",
-                          height: 30,
-                          borderRadius: 10,
-                          borderWidth: 2,
-                          borderColor: "#FBC71C",
-                          justifyContent: "center",
-                        }}
-                      >
+                      <View style={{ flexDirection: "row", width: "50%" }}>
                         <View
-                          style={{ flexDirection: "row", alignSelf: "center" }}
+                          style={{
+                            width: "50%",
+                            height: 20,
+                            borderRadius: 10,
+                            borderWidth: 2,
+                            borderColor: "#FBC71C",
+                            justifyContent: "center",
+                            paddingHorizontal: 2,
+                          }}
                         >
-                          <FontAwesome5
-                            name="running"
-                            size={12}
-                            color="#5BC3FF"
-                            style={{ alignSelf: "center" }}
-                          />
-                          <Text style={styles.textbold1}>
-                            {item.condition.cal}
-                          </Text>
-                        </View>
-                      </View>
-                      <View
-                        style={{
-                          width: "33%",
-                          height: 30,
-                          borderRadius: 10,
-                          borderWidth: 2,
-                          borderColor: "#FBC71C",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <View
-                          style={{ flexDirection: "row", alignSelf: "center" }}
-                        >
-                          <Image
-                            source={{
-                              uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/Group.pn",
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              alignSelf: "center",
+                              alignItems: "center",
                             }}
-                            style={styles.imgpoint2}
-                          />
-                          <Text style={styles.textbold1}>
-                            {item.condition.gold}
-                          </Text>
+                          >
+                            <FontAwesome5
+                              name="running"
+                              size={12}
+                              color="#5BC3FF"
+                              style={{ alignSelf: "center" }}
+                            />
+                            <Text style={styles.textbold1}>
+                              {item.condition.cal}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View
+                          style={{
+                            width: "50%",
+                            height: 20,
+                            borderRadius: 10,
+                            borderWidth: 2,
+                            borderColor: "#FBC71C",
+                            justifyContent: "center",
+                            marginLeft: 4,
+                            paddingHorizontal: 2,
+                          }}
+                        >
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              alignSelf: "center",
+                              alignItems: "center",
+                            }}
+                          >
+                            <Image
+                              source={{
+                                uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/Group.png",
+                              }}
+                              style={styles.imgpoint2}
+                            />
+                            <Text style={styles.textbold1}>
+                              {item.condition.gold}
+                            </Text>
+                          </View>
                         </View>
                       </View>
-
                       <View
                         style={{
-                          width: "33%",
-                          height: 30,
+                          width: "23%",
+                          height: 20,
                           justifyContent: "center",
                           backgroundColor: "#393939",
-                          borderRadius: 10,
                         }}
                       >
                         <Text
                           style={{
                             fontFamily: "Prompt-Regular",
-                            fontSize: 18,
+                            fontSize: 10,
                             color: "#FBC71C",
-                            fontWeight: "bold",
-                            marginLeft: 10,
                           }}
                         >
                           ใช้สิทธิ์
@@ -1078,10 +1163,10 @@ const styles = StyleSheet.create({
   },
   textbold1: {
     fontFamily: "Prompt-Regular",
-    fontSize: 14,
+    fontSize: 7,
     color: "#000",
     fontWeight: "500",
-    marginLeft: 10,
+    marginLeft: 5,
   },
   view: {
     flexDirection: "row",

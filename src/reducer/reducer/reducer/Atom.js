@@ -13,6 +13,12 @@ export const n_devices = atom({
   effects_UNSTABLE: [persistAtom],
 });
 
+export const lans = atom({
+  key: "lans",
+  default: "en",
+  effects_UNSTABLE: [persistAtom],
+});
+
 export const tokenState = atom({
   key: "token",
   default: {},

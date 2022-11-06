@@ -23,6 +23,7 @@ import { timeformet } from "../components/test";
 import BleManager from "react-native-ble-manager";
 const { Fitblekit } = NativeModules;
 import { useRecoilState, useRecoilValue } from "recoil";
+import { authHistrory } from "../../action/actionhistrory";
 import AppleHealthKit, {
   HealthValue,
   HealthKitPermissions,
@@ -33,11 +34,12 @@ import {
   deviceRegis,
   n_devices,
   tokenState,
+  lans,
 } from "../../reducer/reducer/reducer/Atom";
 import Header from "../components/header";
 import { TextInput } from "react-native-gesture-handler";
 import { apiservice } from "../../service/service";
-import { getActionUser } from "../../action/actionauth";
+import { actionEditprofile, getActionUser } from "../../action/actionauth";
 import moment from "moment";
 const { width, height } = Dimensions.get("window");
 import ProgressCircle from "react-native-progress-circle";
@@ -58,10 +60,11 @@ export default function index({ navigation }) {
   const [modals, setModal] = useState(false);
   const [n_device, s_n_device] = useRecoilState(n_devices);
   const [list_setrender, setrender] = useState([]);
-
+  const [lan, setlan] = useRecoilState(lans);
   const [modals1, setModal1] = useState(false);
   const [modals2, setModal2] = useState(Platform.OS == "android");
   const [modals3, setModal3] = useState(false);
+  const [Strava, setStrava] = useState(testjson);
   const peripherals = new Map();
   const [list, setList] = useState([]);
   const eventEmitter = new NativeEventEmitter(Fitblekit);
@@ -315,6 +318,8 @@ export default function index({ navigation }) {
     );
   };
 
+  console.log("body", body?.user_accounts?.total_distance);
+
   const retrieveConnected = () => {
     BleManager.getConnectedPeripherals([]).then((results) => {
       if (results.length == 0) {
@@ -418,7 +423,6 @@ export default function index({ navigation }) {
     }
 
     return () => {
-      console.log("unmount");
       bleManagerEmitter.removeListener(
         "BleManagerDiscoverPeripheral",
         handleDiscoverPeripheral
@@ -434,6 +438,11 @@ export default function index({ navigation }) {
       );
     };
   }, []);
+
+  console.log(
+    "totals >>> ",
+    parseInt(body?.user_accounts?.total_distance) / 10000000
+  );
 
   useEffect(() => {
     try {
@@ -590,67 +599,23 @@ export default function index({ navigation }) {
       const re = url.split("=");
 
       const tokens = {
-        access_token: re[1].replace("?expires_in", ""),
+        access_token: re?.reverse()?.[1].replace("?athlete", ""),
         id_token: re[3].replace("?refreshToken", ""),
         refreshToken: re[4].replace("?scope", ""),
       };
 
-      const getuser = await getActionUser(token);
-
-      console.log("getuser", getuser);
-
       const res = await apiservice({
-        path: "/authen/createhw",
-        method: "post",
-        body: {
-          uid: getuser?.data?.id,
-          info: tokens,
-        },
-      });
-
-      console.log("res", res);
-
-      const regis = await apiservice({
-        method: "post",
+        url: "https://www.strava.com/api/v3/activities?per_page=50&page=1",
         path: "",
-        url: "https://health-api.cloud.huawei.com/healthkit/v1/dataCollectors",
-        token: re[1].replace("?expires_in", ""),
-        body: {
-          collectorName: "DataCollectorExample",
-          collectorType: "raw",
-          appInfo: {
-            appPackageName: "com.sosorun.asia",
-            appName: "Sosorun Virtual Run",
-            desc: "https://sosorun.com",
-            appVersion: "1",
-          },
-          collectorDataType: {
-            name: "com.huawei.continuous.steps.delta",
-          },
-          deviceInfo: {
-            manufacturer: "huawei",
-            modelNum: "ExampleTablet",
-            devType: "Phone",
-            uniqueId: moment().valueOf(),
-            version: "1.0",
-          },
-        },
+        method: "get",
+        token: tokens?.access_token,
       });
 
-      console.log("regis", regis);
-
-      // const getuser = await getActionUser(tokens);
-      // const data = getuser.data;
-      // if (data.height == null) {
-      //   setmodal(true);
-      //   setTokenvisible(tokens);
-      // } else {
-      //   setAuth({
-      //     auth: true,
-      //   });
-      //   setUser(data);
-      //   setToken(tokens);
-      // }
+      if (res?.status == 200) {
+        setStrava(res?.data);
+        // setDeviceI(5);
+        setpage(false);
+      }
     };
     Linking.addEventListener("url", onReceiveURL);
   }, []);
@@ -764,7 +729,7 @@ export default function index({ navigation }) {
           </View>
         </View>
       </Modal>
-      <Modal transparent={true} visible={modals2} style={{ flex: 1 }}>
+      <Modal transparent={true} visible={false} style={{ flex: 1 }}>
         <View
           style={{
             flex: 1,
@@ -1019,7 +984,7 @@ export default function index({ navigation }) {
               navigation.goBack();
             }}
           />
-          <View
+          {/* <View
             style={{
               width: width,
               backgroundColor: "#000",
@@ -1059,14 +1024,12 @@ export default function index({ navigation }) {
                 </Text>
               </ProgressCircle>
             </TouchableOpacity>
-          </View>
-          {page && (
+          </View> */}
+          {
             <View>
-              {(devicsI == 0 || devicsI == 1) && (
-                <Text style={styles.texthead}>SOSORUN SMART GEAR</Text>
-              )}
-              {(devicsI == 0 || devicsI == 1) && <View style={styles.line} />}
-              {(devicsI == 0 || devicsI == 1) && (
+              {<Text style={styles.texthead}>SOSORUN SMART GEAR</Text>}
+              {/* {(devicsI == 0 || devicsI == 1) && <View style={styles.line} />} */}
+              {/* {(devicsI == 0 || devicsI == 1) && (
                 <View style={styles.touch}>
                   <Image
                     source={{
@@ -1157,33 +1120,26 @@ export default function index({ navigation }) {
                         }}
                       >
                         <Text style={[styles.textdevice, { marginLeft: 0 }]}>
-                          boost
+                          send
                         </Text>
                       </TouchableOpacity>
                     )}
                   </View>
                 </View>
-              )}
-              {(devicsI == 0 || devicsI == 1) && <View style={styles.line} />}
-              {(devicsI == 0 ||
+              )} */}
+              {/* {(devicsI == 0 || devicsI == 1) && <View style={styles.line} />} */}
+              {/* {(devicsI == 0 ||
                 devicsI == 2 ||
                 devicsI == 3 ||
                 devicsI == 4) && (
                 <Text style={styles.texthead}>Other Devices</Text>
-              )}
-              {(devicsI == 0 ||
+              )} */}
+              {/* {(devicsI == 0 ||
                 devicsI == 2 ||
                 devicsI == 3 ||
-                devicsI == 4) && <View style={styles.line} />}
-              {(devicsI == 0 || devicsI == 2) && (
-                <View
-                  onPress={() => {
-                    Linking.openURL(
-                      "https://oauth-login.cloud.huawei.com/oauth2/v3/authorize?response_type=code&state=state_parameter_passthrough_value&client_id=106360789&redirect_uri=https://api.sosorun.com/api/authen/huawei&scope=openid+https://www.huawei.com/healthkit/step.read&access_type=offline&display=touch"
-                    );
-                  }}
-                  style={styles.touch}
-                >
+                devicsI == 4) && <View style={styles.line} />} */}
+              {/* {(devicsI == 0 || devicsI == 2) && (
+                <View style={styles.touch}>
                   <Image
                     source={{
                       uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/113.png",
@@ -1277,17 +1233,17 @@ export default function index({ navigation }) {
                         }}
                       >
                         <Text style={[styles.textdevice, { marginLeft: 0 }]}>
-                          boost
+                          send
                         </Text>
                       </TouchableOpacity>
                     )}
                   </View>
                 </View>
-              )}
-              {(devicsI == 0 || devicsI == 2) && Platform.OS == "ios" && (
+              )} */}
+              {/* {(devicsI == 0 || devicsI == 2) && Platform.OS == "ios" && (
                 <View style={styles.line} />
-              )}
-              {Platform.OS == "ios" && (devicsI == 0 || devicsI == 3) && (
+              )} */}
+              {/* {Platform.OS == "ios" && (devicsI == 0 || devicsI == 3) && (
                 <View style={styles.touch}>
                   <Image
                     source={require("../../img/healthkit.png")}
@@ -1422,15 +1378,15 @@ export default function index({ navigation }) {
                         }}
                       >
                         <Text style={[styles.textdevice, { marginLeft: 0 }]}>
-                          boost
+                          send
                         </Text>
                       </TouchableOpacity>
                     )}
                   </View>
                 </View>
-              )}
-              {(devicsI == 0 || devicsI == 3) && <View style={styles.line} />}
-              {(devicsI == 0 || devicsI == 5) && Platform.OS == "android" && (
+              )} */}
+              {<View style={styles.line} />}
+              {
                 <View style={styles.touch}>
                   <Image
                     resizeMode="contain"
@@ -1438,61 +1394,71 @@ export default function index({ navigation }) {
                     style={styles.imgsoso2}
                   />
                   <Text style={styles.textdevice}>Strava</Text>
-                  <View
-                    style={{ position: "absolute", right: 25, top: -7 }}
-                    name="check"
-                    size={32}
-                    color="#55AB68"
-                  >
+                  <View style={{ position: "absolute", right: 25, top: -7 }}>
                     {devicsI == 0 && (
                       <TouchableOpacity
                         onPress={async () => {
-                          const options = {
-                            scopes: [
-                              Scopes.FITNESS_ACTIVITY_READ,
-                              Scopes.FITNESS_ACTIVITY_WRITE,
-                              Scopes.FITNESS_BODY_READ,
-                              Scopes.FITNESS_BODY_WRITE,
-                              Scopes.FITNESS_LOCATION_WRITE,
-                              Scopes.FITNESS_LOCATION_READ,
-                            ],
-                          };
-
-                          GoogleFit.authorize(options)
-                            .then((authResult) => {
-                              if (authResult.success) {
-                                GoogleFit.startRecording((callback) => {
-                                  // Process data from Google Fit Recording API (no google fit app needed)
-                                  fetchData();
-                                });
-                              } else {
-                                Alert.alert(authResult.message);
-                              }
-                            })
-                            .catch((err) => {
-                              Alert.alert(err);
-                            });
+                          Linking.openURL(
+                            // "https://www.strava.com/oauth/mobile/authorize?client_id=91716&redirect_uri=https://api.sosorun.com/api/authen/strava&response_type=code&approval_prompt=auto&scope=activity%3Awrite%2Cread_all&state=test",
+                            "https://www.strava.com/oauth/mobile/authorize?client_id=91716&redirect_uri=https://api.sosorun.com/api/authen/strava&response_type=code&approval_prompt=auto&scope=activity:read_all&state=test"
+                          );
                         }}
                         style={{
-                          backgroundColor: healthkit > 0 ? "#FCC81D" : "#ccc",
                           alignItems: "center",
                           justifyContent: "center",
                           paddingHorizontal: 10,
                           marginTop: -5,
-                          width: 65,
+                          width: 120,
                           height: 65,
                           borderRadius: 55,
                         }}
                       >
-                        <Text style={[styles.textdevice, { marginLeft: 0 }]}>
-                          sync
-                        </Text>
+                        {page && (
+                          <Text style={[styles.textdevice, { marginLeft: 0 }]}>
+                            {lan == "en"
+                              ? "No connected"
+                              : "ยังไม่ได้เชื่อมต่อ"}
+                          </Text>
+                        )}
+                        {!page && (
+                          <Text style={[styles.textdevice, { marginLeft: 0 }]}>
+                            {lan == "en" ? "Connected" : "เชื่อมต่อ"}
+                          </Text>
+                        )}
                       </TouchableOpacity>
                     )}
                     {devicsI == 5 && (
                       <TouchableOpacity
+                        disabled
                         onPress={async () => {
-                          syncData();
+                          // setModal1(true);
+                          // let distance = 0;
+                          // Strava?.filter((e) => {
+                          //   return (
+                          //     moment(e.start_date).format("DD-MM-YYYY") ==
+                          //     moment().format("DD-MM-YYYY")
+                          //   );
+                          // })?.map((e) => (distance = distance + e.distance));
+                          // const res1 = await apiservice({
+                          //   path: "/user/syncdistance",
+                          //   method: "post",
+                          //   body: {
+                          //     uid: body?.id,
+                          //     type: "STRAVA",
+                          //     date: moment(),
+                          //     last_count: distance / 1000,
+                          //   },
+                          // });
+                          // if (res1.status == 200) {
+                          //   setModal1(false);
+                          //   Alert.alert("อัพเดทข้อมูลสำเร็จ");
+                          //   setDeviceI(0);
+                          //   const getuser = await getActionUser(token);
+                          //   setbody(getuser.data);
+                          // } else {
+                          //   setModal1(false);
+                          //   Alert.alert("อัพเดทข้อมูลไม่สำเร็จ");
+                          // }
                         }}
                         style={{
                           backgroundColor: "#ccc",
@@ -1506,118 +1472,182 @@ export default function index({ navigation }) {
                         }}
                       >
                         <Text style={[styles.textdevice, { marginLeft: 0 }]}>
-                          boost
+                          send
                         </Text>
                       </TouchableOpacity>
                     )}
                   </View>
                 </View>
-              )}
+              }
               {(devicsI == 0 || devicsI == 5) && Platform.OS == "android" && (
                 <View style={styles.line} />
               )}
-              {/* {(devicsI == 0 || devicsI == 4) && Platform.OS == "android" && (
-                <View style={styles.touch}>
-                  <Image
-                    resizeMode="contain"
-                    source={require("../../img/fit.png")}
-                    style={styles.imgsoso2}
-                  />
-                  <Text style={styles.textdevice}>GoogleFit</Text>
-                  <View
-                    style={{ position: "absolute", right: 25, top: -7 }}
-                    name="check"
-                    size={32}
-                    color="#55AB68"
-                  >
-                    {devicsI == 0 && (
-                      <TouchableOpacity
-                        onPress={async () => {
-                          const options = {
-                            scopes: [
-                              Scopes.FITNESS_ACTIVITY_READ,
-                              Scopes.FITNESS_ACTIVITY_WRITE,
-                              Scopes.FITNESS_BODY_READ,
-                              Scopes.FITNESS_BODY_WRITE,
-                              Scopes.FITNESS_LOCATION_WRITE,
-                              Scopes.FITNESS_LOCATION_READ,
-                            ],
-                          };
-
-                          GoogleFit.authorize(options)
-                            .then((authResult) => {
-                              if (authResult.success) {
-                                GoogleFit.startRecording((callback) => {
-                                  // Process data from Google Fit Recording API (no google fit app needed)
-                                  fetchData1();
-                                });
-                              } else {
-                                Alert.alert(authResult.message);
-                              }
-                            })
-                            .catch((err) => {
-                              Alert.alert(err);
-                            });
-                        }}
-                        style={{
-                          backgroundColor: healthkit > 0 ? "#FCC81D" : "#ccc",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          paddingHorizontal: 10,
-                          marginTop: -5,
-                          width: 65,
-                          height: 65,
-                          borderRadius: 55,
-                        }}
-                      >
-                        <Text style={[styles.textdevice, { marginLeft: 0 }]}>
-                          sync
-                        </Text>
-                      </TouchableOpacity>
-                    )}
-                    {devicsI == 4 && (
-                      <TouchableOpacity
-                        onPress={async () => {
-                          syncData1();
-                        }}
-                        style={{
-                          backgroundColor: "#ccc",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          paddingHorizontal: 10,
-                          marginTop: -5,
-                          width: 65,
-                          height: 65,
-                          borderRadius: 55,
-                        }}
-                      >
-                        <Text style={[styles.textdevice, { marginLeft: 0 }]}>
-                          boost
-                        </Text>
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                </View>
-              )}
-              {(devicsI == 0 || devicsI == 4) && Platform.OS == "android" && (
-                <View style={styles.line} />
-              )} */}
             </View>
-          )}
+          }
           {!page && (
             <View>
               <FlatList
                 data={data}
                 extraData={[data]}
+                ListHeaderComponent={
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      backgroundColor: "#fff",
+                      marginBottom: 15,
+                    }}
+                  >
+                    <Image
+                      style={{
+                        width: width * 0.22,
+                        height: width * 0.22,
+                        marginTop: 15,
+                        marginLeft: 10,
+                      }}
+                      resizeMode={"contain"}
+                      source={require("../../img/lo_hor.png")}
+                    />
+                    {
+                      <View>
+                        <View style={styles.view}>
+                          <Text style={styles.nameevent}>{"Start Run"}</Text>
+                        </View>
+
+                        <View style={styles.viewtext}>
+                          <View style={styles.viewsmall}>
+                            <Text style={styles.text1}>ระยะทางทั้งหมด</Text>
+                            <Text style={styles.text2}>
+                              {}
+                              {"ไม่จำกัด "}
+                              กม.
+                            </Text>
+                          </View>
+                          <View style={{ borderLeftWidth: 0.5 }} />
+                          <View style={styles.viewsmall}>
+                            <Text style={styles.text1}>ระยะทางที่ทำได้</Text>
+                            <Text style={styles.text2}>
+                              {parseInt(body?.user_accounts?.total_distance) /
+                                1000}{" "}
+                              กม.
+                            </Text>
+                          </View>
+                          <View style={{ borderLeftWidth: 0.5 }} />
+                          <View style={styles.viewsmall}>
+                            <Text style={styles.text1}>ระดับความสำเร็จ</Text>
+                            <Text style={[styles.text2, { fontSize: 14 }]}>
+                              {"∞"}
+                            </Text>
+                          </View>
+                        </View>
+                        <View
+                          style={{
+                            height: 4,
+                            width: width * 0.5,
+                            backgroundColor: "#000",
+                            marginTop: 5,
+                          }}
+                        >
+                          <View
+                            style={{
+                              backgroundColor: "#F8CA36",
+                              height: 4,
+                              width:
+                                width *
+                                0.5 *
+                                (
+                                  parseInt(
+                                    body?.user_accounts?.total_distance
+                                  ) / 10000000
+                                ).toFixed(2),
+                            }}
+                          />
+                        </View>
+                        <TouchableOpacity
+                          onPress={async () => {
+                            let strava_count = 0;
+                            let strava_time = 0;
+
+                            await Promise.all(
+                              Strava?.map(async (el) => {
+                                const res = await apiservice({
+                                  path: "/user/poststava_idForeChack",
+                                  method: "post",
+                                  body: {
+                                    event_id: 10000000001,
+                                    stava_id: el?.id,
+                                  },
+                                  token: token?.accessToken,
+                                });
+
+                                console.log(
+                                  "งงนะทำไมบัคเยอะ",
+                                  {
+                                    event_id: 10000000001,
+                                    stava_id: el?.id,
+                                  },
+                                  res
+                                );
+
+                                if (res?.status == 200) {
+                                  strava_count = strava_count + el?.distance;
+                                  strava_time = strava_time + el?.moving_time;
+                                }
+                              })
+                            );
+
+                            let datamain = {
+                              uid: body.id,
+                              info: {
+                                distance: strava_count,
+                                callery: 12,
+                                time: strava_time,
+                              },
+                              Distance: strava_count,
+                              date: moment().format("YYYY-MM-DD"),
+                            };
+
+                            const response = await authHistrory({
+                              body: datamain,
+                              token,
+                            });
+
+                            const response1 = await actionEditprofile({
+                              body: {
+                                id: body.id,
+                                total_distance:
+                                  parseInt(body.user_accounts.total_distance) +
+                                  strava_count,
+                                wallet: {
+                                  ...body.user_accounts?.wallet,
+                                  cal:
+                                    (body?.user_accounts?.wallet?.cal || 0) +
+                                    12,
+                                },
+                              },
+                              token,
+                            });
+
+                            if (response1.status == 200) {
+                              Alert.alert("อัพเดทข้อมูลสำเร็จ");
+                              getUser();
+                            }
+                          }}
+                          style={styles.viewbottom}
+                        >
+                          <Text style={styles.texttail}>send</Text>
+                        </TouchableOpacity>
+                      </View>
+                    }
+                  </View>
+                }
                 renderItem={({ item, index }) => {
                   return (
-                    item?.event_Listt?.Type != "Eventonroad" &&
-                    (item.total_distance / 1000).toFixed(2) >
-                      (item.last_distance / 1000).toFixed(2) && (
+                    item.total_distance > item.last_distance && (
                       <View
                         style={{
                           flexDirection: "row",
                           backgroundColor: "#fff",
+                          marginBottom: 15,
                         }}
                       >
                         <Image
@@ -1639,52 +1669,6 @@ export default function index({ navigation }) {
                               <Text style={styles.nameevent}>
                                 {item.event_name}
                               </Text>
-                              <TouchableOpacity
-                                onPress={async () =>
-                                  // navigation.navigate("Campaign", { item })
-                                  {
-                                    const res1 = await apiservice({
-                                      path: "/user/distance_subtract",
-                                      method: "post",
-                                      body: {
-                                        uid: body.id,
-                                        distance: body?.distance,
-                                      },
-                                      token: token.accessToken,
-                                    });
-
-                                    console.log(res1?.data);
-
-                                    const response = await apiservice({
-                                      path: "/event/updateuserjoinEvent",
-                                      method: "put",
-                                      body: {
-                                        id: item.id,
-                                        distance:
-                                          body?.distance >
-                                          item?.total_distance / 1000
-                                            ? item?.total_distance
-                                            : body?.distance * 1000,
-                                        running_Time: 0,
-                                        cal: 0,
-                                      },
-                                      token: token.accessToken,
-                                    });
-                                    console.log(response);
-                                    if (response.status == 200) {
-                                      Alert.alert("อัพเดทข้อมูลสำเร็จ");
-                                      setDeviceI(0);
-
-                                      setTimeout(() => {
-                                        getUser();
-                                      }, 1000);
-                                    }
-                                  }
-                                }
-                                style={styles.viewbottom}
-                              >
-                                <Text style={styles.texttail}>Sync</Text>
-                              </TouchableOpacity>
                             </View>
 
                             <View style={styles.viewtext}>
@@ -1694,6 +1678,7 @@ export default function index({ navigation }) {
                                   {(item.total_distance / 1000).toFixed(2)} กม.
                                 </Text>
                               </View>
+                              <View style={{ borderLeftWidth: 0.5 }} />
                               <View style={styles.viewsmall}>
                                 <Text style={styles.text1}>
                                   ระยะทางที่ทำได้
@@ -1702,6 +1687,7 @@ export default function index({ navigation }) {
                                   {(item.last_distance / 1000).toFixed(2)} กม.
                                 </Text>
                               </View>
+                              <View style={{ borderLeftWidth: 0.5 }} />
                               <View style={styles.viewsmall}>
                                 <Text style={styles.text1}>
                                   ระดับความสำเร็จ
@@ -1716,6 +1702,110 @@ export default function index({ navigation }) {
                                 </Text>
                               </View>
                             </View>
+                            <View
+                              style={{
+                                height: 4,
+                                width: width * 0.5,
+                                backgroundColor: "#000",
+                                marginTop: 5,
+                              }}
+                            >
+                              <View
+                                style={{
+                                  backgroundColor: "#F8CA36",
+                                  height: 4,
+                                  width:
+                                    width *
+                                    0.5 *
+                                    (
+                                      ((item.last_distance / 1000).toFixed(2) *
+                                        1) /
+                                      (item.total_distance / 1000).toFixed(2)
+                                    ).toFixed(2),
+                                }}
+                              />
+                            </View>
+                            <TouchableOpacity
+                              onPress={async () => {
+                                const res1 = await apiservice({
+                                  path: "/user/distance_subtract",
+                                  method: "post",
+                                  body: {
+                                    uid: body.id,
+                                    distance: body?.distance,
+                                  },
+                                  token: token.accessToken,
+                                });
+
+                                let strava_count = 0;
+                                let strava_time = 0;
+
+                                await Promise.all(
+                                  Strava.filter((e) => {
+                                    return (
+                                      moment(e?.start_date_local)?.valueOf() >
+                                      moment(
+                                        item?.event_Listt?.startDate
+                                      )?.valueOf()
+                                    );
+                                  })?.map(async (el) => {
+                                    if (strava_count < item?.total_distance) {
+                                      const res = await apiservice({
+                                        path: "/user/poststava_idForeChack ",
+                                        method: "post",
+                                        body: {
+                                          event_id: item?.id,
+                                          stava_id: el?.id,
+                                        },
+                                        token: token?.accessToken,
+                                      });
+
+                                      console.log(
+                                        "งงนะทำไมบัคเยอะ",
+                                        {
+                                          event_id: 10000000001,
+                                          stava_id: el?.id,
+                                        },
+                                        res
+                                      );
+
+                                      if (res?.status == 200) {
+                                        strava_count =
+                                          strava_count + el?.distance;
+                                        strava_time =
+                                          strava_time + el?.moving_time;
+                                      }
+                                    }
+                                  })
+                                );
+
+                                const response = await apiservice({
+                                  path: "/event/updateuserjoinEvent",
+                                  method: "put",
+                                  body: {
+                                    id: item.id,
+                                    distance:
+                                      strava_count > item?.total_distance
+                                        ? item?.total_distance
+                                        : strava_count,
+                                    running_Time: strava_time,
+                                    cal: 0,
+                                  },
+                                  token: token.accessToken,
+                                });
+
+                                if (response.status == 200) {
+                                  Alert.alert("อัพเดทข้อมูลสำเร็จ");
+
+                                  setTimeout(() => {
+                                    getUser();
+                                  }, 1000);
+                                }
+                              }}
+                              style={styles.viewbottom}
+                            >
+                              <Text style={styles.texttail}>send</Text>
+                            </TouchableOpacity>
                           </View>
                         }
                       </View>
@@ -1792,7 +1882,11 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     backgroundColor: "#393939",
     justifyContent: "center",
-    borderRadius: 10,
+    borderRadius: 5,
+    marginBottom: 15,
+    alignSelf: "flex-end",
+    marginRight: 15,
+    marginTop: 15,
   },
   nameevent: {
     fontFamily: "Prompt-Regular",
@@ -1830,13 +1924,13 @@ const styles = StyleSheet.create({
   },
   text1: {
     fontFamily: "Prompt-Regular",
-    fontSize: 12,
+    fontSize: 7,
     color: "#000",
     alignSelf: "center",
   },
   text2: {
     fontFamily: "Prompt-Regular",
-    fontSize: 16,
+    fontSize: 11,
     color: "#000",
     alignSelf: "center",
   },
@@ -1884,3 +1978,340 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
 });
+
+const testjson = [
+  {
+    achievement_count: 0,
+    athlete: {
+      id: 105227748,
+      resource_state: 1,
+    },
+    athlete_count: 1,
+    average_speed: 1.667,
+    comment_count: 0,
+    commute: false,
+    display_hide_heartrate_option: false,
+    distance: 100,
+    elapsed_time: 60,
+    end_latlng: [],
+    external_id: null,
+    flagged: false,
+    from_accepted_tag: false,
+    gear_id: null,
+    has_heartrate: false,
+    has_kudoed: false,
+    heartrate_opt_out: false,
+    id: 7871708575,
+    kudos_count: 0,
+    location_city: null,
+    location_country: null,
+    location_state: null,
+    manual: true,
+    map: {
+      id: "a7871708575",
+      resource_state: 2,
+      summary_polyline: "",
+    },
+    max_speed: 0,
+    moving_time: 60,
+    name: "Night Run",
+    photo_count: 0,
+    pr_count: 0,
+    private: false,
+    resource_state: 2,
+    sport_type: "Run",
+    start_date: "2022-09-26T20:32:00Z",
+    start_date_local: "2022-09-26T13:32:00Z",
+    start_latlng: [],
+    timezone: "(GMT-08:00) America/Los_Angeles",
+    total_elevation_gain: 0,
+    total_photo_count: 1,
+    trainer: false,
+    type: "Run",
+    upload_id: null,
+    utc_offset: -25200,
+    visibility: "everyone",
+    workout_type: 3,
+  },
+  {
+    achievement_count: 0,
+    athlete: {
+      id: 105227748,
+      resource_state: 1,
+    },
+    athlete_count: 1,
+    average_cadence: 69.8,
+    average_heartrate: 94.8,
+    average_speed: 1.177,
+    comment_count: 0,
+    commute: false,
+    display_hide_heartrate_option: true,
+    distance: 93,
+    elapsed_time: 79,
+    end_latlng: [],
+    external_id: "5074113691-1664224580-run.tcx",
+    flagged: false,
+    from_accepted_tag: false,
+    gear_id: null,
+    has_heartrate: true,
+    has_kudoed: false,
+    heartrate_opt_out: false,
+    id: 7871721140,
+    kudos_count: 0,
+    location_city: null,
+    location_country: null,
+    location_state: null,
+    manual: false,
+    map: {
+      id: "a7871721140",
+      resource_state: 2,
+      summary_polyline: "",
+    },
+    max_heartrate: 129,
+    max_speed: 0,
+    moving_time: 79,
+    name: "Afternoon Run",
+    photo_count: 0,
+    pr_count: 0,
+    private: false,
+    resource_state: 2,
+    sport_type: "Run",
+    start_date: "2022-09-26T20:36:20Z",
+    start_date_local: "2022-09-26T13:36:20Z",
+    start_latlng: [],
+    timezone: "(GMT-08:00) America/Los_Angeles",
+    total_elevation_gain: 0,
+    total_photo_count: 0,
+    trainer: true,
+    type: "Run",
+    upload_id: 8412812123,
+    upload_id_str: "8412812123",
+    utc_offset: -25200,
+    visibility: "everyone",
+    workout_type: null,
+  },
+  {
+    achievement_count: 0,
+    athlete: {
+      id: 105227748,
+      resource_state: 1,
+    },
+    athlete_count: 1,
+    average_speed: 0.103,
+    comment_count: 0,
+    commute: false,
+    display_hide_heartrate_option: false,
+    distance: 19.1,
+    elapsed_time: 30864,
+    elev_high: 10.4,
+    elev_low: 10.4,
+    end_latlng: [],
+    external_id: "67747a4a-3597-4b0d-a137-5baff2889814-activity.fit",
+    flagged: false,
+    from_accepted_tag: false,
+    gear_id: null,
+    has_heartrate: false,
+    has_kudoed: false,
+    heartrate_opt_out: false,
+    id: 7873020124,
+    kudos_count: 0,
+    location_city: null,
+    location_country: null,
+    location_state: null,
+    manual: false,
+    map: {
+      id: "a7873020124",
+      resource_state: 2,
+      summary_polyline: "",
+    },
+    max_speed: 1.424,
+    moving_time: 186,
+    name: "Night Run",
+    photo_count: 0,
+    pr_count: 0,
+    private: false,
+    resource_state: 2,
+    sport_type: "Run",
+    start_date: "2022-09-26T20:28:58Z",
+    start_date_local: "2022-09-27T03:28:58Z",
+    start_latlng: [],
+    timezone: "(GMT+07:00) Asia/Bangkok",
+    total_elevation_gain: 0,
+    total_photo_count: 0,
+    trainer: false,
+    type: "Run",
+    upload_id: 8414257428,
+    upload_id_str: "8414257428",
+    utc_offset: 25200,
+    visibility: "everyone",
+    workout_type: 0,
+  },
+  {
+    achievement_count: 0,
+    athlete: {
+      id: 105227748,
+      resource_state: 1,
+    },
+    athlete_count: 1,
+    average_speed: 3.351,
+    comment_count: 0,
+    commute: false,
+    display_hide_heartrate_option: false,
+    distance: 46.9,
+    elapsed_time: 64,
+    elev_high: 10.4,
+    elev_low: 10.3,
+    end_latlng: [],
+    external_id: "db774a25-a334-4a94-9704-53f835437b8f-activity.fit",
+    flagged: false,
+    from_accepted_tag: false,
+    gear_id: null,
+    has_heartrate: false,
+    has_kudoed: false,
+    heartrate_opt_out: false,
+    id: 7873053531,
+    kudos_count: 0,
+    location_city: null,
+    location_country: null,
+    location_state: null,
+    manual: false,
+    map: {
+      id: "a7873053531",
+      resource_state: 2,
+      summary_polyline: "",
+    },
+    max_speed: 4.574,
+    moving_time: 14,
+    name: "Lunch Run",
+    photo_count: 0,
+    pr_count: 0,
+    private: false,
+    resource_state: 2,
+    sport_type: "Run",
+    start_date: "2022-09-27T05:18:20Z",
+    start_date_local: "2022-09-27T12:18:20Z",
+    start_latlng: [],
+    timezone: "(GMT+07:00) Asia/Bangkok",
+    total_elevation_gain: 0,
+    total_photo_count: 0,
+    trainer: false,
+    type: "Run",
+    upload_id: 8414295036,
+    upload_id_str: "8414295036",
+    utc_offset: 25200,
+    visibility: "everyone",
+    workout_type: 3,
+  },
+  {
+    achievement_count: 0,
+    athlete: {
+      id: 105227748,
+      resource_state: 1,
+    },
+    athlete_count: 1,
+    average_speed: 4.087,
+    comment_count: 0,
+    commute: false,
+    display_hide_heartrate_option: false,
+    distance: 110.4,
+    elapsed_time: 34,
+    elev_high: 7.8,
+    elev_low: 6,
+    end_latlng: [],
+    external_id: "d0e9d4df-2640-4ebc-b66d-07a5ca365a35-activity.fit",
+    flagged: false,
+    from_accepted_tag: false,
+    gear_id: null,
+    has_heartrate: false,
+    has_kudoed: false,
+    heartrate_opt_out: false,
+    id: 7874910964,
+    kudos_count: 0,
+    location_city: null,
+    location_country: null,
+    location_state: null,
+    manual: false,
+    map: {
+      id: "a7874910964",
+      resource_state: 2,
+      summary_polyline: "",
+    },
+    max_speed: 7.381,
+    moving_time: 27,
+    name: "Night Run",
+    photo_count: 0,
+    pr_count: 0,
+    private: false,
+    resource_state: 2,
+    sport_type: "Run",
+    start_date: "2022-09-27T14:12:51Z",
+    start_date_local: "2022-09-27T21:12:51Z",
+    start_latlng: [],
+    timezone: "(GMT+07:00) Asia/Bangkok",
+    total_elevation_gain: 0,
+    total_photo_count: 0,
+    trainer: false,
+    type: "Run",
+    upload_id: 8416366179,
+    upload_id_str: "8416366179",
+    utc_offset: 25200,
+    visibility: "everyone",
+    workout_type: 0,
+  },
+  {
+    achievement_count: 0,
+    athlete: {
+      id: 105227748,
+      resource_state: 1,
+    },
+    athlete_count: 1,
+    average_speed: 6.347,
+    comment_count: 0,
+    commute: false,
+    display_hide_heartrate_option: false,
+    distance: 114.2,
+    elapsed_time: 28,
+    elev_high: 5.5,
+    elev_low: 5.4,
+    end_latlng: [],
+    external_id: "482e129d-b776-4297-ad21-e0eaae0ed15a-activity.fit",
+    flagged: false,
+    from_accepted_tag: false,
+    gear_id: null,
+    has_heartrate: false,
+    has_kudoed: false,
+    heartrate_opt_out: false,
+    id: 7881611829,
+    kudos_count: 0,
+    location_city: null,
+    location_country: null,
+    location_state: null,
+    manual: false,
+    map: {
+      id: "a7881611829",
+      resource_state: 2,
+      summary_polyline: "",
+    },
+    max_speed: 11.964,
+    moving_time: 18,
+    name: "Night Run",
+    photo_count: 0,
+    pr_count: 0,
+    private: false,
+    resource_state: 2,
+    sport_type: "Run",
+    start_date: "2022-09-28T19:07:57Z",
+    start_date_local: "2022-09-29T02:07:57Z",
+    start_latlng: [],
+    timezone: "(GMT+07:00) Asia/Bangkok",
+    total_elevation_gain: 0,
+    total_photo_count: 0,
+    trainer: false,
+    type: "Run",
+    upload_id: 8423803158,
+    upload_id_str: "8423803158",
+    utc_offset: 25200,
+    visibility: "everyone",
+    workout_type: 0,
+  },
+];

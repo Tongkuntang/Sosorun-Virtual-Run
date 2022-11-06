@@ -32,6 +32,7 @@ import {
   deviceIndex,
   deviceRegis,
   tokenState,
+  lans,
 } from "../../reducer/reducer/reducer/Atom";
 import Header from "../components/header";
 import { TextInput } from "react-native-gesture-handler";
@@ -55,6 +56,7 @@ export default function index({ navigation, route }) {
   const [modals, setModal] = useState(false);
   const [modals1, setmodals1] = useState(false);
   const [modals3, setModal3] = useState(false);
+  const [lan, setlan] = useRecoilState(lans);
   const peripherals = new Map();
   const [list, setList] = useState([]);
   const eventEmitter = new NativeEventEmitter(Fitblekit);
@@ -69,6 +71,7 @@ export default function index({ navigation, route }) {
   const [data, setData] = useState([]);
   const dataEV = route.params.dataEV;
   const [list_setrender, setrender] = useState([]);
+  const [Strava, setStrava] = useState(null);
 
   async function fetchData() {
     setmodals1(true);
@@ -344,68 +347,102 @@ export default function index({ navigation, route }) {
     }
   }, [list]);
 
+  // useEffect(() => {
+  //   const onReceiveURL = async ({ url }) => {
+  //     const re = url.split("=");
+
+  //     const tokens = {
+  //       access_token: re[1].replace("?expires_in", ""),
+  //       id_token: re[3].replace("?refreshToken", ""),
+  //       refreshToken: re[4].replace("?scope", ""),
+  //     };
+
+  //     const getuser = await getActionUser(token);
+
+  //     const res = await apiservice({
+  //       path: "/authen/createhw",
+  //       method: "post",
+  //       body: {
+  //         uid: getuser?.data?.id,
+  //         info: tokens,
+  //       },
+  //     });
+
+  //     const regis = await apiservice({
+  //       method: "post",
+  //       path: "",
+  //       url: "https://health-api.cloud.huawei.com/healthkit/v1/dataCollectors",
+  //       token: re[1].replace("?expires_in", ""),
+  //       body: {
+  //         collectorName: "DataCollectorExample",
+  //         collectorType: "raw",
+  //         appInfo: {
+  //           appPackageName: "com.sosorun.asia",
+  //           appName: "Sosorun Virtual Run",
+  //           desc: "https://sosorun.com",
+  //           appVersion: "1",
+  //         },
+  //         collectorDataType: {
+  //           name: "com.huawei.continuous.steps.delta",
+  //         },
+  //         deviceInfo: {
+  //           manufacturer: "huawei",
+  //           modelNum: "ExampleTablet",
+  //           devType: "Phone",
+  //           uniqueId: moment().valueOf(),
+  //           version: "1.0",
+  //         },
+  //       },
+  //     });
+
+  //     console.log("regis", regis);
+
+  //     // const getuser = await getActionUser(tokens);
+  //     // const data = getuser.data;
+  //     // if (data.height == null) {
+  //     //   setmodal(true);
+  //     //   setTokenvisible(tokens);
+  //     // } else {
+  //     //   setAuth({
+  //     //     auth: true,
+  //     //   });
+  //     //   setUser(data);
+  //     //   setToken(tokens);
+  //     // }
+  //   };
+  //   Linking.addEventListener("url", onReceiveURL);
+  // }, []);
+
   useEffect(() => {
     const onReceiveURL = async ({ url }) => {
+      console.log(url);
       const re = url.split("=");
-
+      console.log(re);
       const tokens = {
-        access_token: re[1].replace("?expires_in", ""),
-        id_token: re[3].replace("?refreshToken", ""),
-        refreshToken: re[4].replace("?scope", ""),
+        access_token: re?.reverse()?.[1].replace("?athlete", ""),
+        refreshToken: re?.reverse()?.[2].replace("?access_token", ""),
       };
 
-      const getuser = await getActionUser(token);
+      console.log(tokens);
 
       const res = await apiservice({
-        path: "/authen/createhw",
-        method: "post",
-        body: {
-          uid: getuser?.data?.id,
-          info: tokens,
-        },
-      });
-
-      const regis = await apiservice({
-        method: "post",
+        url: "https://www.strava.com/api/v3/activities?per_page=50&page=1",
         path: "",
-        url: "https://health-api.cloud.huawei.com/healthkit/v1/dataCollectors",
-        token: re[1].replace("?expires_in", ""),
-        body: {
-          collectorName: "DataCollectorExample",
-          collectorType: "raw",
-          appInfo: {
-            appPackageName: "com.sosorun.asia",
-            appName: "Sosorun Virtual Run",
-            desc: "https://sosorun.com",
-            appVersion: "1",
-          },
-          collectorDataType: {
-            name: "com.huawei.continuous.steps.delta",
-          },
-          deviceInfo: {
-            manufacturer: "huawei",
-            modelNum: "ExampleTablet",
-            devType: "Phone",
-            uniqueId: moment().valueOf(),
-            version: "1.0",
-          },
-        },
+        method: "get",
+        token: tokens?.access_token,
       });
 
-      console.log("regis", regis);
+      if (res?.status == 200) {
+        let distance = 0;
+        res?.data?.map((e) => (distance = distance + e.distance));
 
-      // const getuser = await getActionUser(tokens);
-      // const data = getuser.data;
-      // if (data.height == null) {
-      //   setmodal(true);
-      //   setTokenvisible(tokens);
-      // } else {
-      //   setAuth({
-      //     auth: true,
-      //   });
-      //   setUser(data);
-      //   setToken(tokens);
-      // }
+        navigation.navigate("SendResults", {
+          ...route?.params,
+          devices: "Strava",
+          last_totals: distance,
+          tokens: tokens,
+        });
+      }
     };
     Linking.addEventListener("url", onReceiveURL);
   }, []);
@@ -694,6 +731,8 @@ export default function index({ navigation, route }) {
             <View>
               <Text style={styles.texthead}>SOSORUN SMART GEAR</Text>
               <View style={styles.line} />
+              {/* <Text style={styles.texthead}>SOSORUN SMART GEAR</Text>
+              <View style={styles.line} />
               <TouchableOpacity
                 onPress={async () => {
                   // setmodals1(true);
@@ -748,8 +787,11 @@ export default function index({ navigation, route }) {
               )}
               {Platform.OS == "android" && (
                 <TouchableOpacity
-                  onPress={() => {
-                    fetchData();
+                  onPress={async () => {
+                    Linking.openURL(
+                      // "https://www.strava.com/oauth/mobile/authorize?client_id=91716&redirect_uri=https://api.sosorun.com/api/authen/strava&response_type=code&approval_prompt=auto&scope=activity%3Awrite%2Cread_all&state=test",
+                      "https://www.strava.com/oauth/mobile/authorize?client_id=91716&redirect_uri=https://api.sosorun.com/api/authen/strava&response_type=code&approval_prompt=auto&scope=activity:read_all&state=test"
+                    );
                   }}
                   style={styles.touch}
                 >
@@ -761,7 +803,7 @@ export default function index({ navigation, route }) {
                   <Text style={styles.textdevice}>Strava</Text>
                 </TouchableOpacity>
               )}
-              <View style={styles.line} />
+              <View style={styles.line} /> */}
               {Platform.OS == "android" && (
                 <TouchableOpacity
                   onPress={() => {

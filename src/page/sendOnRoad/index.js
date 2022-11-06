@@ -274,6 +274,9 @@ export default function index({ navigation, route }) {
 
     //   setnum((connt) => connt - 1);
     // }, 5000);
+
+    clearTimeout(clear);
+
     let cear = setTimeout(() => setTime((val) => val + 1), 1000);
 
     setClear(cear);
@@ -584,7 +587,7 @@ export default function index({ navigation, route }) {
       "change",
       async (nextAppState) => {
         if (nextAppState === "active") {
-          count();
+          // count();
           setTime((val) => val + (new Date().getTime() - dates) / 1000);
         } else {
           clearTimeout(Clear);
@@ -682,16 +685,34 @@ export default function index({ navigation, route }) {
   }
 
   useEffect(() => {
-    completeRunning();
+    if (
+      dataEV.distance[0] <=
+      parseInt(parseFloat(parseFloat(route.params.last_distance) / 1000))
+    ) {
+      navigation.navigate("Succeed", {
+        dataEV,
+        item: {
+          total_distance: dataEV.distance[0],
+          last_distance: (
+            parseFloat(parseFloat(route.params.last_distance) / 1000) +
+            parseFloat((state.currentStepCount * strip) / 100000)
+          ).toFixed(2),
+        },
+      });
+    } else {
+      completeRunning();
+    }
   }, [state]);
 
   async function completeRunning() {
     if (
       dataEV.distance[0] <=
-      (
-        parseFloat((state.currentStepCount * strip) / 100000) +
-        parseFloat(parseFloat(route.params.last_distance) / 1000)
-      ).toFixed(2)
+      parseInt(
+        (
+          parseFloat((state.currentStepCount * strip) / 100000) +
+          parseFloat(parseFloat(route.params.last_distance) / 1000)
+        ).toFixed(2)
+      )
     ) {
       clearInterval(clear);
       setchick((val) => !val);
@@ -1402,6 +1423,15 @@ export default function index({ navigation, route }) {
                 {route?.params?.devices == "Xiaomi" && (
                   <Text style={styles.textdevice}>Xiaomi</Text>
                 )}
+                {route?.params?.devices == "Strava" && (
+                  <Image
+                    source={require("../../img/115.png")}
+                    style={styles.imgsoso2}
+                  />
+                )}
+                {route?.params?.devices == "Strava" && (
+                  <Text style={styles.textdevice}>Strava</Text>
+                )}
                 {route?.params?.devices == "GoogleFit" && (
                   <Image
                     source={require("../../img/fit.png")}
@@ -1429,9 +1459,6 @@ export default function index({ navigation, route }) {
                   // count();
                   setVisible1(true);
                   if (route?.params?.devices == "SOSORUNPODV2") {
-                    console.log("====================================");
-                    console.log("gogo");
-                    console.log("====================================");
                     if (
                       parseFloat(
                         ((pod - route?.params?.last_totals) * strip) / 100000
@@ -1452,8 +1479,37 @@ export default function index({ navigation, route }) {
                           " กม"
                       );
                     }
-                  } else if (route?.params?.devices == "Xiaomi") {
-                    syncData();
+                  } else if (route?.params?.devices == "Strava") {
+                    const res = await apiservice({
+                      url: "https://www.strava.com/api/v3/activities?per_page=50&page=1",
+                      path: "",
+                      method: "get",
+                      token: route?.params?.tokens?.access_token,
+                    });
+
+                    if (res?.status == 200) {
+                      setVisible1(false);
+                      let distance = 0;
+                      res?.data?.map((e) => (distance = distance + e.distance));
+                      if (
+                        dataEV.distance[0] >
+                        parseFloat(
+                          (distance - route?.params?.last_totals) / 1000
+                        )?.toFixed(2)
+                      ) {
+                        Alert.alert(
+                          "ตอนนี้คุณทำได้แค่ " +
+                            parseFloat(
+                              (distance - route?.params?.last_totals) / 1000
+                            )?.toFixed(2) +
+                            " กม จาก " +
+                            dataEV.distance[0] +
+                            " กม"
+                        );
+                      } else {
+                        success();
+                      }
+                    }
                   } else if (route?.params?.devices == "GoogleFit") {
                     syncData1();
                   } else if (route?.params?.devices == "GARMIN") {

@@ -16,7 +16,11 @@ import { Ionicons } from "@expo/vector-icons";
 import Input from "./input";
 import { DelImg, pickImage } from "../../action/actionImg";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { tokenState, userState } from "../../reducer/reducer/reducer/Atom";
+import {
+  lans,
+  tokenState,
+  userState,
+} from "../../reducer/reducer/reducer/Atom";
 import { actionEditprofile, getActionUser } from "../../action/actionauth";
 import { useIsFocused } from "@react-navigation/core";
 import RNPickerSelect, { defaultStyles } from "react-native-picker-select";
@@ -27,6 +31,7 @@ const { width, height } = Dimensions.get("window");
 export default function index({ navigation }) {
   const token = useRecoilValue(tokenState);
   const isFocus = useIsFocused();
+  const lan = useRecoilValue(lans);
   const [user, setUser] = useRecoilState(userState);
   const [body, setbody] = useState({
     id: user.id,
@@ -156,7 +161,7 @@ export default function index({ navigation }) {
             />
           </TouchableOpacity>
           <View style={styles.margin}>
-            <Text style={styles.text}>Name</Text>
+            <Text style={styles.text}>{lan == "en" ? "Name" : "ชื่อ"}</Text>
             <Input
               defaultValue={body.name}
               onChangeText={(text) => setbody({ ...body, name: text })}
@@ -168,7 +173,7 @@ export default function index({ navigation }) {
               onChangeText={(text) => setbody({ ...body, height: text })}
               style={styles.text}
             >
-              Height
+              {lan == "en" ? "Height" : "ส่วนสูง"}
             </Text>
             <Input
               maxLength={3}
@@ -178,7 +183,9 @@ export default function index({ navigation }) {
             />
           </View>
           <View style={styles.margin}>
-            <Text style={styles.text}>Weight</Text>
+            <Text style={styles.text}>
+              {lan == "en" ? "Weight" : "นํ้าหนัก"}
+            </Text>
             <Input
               maxLength={3}
               defaultValue={body.weight}
@@ -187,7 +194,7 @@ export default function index({ navigation }) {
             />
           </View>
           <View style={styles.margin}>
-            <Text style={styles.text}>Tel</Text>
+            <Text style={styles.text}>{lan == "en" ? "Tel" : "เบอร์โทร"}</Text>
             <Input
               maxLength={10}
               defaultValue={body.tel}
@@ -196,7 +203,9 @@ export default function index({ navigation }) {
             />
           </View>
           <View style={styles.margin}>
-            <Text style={styles.text}>Shipping Address</Text>
+            <Text style={styles.text}>
+              {lan == "en" ? "Shipping Address" : "ที่อยู่ในการจัดส่งสินค้า"}
+            </Text>
             <Input
               defaultValue={user.full_address.ShippingAddress}
               onChangeText={(text) =>
@@ -209,7 +218,9 @@ export default function index({ navigation }) {
             />
           </View>
           <View style={styles.margin}>
-            <Text style={styles.text}>Postal Code</Text>
+            <Text style={styles.text}>
+              {lan == "en" ? "Postal Code" : "รหัสไปรษณีย์"}
+            </Text>
             <Input
               defaultValue={
                 user.full_address.postcode != undefined
@@ -222,8 +233,9 @@ export default function index({ navigation }) {
             />
           </View>
           <View style={styles.margin}>
-            <Text style={styles.text}>Province</Text>
-
+            <Text style={styles.text}>
+              {lan == "en" ? "Province" : "จังหวัด"}
+            </Text>
             <View
               style={{
                 width: width * 0.8,
@@ -240,7 +252,9 @@ export default function index({ navigation }) {
             </View>
           </View>
           <View style={styles.margin}>
-            <Text style={styles.text}>District</Text>
+            <Text style={styles.text}>
+              {lan == "en" ? "District" : "เขต/อำเภอ"}
+            </Text>
             <View
               style={{
                 width: width * 0.8,
@@ -255,7 +269,10 @@ export default function index({ navigation }) {
             </View>
           </View>
           <View style={styles.margin}>
-            <Text style={styles.text}>subDistrict</Text>
+            <Text style={styles.text}>
+              {" "}
+              {lan == "en" ? "subDistrict" : "แขวง/ตำบล"}
+            </Text>
             <RNPickerSelect
               value={state.subDistrict}
               placeholder={placeholder3}

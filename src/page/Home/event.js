@@ -11,11 +11,16 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useRecoilValue } from "recoil";
-import { tokenState, userState } from "../../reducer/reducer/reducer/Atom";
+import {
+  lans,
+  tokenState,
+  userState,
+} from "../../reducer/reducer/reducer/Atom";
 import { apiservice } from "../../service/service";
 const { width, height } = Dimensions.get("window");
 export default function startRun({ navigation }) {
   const [page, setpage] = useState(0);
+  const lan = useRecoilValue(lans);
   const token = useRecoilValue(tokenState);
   const user = useRecoilValue(userState);
   const focus = useIsFocused();
@@ -55,8 +60,9 @@ export default function startRun({ navigation }) {
       </View>
       <View style={styles.viewdetail}>
         <Text style={styles.textdetail}>
-          สนุกไปกับการวิ่งของคุณในทุกๆวัน เพื่อสุขภาพ และ เก็บสะสมระยะทาง
-          เพื่อรับ GOLD ไว้ใช้แลก ส่วนลดต่างๆ
+          {lan == "th"
+            ? `สนุกไปกับการวิ่งของคุณในทุกๆวัน เพื่อสุขภาพ และ เก็บสะสมระยะทาง เพื่อรับ GOLD ไว้ใช้แลก ส่วนลดต่างๆ`
+            : "Enjoy your running every day for your health. and collect distance to get GOLD to redeem various discounts"}
         </Text>
 
         <View
@@ -73,7 +79,9 @@ export default function startRun({ navigation }) {
               onPress={() => navigation.navigate("Continue")}
               style={[styles.bottonstart1]}
             >
-              <Text style={styles.textstart}>CONTUNUE</Text>
+              <Text style={styles.textstart}>
+                {lan == "th" ? "รายการที่เคยวิ่ง" : "CONTUNUE"}
+              </Text>
             </TouchableOpacity>
           ) : (
             <View />
@@ -82,7 +90,9 @@ export default function startRun({ navigation }) {
             onPress={() => navigation.navigate("Event")}
             style={[styles.bottonstart]}
           >
-            <Text style={styles.textstart}>START</Text>
+            <Text style={styles.textstart}>
+              {lan == "th" ? "เริ่มวิ่ง" : "START"}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>

@@ -422,8 +422,11 @@ export default function index({ navigation, route }) {
   async function completeRunning() {
     if (
       dataEV.distance ==
-      ((state.currentStepCount * strip) / 100000 + lastDistance / 1000).toFixed(
-        2
+      parseInt(
+        (
+          (state.currentStepCount * strip) / 100000 +
+          lastDistance / 1000
+        ).toFixed(2)
       )
     ) {
       const response1 = await apiservice({

@@ -17,13 +17,14 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import Carousel from "react-native-snap-carousel";
 import { apiservice } from "../../service/service";
-import { useRecoilState } from "recoil";
-import { tokenState } from "../../reducer/reducer/reducer/Atom";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { lans, tokenState } from "../../reducer/reducer/reducer/Atom";
 const { width, height } = Dimensions.get("window");
 export default function index({ navigation, item, route }) {
   const dataEV = route.params.item;
   console.log("<<<<<<<<<datadetail>>>>>>>>", dataEV);
   const award = dataEV.reward;
+  const lan = useRecoilValue(lans);
   // console.log(award[0].shirt[0]);
   const [datamis, setdatamis] = useState([]);
   const [token, setToken] = useRecoilState(tokenState);
@@ -100,7 +101,7 @@ export default function index({ navigation, item, route }) {
                       },
                     ]}
                   >
-                    ของรางวัลที่จะได้รับ
+                    {lan == "en" ? "Reward" : "ของรางวัลที่จะได้รับ"}
                   </Text>
                   <View style={styles.viewprice}>
                     <View
@@ -204,7 +205,9 @@ export default function index({ navigation, item, route }) {
                       color="black"
                       style={{ alignSelf: "center" }}
                     />
-                    <Text style={styles.textrank}>จัดอันดับ</Text>
+                    <Text style={styles.textrank}>
+                      {lan == "en" ? "Ranking" : "จัดอันดับ"}
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() =>
@@ -212,7 +215,9 @@ export default function index({ navigation, item, route }) {
                     }
                     style={styles.touchstart}
                   >
-                    <Text style={styles.textnum}>เริ่ม</Text>
+                    <Text style={styles.textnum}>
+                      {lan == "en" ? "Start" : "เริ่ม"}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>

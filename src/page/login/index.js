@@ -11,9 +11,13 @@ import {
 } from "react-native";
 import Register from "./register";
 import LoGin from "./login";
+import { useRecoilValue } from "recoil";
+import { lans } from "../../reducer/reducer/reducer/Atom";
 const { width, height } = Dimensions.get("window");
 export default function index({ navigation }) {
   const [page, setpage] = useState(0);
+  const lan = useRecoilValue(lans);
+
   return (
     <View style={{ flex: 1 }}>
       <View
@@ -42,6 +46,7 @@ export default function index({ navigation }) {
               styles.bottompage,
               {
                 backgroundColor: page ? "#788995" : "#FCC81D",
+                borderColor: page ? "#788995" : "#FCC81D",
                 borderBottomWidth: page ? 0 : 5,
               },
             ]}
@@ -52,9 +57,10 @@ export default function index({ navigation }) {
                 fontSize: 12,
                 alignSelf: "center",
                 fontWeight: "bold",
+                textDecorationLine: "underline",
               }}
             >
-              LOGIN
+              {lan == "en" ? "LOGIN" : "เข้าสู่ระบ"}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -63,6 +69,7 @@ export default function index({ navigation }) {
               styles.bottompage,
               {
                 backgroundColor: page == 0 ? "#788995" : "#FCC81D",
+                borderColor: page == 0 ? "#788995" : "#FCC81D",
                 borderBottomWidth: page == 0 ? 0 : 5,
               },
             ]}
@@ -75,12 +82,16 @@ export default function index({ navigation }) {
                 fontWeight: "bold",
               }}
             >
-              SIGN UP
+              {lan == "en" ? "SIGN UP" : "สมัครสมาชิก"}
             </Text>
           </TouchableOpacity>
         </View>
-        {page == 1 && <Register setpage={setpage} navigation={navigation} />}
-        {page == 0 && <LoGin setpage={setpage} navigation={navigation} />}
+        {page == 1 && (
+          <Register lan={lan} setpage={setpage} navigation={navigation} />
+        )}
+        {page == 0 && (
+          <LoGin lan={lan} setpage={setpage} navigation={navigation} />
+        )}
         {/* </View> */}
       </View>
     </View>

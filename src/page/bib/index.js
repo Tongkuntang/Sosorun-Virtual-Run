@@ -21,13 +21,13 @@ import {
   updatebib,
   updatebib_event,
 } from "../../action/actionbib";
-import { useRecoilState } from "recoil";
-import { tokenState } from "../../reducer/reducer/reducer/Atom";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { lans, tokenState } from "../../reducer/reducer/reducer/Atom";
 const { width, height } = Dimensions.get("window");
 export default function index({ navigation, route }) {
   const [token, setToken] = useRecoilState(tokenState);
   const dataEV = route.params.dataEV;
-  // console.log("??????!!!!", dataEV);
+  const lan = useRecoilValue(lans);
   const [bib, setbib] = useState([]);
 
   async function allbibevent() {
@@ -62,7 +62,9 @@ export default function index({ navigation, route }) {
         <Headerdetail item={dataEV.titel} navigation={navigation} />
         <ScrollView style={{ marginBottom: 15 }}>
           <View style={styles.background}>
-            <Text style={styles.texthead}>E-BIB ของคุณ</Text>
+            <Text style={styles.texthead}>
+              {lan != "en" ? "E-BIB ของคุณ" : "Your E-BIB number"}
+            </Text>
 
             <View
               style={{
@@ -97,13 +99,19 @@ export default function index({ navigation, route }) {
                 <Text style={styles.textbib}>{character + numm}</Text>
               )}
             </View>
-            <Text style={styles.textpre}>คุณต้องการเลขพรีเมี่ยม</Text>
+            <Text style={styles.textpre}>
+              {lan != "en"
+                ? "คุณต้องการเลขพรีเมี่ยม"
+                : "You want premium numbers"}
+            </Text>
             <View style={styles.viewtouch}>
               <TouchableOpacity
                 onPress={() => navigation.navigate("PremiumBib", { dataEV })}
                 style={styles.touch}
               >
-                <Text style={styles.texttouch}>ราคา 35 บาท</Text>
+                <Text style={styles.texttouch}>
+                  {lan != "en" ? "ราคา 35 บาท" : "฿35"}
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={async () => {
@@ -129,7 +137,9 @@ export default function index({ navigation, route }) {
                 }}
                 style={styles.touch}
               >
-                <Text style={styles.texttouch}>ไม่</Text>
+                <Text style={styles.texttouch}>
+                  {lan != "en" ? "ไม่" : "NO"}
+                </Text>
               </TouchableOpacity>
             </View>
             <View

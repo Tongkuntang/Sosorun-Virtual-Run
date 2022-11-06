@@ -10,9 +10,13 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import moment from "moment";
-import { tokenState, userState } from "../../reducer/reducer/reducer/Atom";
+import {
+  lans,
+  tokenState,
+  userState,
+} from "../../reducer/reducer/reducer/Atom";
 import { getallhistory, getHistrory } from "../../action/actionhistrory";
 import { getAllbanner, getBanNer } from "../../action/actionbanner";
 import Carousel from "react-native-snap-carousel";
@@ -22,6 +26,7 @@ import { timeformet } from "../components/test";
 const { width, height } = Dimensions.get("window");
 export default function result({ navigation, onPress }) {
   const [page, setpage] = useState(0);
+  const lan = useRecoilValue(lans);
   const [OK, setOK] = useState(true);
   const [token, setToken] = useRecoilState(tokenState);
   const [user, setUser] = useRecoilState(userState);
@@ -89,7 +94,9 @@ export default function result({ navigation, onPress }) {
       <View style={{ paddingHorizontal: 20 }}>
         <View style={styles.view}>
           <View style={styles.smallview}>
-            <Text style={styles.text}>Duration</Text>
+            <Text style={styles.text}>
+              {lan == "en" ? "Duration" : "ระยะเวลา"}
+            </Text>
             {hh0 + mm0 + ss0 == hh1 + mm1 + ss1 && (
               <View style={{ marginTop: -10 }}>
                 <FontAwesome name="caret-up" size={29} color="black" />
@@ -109,12 +116,15 @@ export default function result({ navigation, onPress }) {
             )}
           </View>
           <Text style={styles.text}>
-            {hh0} hr : {mm0} m : {ss0} s
+            {hh0} {lan == "en" ? "hr" : "ชม"} : {mm0} {lan == "en" ? "m" : "น"}{" "}
+            : {ss0} {lan == "en" ? "s" : "ว"}
           </Text>
         </View>
         <View style={styles.view}>
           <View style={styles.smallview}>
-            <Text style={styles.text}>Energy</Text>
+            <Text style={styles.text}>
+              {lan == "en" ? "Energy" : "พลังงาน"}
+            </Text>
             {cal0 == cal1 && (
               <View style={{ marginTop: -10 }}>
                 <FontAwesome name="caret-up" size={29} color="black" />
@@ -134,11 +144,15 @@ export default function result({ navigation, onPress }) {
             )}
             {/* <FontAwesome name="caret-up" size={29} color="green" /> */}
           </View>
-          <Text style={styles.text}>{cal0} Calories</Text>
+          <Text style={styles.text}>
+            {cal0} {lan == "en" ? "Calories" : "แคลอรี่"}
+          </Text>
         </View>
         <View style={styles.view}>
           <View style={styles.smallview}>
-            <Text style={styles.text}>AVG Speed</Text>
+            <Text style={styles.text}>
+              {lan == "en" ? "AVG Speed" : "ความเร็วเฉลี่ย"}
+            </Text>
             {AVG0 == AVG1 && (
               <View style={{ marginTop: -10 }}>
                 <FontAwesome name="caret-up" size={29} color="black" />
@@ -157,11 +171,15 @@ export default function result({ navigation, onPress }) {
               <FontAwesome name="caret-down" size={29} color="red" />
             )}
           </View>
-          <Text style={styles.text}>{AVG0} km / hr</Text>
+          <Text style={styles.text}>
+            {AVG0} {lan == "en" ? "km" : "กม."} / {lan == "en" ? "hr" : "ชม."}
+          </Text>
         </View>
         <View style={styles.view}>
           <View style={styles.smallview}>
-            <Text style={styles.text}>Distance</Text>
+            <Text style={styles.text}>
+              {lan == "en" ? "Distance" : "ระยะทาง"}
+            </Text>
             {dis0 == dis1 && (
               <View style={{ marginTop: -10 }}>
                 <FontAwesome name="caret-up" size={29} color="black" />
@@ -180,11 +198,17 @@ export default function result({ navigation, onPress }) {
               <FontAwesome name="caret-down" size={29} color="red" />
             )}
           </View>
-          <Text style={styles.text}>{dis0} km</Text>
+          <Text style={styles.text}>
+            {dis0} {lan == "en" ? "km" : "กม."}
+          </Text>
         </View>
         {detail ? (
           <View style={styles.view}>
-            <Text style={styles.tetxdetail}>View past running history</Text>
+            <Text style={styles.tetxdetail}>
+              {lan == "en"
+                ? "View past running history"
+                : "ดูประวัติการวิ่งที่ผ่านมา"}
+            </Text>
             <TouchableOpacity
               onPress={() => {
                 // navigation.navigate("HistoryAll");
@@ -197,7 +221,11 @@ export default function result({ navigation, onPress }) {
         ) : (
           <View>
             <View style={styles.view}>
-              <Text style={styles.tetxdetail}>View past running history</Text>
+              <Text style={styles.tetxdetail}>
+                {lan == "en"
+                  ? "View past running history"
+                  : "ประวัติการวิ่งทั้งหมด"}
+              </Text>
               <TouchableOpacity onPress={() => setdetail(true)}>
                 <FontAwesome name="caret-down" size={29} color="black" />
               </TouchableOpacity>
@@ -213,9 +241,12 @@ export default function result({ navigation, onPress }) {
                 { borderBottomColor: "#fff" },
               ]}
             >
-              <Text style={styles.text}>ระยะเวลาที่ทำได้</Text>
               <Text style={styles.text}>
-                {hh1} ชม. : {mm1} น. : {ss1} วิ
+                {lan == "en" ? "period of time" : "ระยะเวลาที่ทำได้"}
+              </Text>
+              <Text style={styles.text}>
+                {hh1} {lan == "en" ? "hr" : "ชม"} : {mm1}{" "}
+                {lan == "en" ? "m" : "น"} : {ss1} {lan == "en" ? "s" : "ว"}
               </Text>
             </View>
             <View
@@ -225,8 +256,12 @@ export default function result({ navigation, onPress }) {
                 { borderBottomColor: "#fff" },
               ]}
             >
-              <Text style={styles.text}>พลังงานที่ใช้ไป</Text>
-              <Text style={styles.text}>{cal1} แคลอรี่</Text>
+              <Text style={styles.text}>
+                {lan == "en" ? "Energy" : "พลังงานที่ใช้ไป"}
+              </Text>
+              <Text style={styles.text}>
+                {cal1} {lan == "en" ? "cal" : "แคลอรี่"}
+              </Text>
             </View>
 
             <View
@@ -236,8 +271,13 @@ export default function result({ navigation, onPress }) {
                 { borderBottomColor: "#fff" },
               ]}
             >
-              <Text style={styles.text}>ความเร็วเฉลี่ย</Text>
-              <Text style={styles.text}>{AVG1} กม. / ชม.</Text>
+              <Text style={styles.text}>
+                {lan == "en" ? "AVG Speed" : "ความเร็วเฉลี่ย"}
+              </Text>
+              <Text style={styles.text}>
+                {AVG1} {lan == "en" ? "km" : "กม."} /{" "}
+                {lan == "en" ? "hr" : "ชม."}
+              </Text>
             </View>
             <View
               style={[
@@ -246,8 +286,13 @@ export default function result({ navigation, onPress }) {
                 { borderBottomColor: "#fff" },
               ]}
             >
-              <Text style={styles.text}>ระยะทาง</Text>
-              <Text style={styles.text}>{dis1} กม.</Text>
+              <Text style={styles.text}>
+                {" "}
+                {lan == "en" ? "Distance" : "ระยะทาง"}
+              </Text>
+              <Text style={styles.text}>
+                {dis1} {lan == "en" ? "km" : "กม."}
+              </Text>
             </View>
           </View>
         )}
@@ -261,19 +306,21 @@ export default function result({ navigation, onPress }) {
           onPress={() => navigation.navigate("HistoryAll")}
           style={styles.view}
         >
-          <Text style={styles.tetxdetail}>Total running history</Text>
+          <Text style={styles.tetxdetail}>
+            {lan == "en" ? "Total running history" : "ประวัติการวิ่งทั้งหมด"}
+          </Text>
         </TouchableOpacity>
         <View style={styles.view}>
           <Text style={[styles.tetxdetail, { alignSelf: "center" }]}>
-            Get the prize
+            {lan == "en" ? "Get the prize" : "รับของรางวัล"}
           </Text>
           {autolize_Lv(parseInt(user.user_accounts.total_distance)).lv >= 2 ? (
             <TouchableOpacity onPress={onPress} style={styles.touch}>
-              <Text style={styles.textok}>OK</Text>
+              <Text style={styles.textok}> {lan == "en" ? "OK" : "ตกลง"}</Text>
             </TouchableOpacity>
           ) : (
             <View style={[styles.touchclose, { opacity: 0.5 }]}>
-              <Text style={styles.textok}>OK</Text>
+              <Text style={styles.textok}>{lan == "en" ? "OK" : "ตกลง"}</Text>
             </View>
           )}
         </View>
@@ -282,7 +329,9 @@ export default function result({ navigation, onPress }) {
             onPress={() => navigation.navigate("Home")}
             style={styles.closes}
           >
-            <Text style={styles.textclose}>CLOSE</Text>
+            <Text style={styles.textclose}>
+              {lan == "en" ? "CLOSE" : "ปิด"}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>

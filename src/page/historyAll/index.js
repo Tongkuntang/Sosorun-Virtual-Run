@@ -16,8 +16,12 @@ import {
 import Headerdetail from "../components/headerdetail";
 import { FontAwesome } from "@expo/vector-icons";
 import { apiservice } from "../../service/service";
-import { tokenState, userState } from "../../reducer/reducer/reducer/Atom";
-import { useRecoilState } from "recoil";
+import {
+  tokenState,
+  userState,
+  lans,
+} from "../../reducer/reducer/reducer/Atom";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { useIsFocused } from "@react-navigation/core";
 import { timeformet } from "../components/test";
 import moment from "moment";
@@ -33,7 +37,7 @@ export default function index({ navigation }) {
   const [page, setpage] = useState([0]);
   const focus = useIsFocused();
   const [his, sethis] = useState([]);
-
+  const lan = useRecoilValue(lans);
   async function history() {
     const gethistory = await getallhistory(token);
     sethis(gethistory.data);
@@ -115,7 +119,7 @@ export default function index({ navigation }) {
                     { color: page == 1 ? "#FCC81D" : "#fff" },
                   ]}
                 >
-                  VIRTUAL
+                  {lan == "en" ? "VIRTUAL" : "วิ่งเก็บระยะ"}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -128,7 +132,7 @@ export default function index({ navigation }) {
                     { color: page == 2 ? "#FCC81D" : "#fff" },
                   ]}
                 >
-                  PAYMEMT
+                  {lan == "en" ? "PAYMEMT" : "ประวัติการชำระเงิน"}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -171,7 +175,9 @@ export default function index({ navigation }) {
                             </Text>
                           </TouchableOpacity>
                           <View style={styles.viewdetail}>
-                            <Text style={styles.textdetail}>Duration</Text>
+                            <Text style={styles.textdetail}>
+                              {lan == "en" ? "Duration" : "ระยะเวลา"}
+                            </Text>
                             <Text style={styles.textmain}>
                               {timeformet(Math.floor(item.info.time / 3600))}{" "}
                               ชม. :
@@ -186,25 +192,34 @@ export default function index({ navigation }) {
                             </Text>
                           </View>
                           <View style={styles.viewdetail}>
-                            <Text style={styles.textdetail}>Energy</Text>
+                            <Text style={styles.textdetail}>
+                              {lan == "en" ? "Energy" : "พลังงาน"}
+                            </Text>
                             <Text style={styles.textmain}>
-                              {item.info.callery.toFixed(2)} แคลอรี่
+                              {item.info.callery.toFixed(2)}{" "}
+                              {lan == "en" ? "kcal" : "แคลอรี่"}
                             </Text>
                           </View>
                           <View style={styles.viewdetail}>
-                            <Text style={styles.textdetail}>Distance</Text>
+                            <Text style={styles.textdetail}>
+                              {lan == "en" ? "Distance" : "ระยะทาง"}
+                            </Text>
                             <Text style={styles.textmain}>
-                              {item.info.distance.toFixed(2)} กม.
+                              {item.info.distance.toFixed(2)}{" "}
+                              {lan == "en" ? "km" : "กม"}.
                             </Text>
                           </View>
                           <View style={styles.viewdetail}>
-                            <Text style={styles.textdetail}>AVG Speed</Text>
+                            <Text style={styles.textdetail}>
+                              {lan == "en" ? "AVG Speed" : "ความเร็วเฉลี่ย"}
+                            </Text>
                             <Text style={styles.textmain}>
                               {(
                                 ((item.info.distance * 1000) / item.info.time) *
                                 3.6
                               ).toFixed(2)}{" "}
-                              กม. / ชม.
+                              {lan == "en" ? "km" : "กม"}. /{" "}
+                              {lan == "en" ? "hr" : "ชม"}.
                             </Text>
                           </View>
                         </View>
@@ -222,6 +237,10 @@ export default function index({ navigation }) {
                   data={data}
                   renderItem={({ item, index }) => {
                     console.log(">>>>>>>>>>>>", item);
+                    console.log(">>>>>>>>>>>>", item?.last_distance);
+                    console.log(">>>>>>>>>>>>", item?.running_Time);
+
+                    console.log((item.last_distance / item.running_Time) * 3.6);
                     return (
                       <View>
                         {detail1 != index ? (
@@ -258,49 +277,64 @@ export default function index({ navigation }) {
                               </Text>
                             </TouchableOpacity>
                             <View style={styles.viewdetail}>
-                              <Text style={styles.textdetail}>Duration</Text>
+                              <Text style={styles.textdetail}>
+                                {lan == "en" ? "Duration" : "ระยะเวลา"}
+                              </Text>
 
                               <Text style={styles.textmain}>
                                 {timeformet(
                                   Math.floor(item.running_Time / 3600)
                                 )}{" "}
-                                ชม. :
+                                {lan == "en" ? "hr" : "ชม"}. :
                                 {timeformet(
                                   Math.floor((item.running_Time % 3600) / 60)
                                 )}{" "}
-                                น. :
+                                {lan == "en" ? "m" : "น"}. :
                                 {timeformet(
                                   Math.floor((item.running_Time % 3600) % 60)
                                 )}
-                                วิ
+                                {lan == "en" ? "s" : "วิ"}
                               </Text>
                             </View>
                             <View style={styles.viewdetail}>
-                              <Text style={styles.textdetail}>Energy</Text>
+                              <Text style={styles.textdetail}>
+                                {lan == "en" ? "Energy" : "พลังงาน"}
+                              </Text>
                               <Text style={styles.textmain}>
-                                {item.Achievement.cal} แคลอรี่
+                                {item.Achievement.cal}{" "}
+                                {lan == "en" ? "kcal" : "แคลอรี่"}
                               </Text>
                             </View>
                             <View style={styles.viewdetail}>
-                              <Text style={styles.textdetail}>Distance</Text>
+                              <Text style={styles.textdetail}>
+                                {lan == "en" ? "Distance" : "ระยะทาง"}
+                              </Text>
                               <Text style={styles.textmain}>
-                                {(item.last_distance / 1000).toFixed(2)} กม.
+                                {(item.last_distance / 1000).toFixed(2)}{" "}
+                                {lan == "en" ? "km" : "กม"}.
                               </Text>
                             </View>
                             <View style={styles.viewdetail}>
-                              <Text style={styles.textdetail}>AVG Speed</Text>
+                              <Text style={styles.textdetail}>
+                                {lan == "en" ? "AVG Speed" : "ความเร็วเฉลี่ย"}
+                              </Text>
                               {(item.last_distance / item.running_Time) * 3.6 ==
                               "NaN" ? (
                                 <Text style={styles.textmain}>
-                                  0.00 กม. / ชม.
+                                  0.00 {lan == "en" ? "km" : "กม"}. /{" "}
+                                  {lan == "en" ? "hr" : "ชม"}.
                                 </Text>
                               ) : (
                                 <Text style={styles.textmain}>
-                                  {(
-                                    (item.last_distance / item.running_Time) *
-                                    3.6
-                                  ).toFixed(2)}{" "}
-                                  กม. / ชม.
+                                  {item?.last_distance == 0
+                                    ? "0.00"
+                                    : (
+                                        ((item?.last_distance || 0) /
+                                          (item?.running_Time || 0)) *
+                                        3.6
+                                      ).toFixed(2)}{" "}
+                                  {lan == "en" ? "km" : "กม"}. /{" "}
+                                  {lan == "en" ? "hr" : "ชม"}.
                                 </Text>
                               )}
                             </View>
@@ -344,8 +378,17 @@ export default function index({ navigation }) {
                         <Text
                           style={[styles.textHis, { alignSelf: "flex-end" }]}
                         >
-                          {moment(new Date()).diff(item.updatedAt, "minutes")}{" "}
-                          นาทีที่แล้ว
+                          {moment(new Date()).diff(item.updatedAt, "minutes") >
+                          60
+                            ? moment(item.updatedAt).format("DD-MMMM-YYYY")
+                            : moment(new Date()).diff(
+                                item.updatedAt,
+                                "minutes"
+                              )}{" "}
+                          {moment(new Date()).diff(item.updatedAt, "minutes") >
+                          60
+                            ? ""
+                            : "นาทีที่แล้ว"}
                         </Text>
                         <View style={styles.line} />
                       </View>

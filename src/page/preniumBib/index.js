@@ -16,8 +16,8 @@ import {
 import Headerdetail from "../components/headerdetail";
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRecoilState } from "recoil";
-import { tokenState } from "../../reducer/reducer/reducer/Atom";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { lans, tokenState } from "../../reducer/reducer/reducer/Atom";
 import {
   getbibevent,
   getbib_Byevent,
@@ -34,7 +34,7 @@ export default function index({ navigation, route }) {
   const [modalVisible, setmodalVisible] = useState(false);
   const [token, setToken] = useRecoilState(tokenState);
   const dataEV = route.params.dataEV;
-  // console.log("??????!!!!", dataEV);
+  const lan = useRecoilValue(lans);
   const [bib, setbib] = useState({});
   async function allbibevent() {
     const getbib = await getbibevent({ token, id: dataEV.id });
@@ -129,7 +129,11 @@ export default function index({ navigation, route }) {
               >
                 <AntDesign name="close" size={24} color="black" />
               </TouchableOpacity>
-              <Text style={styles.textopicmodal}>คุณสามารถใช้เลขนี้ได้</Text>
+              <Text style={styles.textopicmodal}>
+                {lan != "en"
+                  ? "คุณสามารถใช้เลขนี้ได้"
+                  : "You can use this number"}
+              </Text>
               {<Text style={styles.textmainmodal}>{bibnumber}</Text>}
               <View style={styles.viewtouchmodal}>
                 <TouchableOpacity
@@ -145,13 +149,19 @@ export default function index({ navigation, route }) {
                   }}
                   style={styles.touchmodal}
                 >
-                  <Text style={styles.texttouchmodal}>ตกลง</Text>
+                  <Text style={styles.texttouchmodal}>
+                    {" "}
+                    {lan != "en" ? "ตกลง" : "OK"}
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => setmodal(!modal)}
                   style={styles.touchmodal}
                 >
-                  <Text style={styles.texttouchmodal}>ยกเลิก</Text>
+                  <Text style={styles.texttouchmodal}>
+                    {" "}
+                    {lan != "en" ? "ยกเลิก" : "Cancel"}
+                  </Text>
                 </TouchableOpacity>
               </View>
             </LinearGradient>
@@ -177,16 +187,27 @@ export default function index({ navigation, route }) {
               >
                 <AntDesign name="close" size={24} color="black" />
               </TouchableOpacity>
-              <Text style={styles.textopicmodal}>เลขนี้มีผู้ใช้แล้ว</Text>
+              <Text style={styles.textopicmodal}>
+                {" "}
+                {lan != "en"
+                  ? "เลขนี้มีผู้ใช้แล้ว"
+                  : "This number is already in use"}
+              </Text>
               {<Text style={styles.textmainmodal}>{bibnumber}</Text>}
               <TouchableOpacity style={styles.touchmodalvisible}>
-                <Text style={styles.texttouchmodal}>ค้นหาอีกครั้ง</Text>
+                <Text style={styles.texttouchmodal}>
+                  {lan != "en" ? "ค้นหาอีกครั้ง" : "Search again"}
+                </Text>
               </TouchableOpacity>
             </LinearGradient>
           </View>
         </Modal>
         <View style={styles.background}>
-          <Text style={styles.texthead}>ระบุเลขBIBที่คุณต้องการ</Text>
+          <Text style={styles.texthead}>
+            {lan != "en"
+              ? "ระบุเลข E-BIB ที่คุณต้องการ"
+              : "Enter the E-BIB number you want"}
+          </Text>
           <View
             style={{
               width: width,
@@ -229,10 +250,15 @@ export default function index({ navigation, route }) {
               }}
               style={styles.touch}
             >
-              <Text style={styles.texttouch}>ค้นหา</Text>
+              <Text style={styles.texttouch}>
+                {" "}
+                {lan != "en" ? "ค้นหา" : "Search"}
+              </Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.texthead}>เลขBIBที่สามารถเลือกได้</Text>
+          <Text style={styles.texthead}>
+            {lan != "en" ? "เลขBIBที่สามารถเลือกได้" : "Select E-BIB number"}
+          </Text>
           <FlatList
             data={data}
             // columnWrapperStyle={{justifyContent: 'space-between'}}

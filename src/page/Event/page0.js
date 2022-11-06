@@ -11,8 +11,12 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { getallmission } from "../../action/actiongetall";
-import { tokenState, userState } from "../../reducer/reducer/reducer/Atom";
-import { useRecoilState } from "recoil";
+import {
+  lans,
+  tokenState,
+  userState,
+} from "../../reducer/reducer/reducer/Atom";
+import { useRecoilState, useRecoilValue } from "recoil";
 import moment from "moment";
 import { apiservice } from "../../service/service";
 import { autolize_Lv } from "../../json/utils";
@@ -23,7 +27,7 @@ export default function page0({ onPress, navigation }) {
   const [Visible, setVisible] = useState(false);
   const [user, setUser] = useRecoilState(userState);
   const datauser = user.user_accounts;
-
+  const lan = useRecoilValue(lans);
   const [event, setevent] = useState([]);
   const focus = useIsFocused();
   async function allmission() {
@@ -77,13 +81,17 @@ export default function page0({ onPress, navigation }) {
                 marginVertical: 30,
               }}
             >
-              คุณไม่สามารถเข้าร่วม รายการนี้ได้ เนื่องจาก ไม่ตรงตามเงื่อนไข
+              {lan == "en"
+                ? `You can't join 
+because does not 
+meet the conditions`
+                : "คุณไม่สามารถเข้าร่วม รายการนี้ได้ เนื่องจาก ไม่ตรงตามเงื่อนไข"}
             </Text>
             <TouchableOpacity
               onPress={() => setVisible(!Visible)}
               style={styles.touchmodal}
             >
-              <Text style={styles.go}>ตกลง</Text>
+              <Text style={styles.go}>{lan == "en" ? "OK" : "ตกลง"}</Text>
             </TouchableOpacity>
           </LinearGradient>
         </View>
@@ -130,7 +138,8 @@ export default function page0({ onPress, navigation }) {
                       style={styles.viewlimid}
                     >
                       <Text style={styles.textlimid}>
-                        LV {item.request_ranking} ขึ้นไป
+                        LV {item.request_ranking}{" "}
+                        {lan == "en" ? "Up" : "ขึ้นไป"}
                       </Text>
                     </LinearGradient>
                   ) : (
@@ -139,7 +148,8 @@ export default function page0({ onPress, navigation }) {
                       style={styles.viewlimid}
                     >
                       <Text style={styles.textlimid}>
-                        LV {item.request_ranking} ขึ้นไป
+                        LV {item.request_ranking}{" "}
+                        {lan == "en" ? "Up" : "ขึ้นไป"}
                       </Text>
                     </LinearGradient>
                   )}
@@ -155,7 +165,9 @@ export default function page0({ onPress, navigation }) {
               </View>
               <View style={styles.view}>
                 <View style={{ marginLeft: 10 }}>
-                  <Text style={styles.texttime}>ระยะเวลา</Text>
+                  <Text style={styles.texttime}>
+                    {lan == "en" ? "Duration" : "ระยะเวลา"}
+                  </Text>
                   <Text style={styles.texttime}>
                     ตั้งแต่วันที่ {moment(item.startDate).format("DD")} -{" "}
                     {moment(item.expireDate).format("DD/MMMM/YYYY")}

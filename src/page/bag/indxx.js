@@ -20,12 +20,13 @@ import {
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import { useRecoilState } from "recoil";
-import { tokenState } from "../../reducer/reducer/reducer/Atom";
+import { tokenState, lans } from "../../reducer/reducer/reducer/Atom";
 import { getActionUser } from "../../action/actionauth";
 import { useIsFocused } from "@react-navigation/core";
 const { width, height } = Dimensions.get("window");
 export default function indxx({ navigation }) {
   const [token, setToken] = useRecoilState(tokenState);
+  const [lan, setlans] = useRecoilState(lans);
   const [user, setUser] = useState(null);
   const isFocus = useIsFocused();
   // console.log(token);
@@ -92,7 +93,9 @@ export default function indxx({ navigation }) {
                 <Text style={styles.textna}>{user.name}</Text>
               )}
             </Text>
-            <Text style={styles.textdetail}>Your current wallet</Text>
+            <Text style={styles.textdetail}>
+              {lan == "en" ? "Your current wallet" : "กระเป๋าเงินของคุณ"}
+            </Text>
           </View>
         </View>
         <View style={styles.viewdetail}>
@@ -106,12 +109,15 @@ export default function indxx({ navigation }) {
             <View
               style={{ flex: 0.8, justifyContent: "center", marginLeft: -20 }}
             >
-              <Text style={styles.textgold}>gold</Text>
+              <Text style={styles.textgold}>
+                {" "}
+                {lan == "en" ? "GOLD" : "โกลด์"}
+              </Text>
               <Text style={styles.textname}>
                 {user.user_accounts.wallet.gold != undefined
                   ? user.user_accounts.wallet.gold
                   : 0}{" "}
-                GOLD
+                {lan == "en" ? "GOLD" : "โกลด์"}
               </Text>
             </View>
           </View>
@@ -133,12 +139,14 @@ export default function indxx({ navigation }) {
               style={{ alignSelf: "center" }}
             />
             <View style={{ flex: 0.8, justifyContent: "center" }}>
-              <Text style={styles.textgold}>calories</Text>
+              <Text style={styles.textgold}>
+                {lan == "en" ? "CALORIES" : "แคลอรี่"}
+              </Text>
               <Text style={styles.textname}>
                 {user.user_accounts.wallet.cal != undefined
                   ? user.user_accounts.wallet.cal
                   : 0}{" "}
-                CALORIES
+                {lan == "en" ? "CALORIES" : "แคลอรี่"}
               </Text>
             </View>
           </View>
@@ -165,7 +173,10 @@ export default function indxx({ navigation }) {
               style={{ alignSelf: "center" }}
             />
             <View style={{ flex: 0.8, justifyContent: "center" }}>
-              <Text style={styles.textname}>USE POINTS</Text>
+              <Text style={styles.textname}>
+                {" "}
+                {lan == "en" ? "USE POINTS" : "ใช้แต้ม"}
+              </Text>
             </View>
           </View>
 

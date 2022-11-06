@@ -12,7 +12,11 @@ import {
 import HeaderFree from "../components/headerfree";
 import { apiservice } from "../../service/service";
 import { useRecoilValue } from "recoil";
-import { tokenState, userState } from "../../reducer/reducer/reducer/Atom";
+import {
+  tokenState,
+  userState,
+  lans,
+} from "../../reducer/reducer/reducer/Atom";
 
 const { width, height } = Dimensions.get("window");
 
@@ -21,6 +25,8 @@ export default function friend({ navigation }) {
   const [data, setdata] = useState([]);
   const token = useRecoilValue(tokenState);
   const user = useRecoilValue(userState);
+  const lan = useRecoilValue(lans);
+
   const DATA = [
     {
       imageURL: {
@@ -144,7 +150,7 @@ export default function friend({ navigation }) {
           marginTop: 10,
         }}
       >
-        ACHIEVEMENT
+        {lan == "en" ? "ACHIEVEMENT" : "เหรียญรางวัล"}
       </Text>
       <TouchableOpacity
         onPress={() => {
@@ -167,7 +173,7 @@ export default function friend({ navigation }) {
             alignSelf: "center",
           }}
         >
-          EVENT
+          {lan == "en" ? "EVENT" : "ภารกิจ"}
         </Text>
         {data.length +
           DATA.filter(
@@ -216,7 +222,7 @@ export default function friend({ navigation }) {
             color: "#393939",
           }}
         >
-          CHALLENGES
+          {lan == "en" ? "CHALLENGES" : "กิจกรรมท้าทาย"}
         </Text>
       </TouchableOpacity>
       {/* <TouchableOpacity

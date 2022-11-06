@@ -22,8 +22,12 @@ import {
   getAllfreepoint,
   getfreepointUser,
 } from "../../action/actionfreepoint";
-import { useRecoilState } from "recoil";
-import { tokenState, userState } from "../../reducer/reducer/reducer/Atom";
+import { useRecoilState, useRecoilValue } from "recoil";
+import {
+  tokenState,
+  userState,
+  lans,
+} from "../../reducer/reducer/reducer/Atom";
 import { Video, AVPlaybackStatus } from "expo-av";
 import { useIsFocused } from "@react-navigation/core";
 import { actionEditwal, getActionUser } from "../../action/actionauth";
@@ -40,6 +44,7 @@ export default function index({ navigation }) {
   const [token, setToken] = useRecoilState(tokenState);
   const [user, setUser] = useRecoilState(userState);
   const [state, setstate] = useState(null);
+  const lan = useRecoilValue(lans);
   const focus = useIsFocused();
   const [banner, setbanner] = useState([]);
   async function allpoint() {
@@ -216,7 +221,7 @@ export default function index({ navigation }) {
                   { zIndex: 99, marginTop: 20, alignItems: "flex-start" },
                 ]}
               >
-                {num} sec
+                {num} {lan == "en" ? "sec" : "วิ"}
               </Text>
               <Video
                 ref={video}
@@ -264,7 +269,10 @@ export default function index({ navigation }) {
               colors={["#FCC81D", "#EFD98F", "#EEE6CB", "#C29709"]}
               style={styles.backgroundmodal}
             >
-              <Text style={styles.textmodal}>คุณได้รับ</Text>
+              <Text style={styles.textmodal}>
+                {" "}
+                {lan == "en" ? "YOU GET" : "คุณได้รับ"}
+              </Text>
               <Image
                 // resizeMode={"stretch"}
                 source={{
@@ -272,7 +280,9 @@ export default function index({ navigation }) {
                 }}
                 style={styles.imgmodal}
               />
-              <Text style={styles.textmodal1}>{golds} โกลด์</Text>
+              <Text style={styles.textmodal1}>
+                {golds} {lan == "en" ? "GOLD" : "โกลด์"}
+              </Text>
               <TouchableOpacity
                 onPress={async () => {
                   const id = state != null && state.id;
@@ -301,7 +311,7 @@ export default function index({ navigation }) {
                 }}
                 style={styles.touchmodal}
               >
-                <Text style={styles.go}>ตกลง</Text>
+                <Text style={styles.go}>{lan == "en" ? "Ok" : "ตกลง"}</Text>
               </TouchableOpacity>
             </LinearGradient>
           </View>
@@ -380,8 +390,12 @@ export default function index({ navigation }) {
                           </Text>
                         </View>
                         <View>
-                          <Text style={styles.texttime}>time</Text>
-                          <Text style={styles.textsec}>30 sec</Text>
+                          <Text style={styles.texttime}>
+                            {lan == "en" ? "time" : "เวลา"}
+                          </Text>
+                          <Text style={styles.textsec}>
+                            30 {lan == "en" ? "sec" : "วิ"}
+                          </Text>
                           <View style={{ flexDirection: "row" }}>
                             <Text
                               style={[styles.texttime, { alignSelf: "center" }]}
@@ -417,7 +431,9 @@ export default function index({ navigation }) {
                           style={styles.touch}
                         >
                           <Text style={styles.textouch}>
-                            Watch Ad for Get Free Point
+                            {lan == "en"
+                              ? "Watch Ad for Get Free Point"
+                              : "ดูโฆษณาเพื่อรับแต้มฟรี"}
                           </Text>
                         </TouchableOpacity>
                       )}

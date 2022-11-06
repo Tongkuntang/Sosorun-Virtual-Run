@@ -357,10 +357,12 @@ export default function fromcontinue({ navigation, route }) {
   async function completeRunning() {
     if (
       dataEV.mission_List.distance <=
-      (
-        (state.currentStepCount * strip) / 100000 +
-        route.params.last_distance / 1000
-      ).toFixed(2)
+      parseInt(
+        (
+          (state.currentStepCount * strip) / 100000 +
+          route.params.last_distance / 1000
+        ).toFixed(2)
+      )
     ) {
       const response1 = await apiservice({
         path: "/event/resultsrunning",

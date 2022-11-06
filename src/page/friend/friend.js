@@ -14,8 +14,12 @@ import {
 import { FontAwesome } from "@expo/vector-icons";
 import HeaderFree from "../components/headerfree";
 import { useIsFocused } from "@react-navigation/native";
-import { useRecoilState } from "recoil";
-import { tokenState, userState } from "../../reducer/reducer/reducer/Atom";
+import { useRecoilState, useRecoilValue } from "recoil";
+import {
+  tokenState,
+  userState,
+  lans,
+} from "../../reducer/reducer/reducer/Atom";
 import { actionMyfriend, getfriendreq } from "../../action/actionfriend";
 import Friendrequest from "./friend_request";
 import Friendaccetp from "./friend_accept";
@@ -30,7 +34,7 @@ export default function friend({ navigation }) {
   const [page, setpage] = useState(0);
   const [state, setstate] = useState("");
   const [data, setdata] = useState([]);
-
+  const lan = useRecoilValue(lans);
   async function allstate() {
     const getstate = await actionMyfriend({ token, uid: user.id });
     if (getstate.status == 200) {
@@ -47,7 +51,7 @@ export default function friend({ navigation }) {
   // console.log("43", state);
   useEffect(() => {
     allstate();
-  }, [token, focus, state]);
+  }, [token, focus]);
 
   const [search, setsearch] = useState("");
   return (
@@ -84,7 +88,7 @@ export default function friend({ navigation }) {
                 alignSelf: "center",
               }}
             >
-              FRIENDS
+              {lan == "en" ? "FRIENDS" : "เพื่อน"}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -104,7 +108,7 @@ export default function friend({ navigation }) {
                 alignSelf: "center",
               }}
             >
-              ACCEPT
+              {lan == "en" ? "ACCEPT" : "ยืนยันเพื่อน"}
             </Text>
             {data?.length > 0 && (
               <View
@@ -134,7 +138,7 @@ export default function friend({ navigation }) {
                 alignSelf: "center",
               }}
             >
-              REQUEST
+              {lan == "en" ? "REQUEST" : "คำขอเป็นเพื่อน"}
             </Text>
           </TouchableOpacity>
         </View>
@@ -177,7 +181,7 @@ export default function friend({ navigation }) {
                     color: "#A1949A",
                     alignItems: "center",
                   }}
-                  placeholder="SEARCH"
+                  placeholder={lan == "en" ? "SEARCH" : "ค้นหา"}
                   onChangeText={(search) => setsearch(search)}
                   defaultValue={search}
                 />
@@ -205,7 +209,7 @@ export default function friend({ navigation }) {
                 marginTop: 10,
               }}
             >
-              FRIENDS
+              {lan == "en" ? "FRIENDS" : "เพื่อน"}
             </Text>
             <View>
               <FlatList

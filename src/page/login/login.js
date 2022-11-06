@@ -33,7 +33,7 @@ import { apiservice } from "../../service/service";
 import { set } from "react-native-reanimated";
 const { width, height } = Dimensions.get("window");
 
-export default function register({ navigation }) {
+export default function register({ navigation, lan }) {
   const [token, setToken] = useRecoilState(tokenState);
   const [tokenvisible, setTokenvisible] = useState(null);
   const [ValidText, setValidText] = useState("");
@@ -289,37 +289,32 @@ export default function register({ navigation }) {
             style={styles.backgroundmodal}
           >
             <Text style={[styles.go, { color: "#000" }]}>
-              กรุณากรอกข้อมูลเพื่อความแม่นยำในการคำนวณ
+              {lan == "en"
+                ? "Please fill out the information for accurate calculations. "
+                : "กรุณากรอกข้อมูลเพื่อความแม่นยำในการคำนวณ"}
             </Text>
             <TextInput
               keyboardType={"number-pad"}
-              placeholder="weight"
+              placeholder={lan == "en" ? "weight" : "นํ้าหนัก"}
               onChangeText={(text) => setbody({ ...body, weight: text })}
               style={styles.input}
               autoCapitalize="none"
             />
             <TextInput
               keyboardType={"number-pad"}
-              placeholder="height"
+              placeholder={lan == "en" ? "height" : "ส่วนสูง"}
               onChangeText={(text) => setbody({ ...body, height: text })}
               style={styles.input}
               autoCapitalize="none"
             />
             <TextInput
-              keyboardType={"number-pad"}
-              placeholder="height"
-              onChangeText={(text) => setbody({ ...body, height: text })}
-              style={styles.input}
-              autoCapitalize="none"
-            />
-            <TextInput
-              placeholder="gender"
+              placeholder={lan == "en" ? "gender" : "เพศ"}
               onChangeText={(text) => setbody({ ...body, gender: text })}
               style={styles.input}
               autoCapitalize="none"
             />
             <TextInput
-              placeholder="age"
+              placeholder={lan == "en" ? "age" : "อายุ"}
               onChangeText={(text) => setbody({ ...body, birthday: text })}
               style={styles.input}
               autoCapitalize="none"
@@ -355,7 +350,7 @@ export default function register({ navigation }) {
                   : styles.touchmodal
               }
             >
-              <Text style={styles.go}>ตกลง</Text>
+              <Text style={styles.go}>{lan == "en" ? "Ok" : "ตกลง"}</Text>
             </TouchableOpacity>
           </LinearGradient>
         </View>
@@ -383,7 +378,9 @@ export default function register({ navigation }) {
             <Text
               style={[styles.go, { color: "#000" }, { textAlign: "center" }]}
             >
-              กรุณายืนยัน EMAIL เพื่อเข้าสู่ระบบ
+              {lan == "en"
+                ? "Please verify your email"
+                : "กรุณายืนยัน EMAIL เพื่อเข้าสู่ระบบ"}
             </Text>
 
             <TouchableOpacity
@@ -392,7 +389,7 @@ export default function register({ navigation }) {
               }}
               style={styles.touchmodal}
             >
-              <Text style={styles.go}>ตกลง</Text>
+              <Text style={styles.go}>{lan == "en" ? "Ok" : "ตกลง"}</Text>
             </TouchableOpacity>
           </LinearGradient>
         </View>
@@ -401,13 +398,13 @@ export default function register({ navigation }) {
         <Input
           onChangeText={(text) => setbody1({ ...body1, username: text })}
           icon={"user"}
-          placeholder="User name"
+          placeholder={lan == "en" ? "Username" : "บัญชีผู้ใช้"}
           autoCapitalize="none"
         />
         <Input
           onChangeText={(text) => setbody1({ ...body1, password: text })}
           icon={"lock"}
-          placeholder="Password"
+          placeholder={lan == "en" ? "Password" : "รหัสผ่าน"}
           autoCapitalize="none"
           secureTextEntry
         />
@@ -422,17 +419,21 @@ export default function register({ navigation }) {
             alignSelf: "flex-end",
           }}
         >
-          <Text style={styles.textlogin}>ลืมรหัสผ่าน?</Text>
+          <Text style={[styles.textlogin, { color: "#000" }]}>
+            {lan == "en" ? "Forget password?" : "ลืมรหัสผ่าน?"}
+          </Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.background1}>
         <TouchableOpacity onPress={login} style={styles.touchlogin}>
-          <Text style={styles.textlogin}>เข้าสู่ระบบ</Text>
+          <Text style={styles.textlogin}>
+            {lan == "en" ? "Sign in" : "เข้าสู่ระบบ"}
+          </Text>
         </TouchableOpacity>
         <View style={styles.viewline}>
           <View style={styles.line} />
-          <Text style={styles.textline}>หรือ</Text>
+          <Text style={styles.textline}>{lan == "en" ? "Or" : "หรือ"}</Text>
           <View style={styles.line} />
         </View>
         <View style={styles.viewtouch}>

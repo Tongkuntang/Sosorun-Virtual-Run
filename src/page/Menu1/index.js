@@ -18,8 +18,12 @@ import {
   Ionicons,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
-import { useRecoilState } from "recoil";
-import { tokenState, userState } from "../../reducer/reducer/reducer/Atom";
+import { useRecoilState, useRecoilValue } from "recoil";
+import {
+  lans,
+  tokenState,
+  userState,
+} from "../../reducer/reducer/reducer/Atom";
 import { apiservice } from "../../service/service";
 
 const { width, height } = Dimensions.get("window");
@@ -27,6 +31,7 @@ export default function index({ navigation }) {
   const [user, setUser] = useRecoilState(userState);
   const [token, setToken] = useRecoilState(tokenState);
   const [data, setstate] = useState([]);
+  const lan = useRecoilValue(lans);
 
   useEffect(() => {
     callAPi();
@@ -121,7 +126,9 @@ export default function index({ navigation }) {
               style={styles.touch}
             >
               <FontAwesome name="home" size={25} color="#717171" />
-              <Text style={styles.textname}>Home</Text>
+              <Text style={styles.textname}>
+                {lan == "en" ? "Home" : "หน้าหลัก"}
+              </Text>
             </TouchableOpacity>
             {/* <TouchableOpacity
               onPress={() => navigation.navigate("Account")}
@@ -140,7 +147,10 @@ export default function index({ navigation }) {
                 size={24}
                 color="#717171"
               />
-              <Text style={styles.textname}>EVENT</Text>
+              <Text style={styles.textname}>
+                {" "}
+                {lan == "en" ? "EVENT" : "อีเวนท์"}
+              </Text>
             </TouchableOpacity>
             <View style={styles.line} />
             <TouchableOpacity
@@ -155,7 +165,7 @@ export default function index({ navigation }) {
                   { opacity: token?.role == "VIP" ? 0.2 : 1 },
                 ]}
               >
-                BAG
+                {lan == "en" ? "BAG" : "กระเป๋า"}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -175,7 +185,7 @@ export default function index({ navigation }) {
                   { opacity: token?.role == "VIP" ? 0.2 : 1 },
                 ]}
               >
-                FREE POINT
+                {lan == "en" ? "FREE POINT" : "รับแต้มฟรี"}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -192,7 +202,7 @@ export default function index({ navigation }) {
                   { opacity: token?.role == "VIP" ? 0.2 : 1 },
                 ]}
               >
-                DISCOUNT
+                {lan == "en" ? "DISCOUNT" : "แลกส่วนลด"}
               </Text>
             </TouchableOpacity>
             <View style={styles.line} />
@@ -208,7 +218,7 @@ export default function index({ navigation }) {
                   { opacity: token?.role == "VIP" ? 0.2 : 1 },
                 ]}
               >
-                HISTORY
+                {lan == "en" ? "HISTORY" : "ประวัติการวิ่งย้อนหลัง"}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -225,7 +235,7 @@ export default function index({ navigation }) {
                   { opacity: token?.role == "VIP" ? 0.2 : 1 },
                 ]}
               >
-                ACHIEVEMENT
+                {lan == "en" ? "ACHIEVEMENT" : "เหรียญรางวัล"}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -242,7 +252,7 @@ export default function index({ navigation }) {
                   { opacity: token?.role == "VIP" ? 0.2 : 1 },
                 ]}
               >
-                FRIEND
+                {lan == "en" ? "FRIEND" : "รายชื่อเพื่อน"}
               </Text>
             </TouchableOpacity>
             <View style={styles.view}>
@@ -260,7 +270,7 @@ export default function index({ navigation }) {
                     { opacity: token?.role == "VIP" ? 0.2 : 1 },
                   ]}
                 >
-                  NOTIFICATION
+                  {lan == "en" ? "NOTIFICATION" : "การแจ้งเตือน"}
                 </Text>
                 {data?.length > 0 && (
                   <View
@@ -287,7 +297,9 @@ export default function index({ navigation }) {
               style={styles.touch}
             >
               <MaterialIcons name="logout" size={24} color="#717171" />
-              <Text style={styles.textname}>LOGOUT</Text>
+              <Text style={styles.textname}>
+                {lan == "en" ? "LOGOUT" : "ออกจากระบบ"}
+              </Text>
             </TouchableOpacity>
             <View style={styles.linee} />
           </ScrollView>

@@ -23,8 +23,12 @@ import {
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import HeaderFree from "../components/headerfree";
-import { useRecoilState } from "recoil";
-import { tokenState, userState } from "../../reducer/reducer/reducer/Atom";
+import { useRecoilState, useRecoilValue } from "recoil";
+import {
+  tokenState,
+  userState,
+  lans,
+} from "../../reducer/reducer/reducer/Atom";
 import {
   actionAcceptFriend,
   actionMyfriend,
@@ -41,6 +45,7 @@ export default function friend({ navigation }) {
   const [user, setuser] = useRecoilState(userState);
   const focus = useIsFocused();
   const [data, setdata] = useState([]);
+  const lan = useRecoilValue(lans);
 
   async function allstate() {
     const getstate = await getfriendreq(token);
@@ -73,7 +78,7 @@ export default function friend({ navigation }) {
           marginTop: 10,
         }}
       >
-        ACCEPT FRIEND REQUEST
+        {lan == "en" ? "ACCEPT FRIEND REQUEST" : "ยืนยันคำขอเป็นเพื่อน"}
       </Text>
       <View>
         <FlatList

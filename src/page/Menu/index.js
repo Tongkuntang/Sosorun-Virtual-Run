@@ -19,12 +19,12 @@ import {
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import { apiservice } from "../../service/service";
-import { useRecoilState } from "recoil";
-import { tokenState } from "../../reducer/reducer/reducer/Atom";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { lans, tokenState } from "../../reducer/reducer/reducer/Atom";
 const { width, height } = Dimensions.get("window");
 export default function index({}) {
   const [token, setToken] = useRecoilState(tokenState);
-
+  const lan = useRecoilValue(lans);
   const [data, setstate] = useState([]);
 
   useEffect(() => {

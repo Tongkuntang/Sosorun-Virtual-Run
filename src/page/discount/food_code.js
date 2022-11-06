@@ -139,7 +139,22 @@ export default function friend({ navigation, route }) {
             marginVertical: 10,
           }}
         >
-          <Text style={[styles.text, { color: "red" }]}>
+          <Text
+            style={[
+              styles.text,
+              { color: "#000", fontSize: 22, alignSelf: "center" },
+            ]}
+          >
+            {item.name}
+          </Text>
+        </View>
+        <View
+          style={{
+            flexDirection: "row",
+            marginVertical: 10,
+          }}
+        >
+          <Text style={[styles.text, { color: "#000" }]}>
             {item.description}
           </Text>
         </View>
@@ -215,7 +230,7 @@ export default function friend({ navigation, route }) {
             <Text
               style={{
                 fontFamily: "Prompt-Regular",
-                fontSize: 16,
+                fontSize: 14,
                 color: "#000000",
               }}
             >
@@ -228,7 +243,7 @@ export default function friend({ navigation, route }) {
               <Text
                 style={{
                   fontFamily: "Prompt-Regular",
-                  fontSize: 16,
+                  fontSize: 14,
                   color: "#000000",
                 }}
               >
@@ -239,7 +254,7 @@ export default function friend({ navigation, route }) {
             <Text
               style={{
                 fontFamily: "Prompt-Regular",
-                fontSize: 16,
+                fontSize: 14,
                 color: "#000000",
               }}
             >
@@ -287,6 +302,18 @@ export default function friend({ navigation, route }) {
               </View>
             )}
         </View>
+        {item.code_using.click_date == undefined && (
+          <Text
+            style={{
+              fontFamily: "Prompt-Regular",
+              fontSize: 14,
+              color: "#000000",
+              paddingHorizontal: 10,
+            }}
+          >
+            (เมื่อกดแลกสิทธิ์แล้ว จะมีระยะเวลาจำกัดในการใช้)
+          </Text>
+        )}
         {item.code_using.click_date == undefined ||
           (moment(item.code_using.click_date).add(15, "minutes").valueOf() <
             moment().utcOffset("+0000").add(7, "hour").valueOf() && (
@@ -371,46 +398,62 @@ export default function friend({ navigation, route }) {
               justifyContent: "space-between",
               marginHorizontal: 10,
               marginTop: 20,
+              marginBottom: 20,
             }}
           >
-            <View
-              style={{
-                width: 100,
-                height: 50,
-                borderRadius: 10,
-                borderWidth: 2,
-                borderColor: "#FBC71C",
-                justifyContent: "center",
-              }}
-            >
-              <View style={{ flexDirection: "row", alignSelf: "center" }}>
-                <FontAwesome5
-                  name="running"
-                  size={24}
-                  color="#5BC3FF"
-                  style={{ alignSelf: "center" }}
-                />
-                <Text style={styles.textbold1}>{item.condition.cal}</Text>
-              </View>
-            </View>
-            <View
-              style={{
-                width: 100,
-                height: 50,
-                borderRadius: 10,
-                borderWidth: 2,
-                borderColor: "#FBC71C",
-                justifyContent: "center",
-              }}
-            >
-              <View style={{ flexDirection: "row", alignSelf: "center" }}>
-                <Image
-                  source={{
-                    uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/Group.png",
+            <View style={{ flexDirection: "row" }}>
+              <View
+                style={{
+                  width: 100,
+                  height: 34.8,
+                  borderRadius: 10,
+                  borderWidth: 2,
+                  borderColor: "#FBC71C",
+                  justifyContent: "center",
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignSelf: "center",
+                    alignItems: "center",
+                    marginRight: 10,
                   }}
-                  style={styles.imgpoint2}
-                />
-                <Text style={styles.textbold1}>{item.condition.gold}</Text>
+                >
+                  <FontAwesome5
+                    name="running"
+                    size={24}
+                    color="#5BC3FF"
+                    style={{ alignSelf: "center" }}
+                  />
+                  <Text style={styles.textbold1}>{item.condition.cal}</Text>
+                </View>
+              </View>
+              <View
+                style={{
+                  width: 100,
+                  height: 34.8,
+                  borderRadius: 10,
+                  borderWidth: 2,
+                  borderColor: "#FBC71C",
+                  justifyContent: "center",
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignSelf: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Image
+                    source={{
+                      uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/Group.png",
+                    }}
+                    style={styles.imgpoint2}
+                  />
+                  <Text style={styles.textbold1}>{item.condition.gold}</Text>
+                </View>
               </View>
             </View>
 
@@ -454,10 +497,10 @@ export default function friend({ navigation, route }) {
                 }}
                 style={{
                   width: 120,
-                  height: 50,
+                  height: 30,
                   justifyContent: "center",
                   backgroundColor: "#393939",
-                  borderRadius: 10,
+                  borderRadius: 5,
                   opacity:
                     item.code_using.click_date != undefined &&
                     moment(item.code_using.click_date)
@@ -471,7 +514,7 @@ export default function friend({ navigation, route }) {
                 <Text
                   style={{
                     fontFamily: "Prompt-Regular",
-                    fontSize: 28,
+                    fontSize: 13,
                     color: "#FBC71C",
                     fontWeight: "bold",
                     alignSelf: "center",
@@ -484,16 +527,16 @@ export default function friend({ navigation, route }) {
               <View
                 style={{
                   width: 120,
-                  height: 50,
+                  height: 30,
                   justifyContent: "center",
                   backgroundColor: "#39393950",
-                  borderRadius: 10,
+                  borderRadius: 5,
                 }}
               >
                 <Text
                   style={{
                     fontFamily: "Prompt-Regular",
-                    fontSize: 28,
+                    fontSize: 13,
                     color: "#fffc",
                     fontWeight: "bold",
                     alignSelf: "center",
@@ -578,18 +621,18 @@ const styles = StyleSheet.create({
   },
   text: {
     fontFamily: "Prompt-Regular",
-    fontSize: 22,
+    fontSize: 14,
     color: "#000000",
     paddingHorizontal: 10,
   },
   imgpoint2: {
-    width: 35,
-    height: 35,
+    width: 30,
+    height: 30,
     alignSelf: "center",
   },
   textbold1: {
     fontFamily: "Prompt-Regular",
-    fontSize: 24,
+    fontSize: 18,
     color: "#000",
     fontWeight: "bold",
     marginLeft: 10,

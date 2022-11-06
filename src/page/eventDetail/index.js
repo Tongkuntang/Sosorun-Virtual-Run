@@ -12,18 +12,22 @@ import {
   FlatList,
   ScrollView,
 } from "react-native";
-
 import Imagescalable from "react-native-scalable-image";
 import Headerdetail from "../components/headerdetail";
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
 import Carousel from "react-native-snap-carousel";
 import { getalleventid, getmyeventid } from "../../action/actiongetall";
-import { useRecoilState } from "recoil";
-import { tokenState, userState } from "../../reducer/reducer/reducer/Atom";
+import { useRecoilState, useRecoilValue } from "recoil";
+import {
+  lans,
+  tokenState,
+  userState,
+} from "../../reducer/reducer/reducer/Atom";
 import { set } from "react-native-reanimated";
 import moment from "moment";
 const { width, height } = Dimensions.get("window");
 export default function index({ navigation, route }) {
+  const lan = useRecoilValue(lans);
   const [state, setstate] = useState(true);
   const dataEV = route.params.item;
   const carouselRef = useRef();
@@ -55,7 +59,7 @@ export default function index({ navigation, route }) {
   return (
     <View style={styles.container}>
       <SafeAreaView />
-      <Modal visible={visible} transparent style={{ flex: 1 }}>
+      <Modal visible={false} transparent style={{ flex: 1 }}>
         <View
           style={{ width: width, height: height, backgroundColor: "#000000" }}
         >
@@ -245,9 +249,8 @@ export default function index({ navigation, route }) {
                     },
                   ]}
                 >
-                  ของรางวัลที่จะได้รับ
+                  {lan == "en" ? "Rewards" : "ของรางวัลที่จะได้รับ"}
                 </Text>
-
                 <View
                   style={{
                     alignItems: "center",
@@ -345,7 +348,9 @@ export default function index({ navigation, route }) {
                       color="black"
                       style={{ alignSelf: "center" }}
                     />
-                    <Text style={styles.textrank}>จัดอันดับ</Text>
+                    <Text style={styles.textrank}>
+                      {lan == "en" ? "Ranking" : "จัดอันดับ"}
+                    </Text>
                   </TouchableOpacity>
                   {data.filter((e, i) => {
                     return e.event_id == dataEV.id;
@@ -409,14 +414,28 @@ export default function index({ navigation, route }) {
                       }}
                       style={styles.touchstart}
                     >
-                      <Text style={[styles.textnum]}>เริ่ม</Text>
+                      <Text style={[styles.textnum]}>
+                        {lan == "en" ? "Start" : "เริ่ม"}
+                      </Text>
                     </TouchableOpacity>
                   ) : (
                     <TouchableOpacity
+                      disabled={
+                        moment(dataEV?.startDate).valueOf() < moment().valueOf()
+                      }
                       onPress={() => navigation.navigate("PayEvent", { event })}
                       style={styles.touchstart}
                     >
-                      <Text style={styles.textnum}>ชำระเงิน</Text>
+                      <Text style={styles.textnum}>
+                        {moment(dataEV?.startDate).valueOf() <
+                        moment().valueOf()
+                          ? lan == "en"
+                            ? "Time up"
+                            : "หมดเวลา"
+                          : lan == "en"
+                          ? "Pay"
+                          : "ชำระเงิน"}
+                      </Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -470,7 +489,7 @@ export default function index({ navigation, route }) {
                     },
                   ]}
                 >
-                  ของรางวัลที่จะได้รับ
+                  {lan == "en" ? "Rewards" : "ของรางวัลที่จะได้รับ"}
                 </Text>
                 <View
                   style={{
@@ -569,7 +588,9 @@ export default function index({ navigation, route }) {
                       color="black"
                       style={{ alignSelf: "center" }}
                     />
-                    <Text style={styles.textrank}>จัดอันดับ</Text>
+                    <Text style={styles.textrank}>
+                      {lan == "en" ? "Ranking" : "จัดอันดับ"}
+                    </Text>
                   </TouchableOpacity>
                   {data.filter((e, i) => e.event_id == dataEV.id).length > 0 ? (
                     <TouchableOpacity
@@ -612,14 +633,28 @@ export default function index({ navigation, route }) {
                       }}
                       style={styles.touchstart}
                     >
-                      <Text style={styles.textnum}>เริ่ม</Text>
+                      <Text style={styles.textnum}>
+                        {lan == "en" ? "Start" : "เริ่ม"}
+                      </Text>
                     </TouchableOpacity>
                   ) : (
                     <TouchableOpacity
+                      disabled={
+                        moment(dataEV?.startDate).valueOf() < moment().valueOf()
+                      }
                       onPress={() => navigation.navigate("PayEvent", { event })}
                       style={styles.touchstart}
                     >
-                      <Text style={styles.textnum}>ชำระเงิน</Text>
+                      <Text style={styles.textnum}>
+                        {moment(dataEV?.startDate).valueOf() <
+                        moment().valueOf()
+                          ? lan == "en"
+                            ? "Time up"
+                            : "หมดเวลา"
+                          : lan == "en"
+                          ? "Pay"
+                          : "ชำระเงิน"}
+                      </Text>
                     </TouchableOpacity>
                   )}
                 </View>

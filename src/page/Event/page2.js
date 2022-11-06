@@ -14,8 +14,12 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { getalllevel, getallmission } from "../../action/actiongetall";
-import { useRecoilState } from "recoil";
-import { tokenState, userState } from "../../reducer/reducer/reducer/Atom";
+import { useRecoilState, useRecoilValue } from "recoil";
+import {
+  lans,
+  tokenState,
+  userState,
+} from "../../reducer/reducer/reducer/Atom";
 import { autolize_Lv } from "../../json/utils";
 import { getsucceed } from "../../action/actionhistrory";
 // import { logPushNotificationOpenAsync } from "expo-facebook";
@@ -25,6 +29,7 @@ export default function page2({ onPress, navigation }) {
   const [Visible, setVisible] = useState(false);
   const [user, setUser] = useRecoilState(userState);
   const datauser = user.user_accounts;
+  const lan = useRecoilValue(lans);
 
   const [event, setevent] = useState([]);
   // console.log(datauser.Lv);
@@ -160,7 +165,9 @@ export default function page2({ onPress, navigation }) {
                     colors={["#F2F6F8", "#DBDBDB"]}
                     style={[styles.viewlimid, { width: 55, height: 24 }]}
                   >
-                    <Text style={styles.textlimid}>กม</Text>
+                    <Text style={styles.textlimid}>
+                      {lan != "en" ? "กม" : "km"}
+                    </Text>
                   </LinearGradient>
                 </View>
               </View>

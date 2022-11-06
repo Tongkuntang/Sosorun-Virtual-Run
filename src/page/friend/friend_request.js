@@ -23,8 +23,8 @@ import {
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import HeaderFree from "../components/headerfree";
-import { useRecoilState } from "recoil";
-import { tokenState } from "../../reducer/reducer/reducer/Atom";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { tokenState, lans } from "../../reducer/reducer/reducer/Atom";
 import { useIsFocused } from "@react-navigation/native";
 import { getfriendreq, getreqfriend } from "../../action/actionfriend";
 const { width, height } = Dimensions.get("window");
@@ -32,11 +32,12 @@ export default function friend({ navigation }) {
   // รอเพื่อนตอบรับ
   const [token, setToken] = useRecoilState(tokenState);
   const focus = useIsFocused();
+  const lan = useRecoilValue(lans);
   const [data, setdata] = useState([]);
   async function allstate() {
     const getstate = await getreqfriend(token);
+
     setdata(getstate.data.data);
-    // console.log("39", getstate.data.data);
   }
   useEffect(() => {
     allstate();
@@ -54,7 +55,7 @@ export default function friend({ navigation }) {
           marginTop: 10,
         }}
       >
-        FRIEND REQUEST
+        {lan == "en" ? "FRIEND REQUEST" : "คำขอเพื่อน"}
       </Text>
       <View>
         <FlatList

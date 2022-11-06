@@ -39,9 +39,8 @@ export default function headerfree({ navigation }) {
           onPress={() => navigation.navigate("Home")}
         >
           <Image
-            source={{
-              uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/logo_sosorun.png",
-            }}
+            resizeMode={"contain"}
+            source={require("../../img/lo_hor.png")}
             style={styles.img}
           />
         </TouchableOpacity>

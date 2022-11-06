@@ -18,12 +18,13 @@ import Page2 from "./page2";
 import { LinearGradient } from "expo-linear-gradient";
 import { getAllbanner, getBanNer } from "../../action/actionbanner";
 import Carousel from "react-native-snap-carousel";
-import { useRecoilState } from "recoil";
-import { tokenState } from "../../reducer/reducer/reducer/Atom";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { lans, tokenState } from "../../reducer/reducer/reducer/Atom";
 import Imagescalable from "react-native-scalable-image";
 const { width, height } = Dimensions.get("window");
 
 export default function index({ navigation }) {
+  const lan = useRecoilValue(lans);
   const [Visible, setVisible] = useState(false);
   const [token, setToken] = useRecoilState(tokenState);
   const [page, setpage] = useState(0);
@@ -53,7 +54,10 @@ export default function index({ navigation }) {
           marginTop: Platform.OS === "ios" ? 0 : 0,
         }}
       >
-        <Headerevent item="อีเว้นทั้งหมด" navigation={navigation} />
+        <Headerevent
+          item={lan == "en" ? "All event" : "อีเวนท์ทั้งหมด"}
+          navigation={navigation}
+        />
         <Modal
           animationType="none"
           transparent={true}
@@ -78,13 +82,17 @@ export default function index({ navigation }) {
                   marginVertical: 30,
                 }}
               >
-                คุณไม่สามารถเข้าร่วม รายการนี้ได้ เนื่องจาก ไม่ตรงตามเงื่อนไข
+                {lan == "en"
+                  ? `You can't join 
+because does not 
+meet the conditions`
+                  : "คุณไม่สามารถเข้าร่วม รายการนี้ได้ เนื่องจาก ไม่ตรงตามเงื่อนไข"}
               </Text>
               <TouchableOpacity
                 onPress={() => setVisible(!Visible)}
                 style={styles.touchmodal}
               >
-                <Text style={styles.go}>ตกลง</Text>
+                <Text style={styles.go}>{lan == "en" ? "OK" : "ตกลง"}</Text>
               </TouchableOpacity>
             </LinearGradient>
           </View>
@@ -98,7 +106,9 @@ export default function index({ navigation }) {
               { borderBottomColor: page == 0 ? "#000" : "#fff" },
             ]}
           >
-            <Text style={styles.text}>ภารกิจ</Text>
+            <Text style={styles.text}>
+              {lan == "en" ? "Mission" : "ภารกิจ"}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setpage(1)}
@@ -107,7 +117,9 @@ export default function index({ navigation }) {
               { borderBottomColor: page == 1 ? "#000" : "#fff" },
             ]}
           >
-            <Text style={styles.text}>เวอร์ชวล</Text>
+            <Text style={styles.text}>
+              {lan == "en" ? "Virtual Run " : "เวอร์ชวล"}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             disabled={token?.role == "VIP"}
@@ -117,7 +129,9 @@ export default function index({ navigation }) {
               { borderBottomColor: page == 2 ? "#000" : "#fff" },
             ]}
           >
-            <Text style={styles.text}>เลื่อนขั้น</Text>
+            <Text style={styles.text}>
+              {lan == "en" ? "Next Lv" : "เลื่อนขั้น"}
+            </Text>
           </TouchableOpacity>
         </View>
         <View style={styles.viewback}>
