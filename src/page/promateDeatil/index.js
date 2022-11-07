@@ -34,143 +34,132 @@ export default function index({ navigation, route }) {
         }}
       >
         <Headerdetail item={datadetail.titel} navigation={navigation} />
-        <View style={{ height: height * 0.9 }}>
-          <ScrollView>
-            <View
-              style={{
-                width: width,
-                height: height * 0.3,
-                backgroundColor: "#00272C",
+        <ScrollView>
+          <View
+            style={{
+              width: width,
+              height: height * 0.3,
+              backgroundColor: "#00272C",
+            }}
+          >
+            <Carousel
+              ref={carouselRef}
+              data={datadetail.img_List}
+              sliderWidth={1000}
+              itemWidth={1000}
+              autoplay
+              loop
+              renderItem={({ item, index }) => {
+                return (
+                  <Image
+                    style={{ width: width, height: height * 0.3 }}
+                    source={{
+                      uri: "https://api.sosorun.com/api/imaged/get/" + item,
+                    }}
+                  />
+                );
               }}
-            >
-              <Carousel
-                ref={carouselRef}
-                data={datadetail.img_List}
-                sliderWidth={1000}
-                itemWidth={1000}
-                autoplay
-                loop
-                renderItem={({ item, index }) => {
-                  return (
-                    <Image
-                      style={{ width: width, height: height * 0.3 }}
-                      source={{
-                        uri: "https://api.sosorun.com/api/imaged/get/" + item,
+            />
+          </View>
+          <View style={styles.viewhead}>
+            <View>
+              <Text style={styles.textopic}>{datadetail.titel}</Text>
+              <Text style={styles.textdetail}>{datadetail.discription}</Text>
+            </View>
+            <View>
+              <View>
+                <Text
+                  style={[
+                    styles.textnum,
+                    {
+                      marginTop: 15,
+                    },
+                  ]}
+                >
+                  ของรางวัลที่จะได้รับ
+                </Text>
+                <View style={styles.viewprice}>
+                  <View
+                    style={{ alignItems: "center", justifyContent: "center" }}
+                  >
+                    <FlatList
+                      data={datadetail?.reward}
+                      horizontal
+                      contentContainerStyle={{ justifyContent: "center" }}
+                      renderItem={({ item, index }) => {
+                        return (
+                          <View style={{ justifyContent: "center" }}>
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                width: null,
+                              }}
+                            >
+                              {item.type == "โกลด์" && (
+                                <Image
+                                  style={{
+                                    width: 35,
+                                    height: 35,
+                                    alignSelf: "center",
+                                    marginHorizontal: 10,
+                                  }}
+                                  source={{
+                                    uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/Group.png",
+                                  }}
+                                />
+                              )}
+                              {item.type == "โกลด์" && (
+                                <Text style={styles.textnum}>{item?.coin}</Text>
+                              )}
+                            </View>
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                width: "30%",
+                              }}
+                            >
+                              {item.type == "ไดมอนด์" && (
+                                <Image
+                                  style={{
+                                    width: 35,
+                                    height: 35,
+                                    alignSelf: "center",
+                                    marginHorizontal: 10,
+                                  }}
+                                  source={{
+                                    uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/Group2835.png",
+                                  }}
+                                />
+                              )}
+                              {item.type == "ไดมอนด์" && (
+                                <Text style={styles.textnum}>
+                                  {item?.diamond}
+                                </Text>
+                              )}
+                            </View>
+                          </View>
+                        );
                       }}
                     />
-                  );
-                }}
-              />
-            </View>
-            <View style={styles.viewhead}>
-              <View>
-                <Text style={styles.textopic}>{datadetail.titel}</Text>
-                <Text style={styles.textdetail}>
-                  {datadetail.discription +
-                    datadetail.discription +
-                    datadetail.discription +
-                    datadetail.discription}
-                </Text>
-              </View>
-              <View>
-                <View>
-                  <Text
-                    style={[
-                      styles.textnum,
-                      {
-                        marginTop: 15,
-                      },
-                    ]}
-                  >
-                    ของรางวัลที่จะได้รับ
-                  </Text>
-                  <View style={styles.viewprice}>
-                    <View
-                      style={{ alignItems: "center", justifyContent: "center" }}
-                    >
-                      <FlatList
-                        data={datadetail?.reward}
-                        horizontal
-                        contentContainerStyle={{ justifyContent: "center" }}
-                        renderItem={({ item, index }) => {
-                          return (
-                            <View style={{ justifyContent: "center" }}>
-                              <View
-                                style={{
-                                  flexDirection: "row",
-                                  width: null,
-                                }}
-                              >
-                                {item.type == "โกลด์" && (
-                                  <Image
-                                    style={{
-                                      width: 35,
-                                      height: 35,
-                                      alignSelf: "center",
-                                      marginHorizontal: 10,
-                                    }}
-                                    source={{
-                                      uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/Group.png",
-                                    }}
-                                  />
-                                )}
-                                {item.type == "โกลด์" && (
-                                  <Text style={styles.textnum}>
-                                    {item?.coin}
-                                  </Text>
-                                )}
-                              </View>
-                              <View
-                                style={{
-                                  flexDirection: "row",
-                                  width: "30%",
-                                }}
-                              >
-                                {item.type == "ไดมอนด์" && (
-                                  <Image
-                                    style={{
-                                      width: 35,
-                                      height: 35,
-                                      alignSelf: "center",
-                                      marginHorizontal: 10,
-                                    }}
-                                    source={{
-                                      uri: "https://ssr-project.s3.ap-southeast-1.amazonaws.com/Group2835.png",
-                                    }}
-                                  />
-                                )}
-                                {item.type == "ไดมอนด์" && (
-                                  <Text style={styles.textnum}>
-                                    {item?.diamond}
-                                  </Text>
-                                )}
-                              </View>
-                            </View>
-                          );
-                        }}
-                      />
-                    </View>
                   </View>
                 </View>
-                <View style={styles.view}>
-                  <TouchableOpacity style={styles.touchrank}>
-                    <Text style={styles.textrank}>
-                      {datadetail.distance} กม.
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() =>
-                      navigation.navigate("RunLevel", { datadetail })
-                    }
-                    style={styles.touchstart}
-                  >
-                    <Text style={styles.textnum}>เริ่ม</Text>
-                  </TouchableOpacity>
-                </View>
+              </View>
+              <View style={styles.view}>
+                <TouchableOpacity style={styles.touchrank}>
+                  <Text style={styles.textrank}>{datadetail.distance} กม.</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() =>
+                    navigation.navigate("RunLevel", { datadetail })
+                  }
+                  style={styles.touchstart}
+                >
+                  <Text style={styles.textnum}>เริ่ม</Text>
+                </TouchableOpacity>
               </View>
             </View>
-          </ScrollView>
-        </View>
+          </View>
+        </ScrollView>
       </View>
     </View>
   );
@@ -192,7 +181,6 @@ const styles = StyleSheet.create({
     color: "#000",
     marginHorizontal: 10,
     marginTop: 20,
-    marginBottom: 20,
   },
   textnum: {
     fontFamily: "Prompt-Regular",
@@ -208,7 +196,7 @@ const styles = StyleSheet.create({
   },
   viewhead: {
     width: width,
-    height: null,
+    height: height * 0.6,
     backgroundColor: "#FBC71C",
     paddingVertical: 10,
     justifyContent: "space-between",

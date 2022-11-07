@@ -67,7 +67,7 @@ export default function fromcontinue({ navigation, route }) {
     });
 
     if (response.status == 200) {
-      const lv = autolize_Lv(parseInt(users?.user_accounts?.total_distance)).lv;
+      const lv = autolize_Lv(parseInt(users.user_accounts.total_distance)).lv;
 
       const checl_list = d_arr?.map((e) => {
         if (e < lv) {
@@ -650,13 +650,11 @@ export default function fromcontinue({ navigation, route }) {
               <View style={styles.viewdistance}>
                 <View style={styles.viewsmall2}>
                   {dataEV.distance != undefined && (
-                    <Text style={styles.text1}>
-                      {parseFloat(dataEV.distance).toFixed(3)} กม.
-                    </Text>
+                    <Text style={styles.text1}>{dataEV.distance} กม.</Text>
                   )}
                   {dataEV.total_distance != undefined && (
                     <Text style={styles.text1}>
-                      {parseFloat(dataEV.total_distance / 1000).toFixed(3)} กม.
+                      {dataEV.total_distance / 1000} กม.
                     </Text>
                   )}
                 </View>
@@ -665,7 +663,7 @@ export default function fromcontinue({ navigation, route }) {
                     {(
                       (state.currentStepCount * strip) / 100000 +
                       route.params.last_distance / 1000
-                    ).toFixed(3)}{" "}
+                    ).toFixed(2)}{" "}
                     กม.
                   </Text>
                 </View>
@@ -677,16 +675,13 @@ export default function fromcontinue({ navigation, route }) {
               </Text>
               {chick ? (
                 <TouchableOpacity
-                  onLongPress={() => {
+                  onPress={() => {
                     clearInterval(clear);
                     setchick((val) => !val);
                   }}
                   style={styles.bottompause}
                 >
                   <Text style={styles.textpause}>พัก</Text>
-                  <Text style={[styles.textpause, { fontSize: 16 }]}>
-                    กดค้างเพื่อพัก
-                  </Text>
                 </TouchableOpacity>
               ) : (
                 <View
@@ -706,15 +701,12 @@ export default function fromcontinue({ navigation, route }) {
                     <Text style={styles.textpause}>ดำเนินการต่อ</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    onLongPress={async () => {
+                    onPress={async () => {
                       setput(!put);
                     }}
                     style={styles.bottomresume}
                   >
                     <Text style={styles.textpause}>หยุด</Text>
-                    <Text style={[styles.textpause, { fontSize: 16 }]}>
-                      กดค้างเพื่อหยุด
-                    </Text>
                   </TouchableOpacity>
                 </View>
               )}

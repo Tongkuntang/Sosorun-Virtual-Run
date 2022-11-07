@@ -17,10 +17,8 @@ import {
   Alert,
   FlatList,
   ActivityIndicator,
-  PermissionsAndroid,
 } from "react-native";
 import { timeformet } from "../components/test";
-import BleManager from "react-native-ble-manager";
 const { Fitblekit } = NativeModules;
 import { useRecoilState, useRecoilValue } from "recoil";
 import { authHistrory } from "../../action/actionhistrory";
@@ -32,7 +30,6 @@ import GoogleFit, { Scopes, BucketUnit } from "react-native-google-fit";
 import {
   deviceIndex,
   deviceRegis,
-  n_devices,
   tokenState,
   lans,
 } from "../../reducer/reducer/reducer/Atom";
@@ -44,8 +41,6 @@ import moment from "moment";
 const { width, height } = Dimensions.get("window");
 import ProgressCircle from "react-native-progress-circle";
 import { useIsFocused } from "@react-navigation/native";
-const BleManagerModule = NativeModules.BleManager;
-const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
 const permissions = {
   permissions: {
@@ -58,7 +53,7 @@ const permissions = {
 
 export default function index({ navigation }) {
   const [modals, setModal] = useState(false);
-  const [n_device, s_n_device] = useRecoilState(n_devices);
+  const [n_device, s_n_device] = useState("");
   const [list_setrender, setrender] = useState([]);
   const [lan, setlan] = useRecoilState(lans);
   const [modals1, setModal1] = useState(false);
@@ -89,10 +84,10 @@ export default function index({ navigation }) {
 
     res?.map((item) => {
       if (item.source == "com.google.android.gms:estimated_steps") {
-        console.log(item.rawSteps);
         if (
-          item.rawSteps?.filter((e) => e?.appPackageName?.includes("strava"))
-            .length > 0
+          item.rawSteps?.filter(
+            (e) => e?.appPackageName == "com.xiaomi.hm.health"
+          ).length > 0
         ) {
           setDeviceI(5);
         }
@@ -115,7 +110,7 @@ export default function index({ navigation }) {
     res?.map((item) => {
       if (item.source == "com.google.android.gms:estimated_steps") {
         item.rawSteps
-          ?.filter((e) => e?.appPackageName?.includes("strava"))
+          ?.filter((e) => e?.appPackageName == "com.xiaomi.hm.health")
           .map((e) => (steps = steps + e.steps));
       }
     });
@@ -278,6 +273,7 @@ export default function index({ navigation }) {
     );
   };
 
+<<<<<<< HEAD
   const [isScanning, setIsScanning] = useState(false);
 
   const startScan = () => {
@@ -444,24 +440,18 @@ export default function index({ navigation }) {
     parseInt(body?.user_accounts?.total_distance) / 10000000
   );
 
+=======
+>>>>>>> parent of 645d93e (update)
   useEffect(() => {
     try {
       if (Platform.OS == "android") {
         const newDevice = eventEmitter.addListener(
           "EVENTFBK",
           (deviceDiscovered) => {
-            const ress = deviceDiscovered
-              ?.replace("[", "")
-              ?.replace("]", "")
-              .split("MOVE");
+            const ress = deviceDiscovered.split(",");
             console.log("deviceDiscovered", ress);
             if (ress.length > 0) {
-              console.log(ress);
-              setrender(
-                ress
-                  ?.map((e) => (e?.length > 0 ? "MOVE" + e : false))
-                  ?.filter((e) => e)
-              );
+              setrender(ress);
             }
           }
         );
@@ -551,34 +541,16 @@ export default function index({ navigation }) {
           batteryPower.remove();
         };
       } else {
-        BleManager.start({ showAlert: false }).then(() => {
-          // Success code
-          console.log("Module initialized");
-
-          BleManager.scan([], 5, true).then((e) => {
-            // Success code
-            console.log("Scan started", e);
-          });
-
-          bleManagerEmitter.addListener(
-            "BleManagerDiscoverPeripheral",
-            (args) => {
-              // The id: args.id
-              // The name: args.name
-            }
-          );
-        });
-
         const newDevice2 = eventEmitter.addListener(
           "CONNECT",
           (deviceDiscovered) => {
-            // setrender(
-            //   deviceDiscovered.name
-            //     .filter((item) => {
-            //       return item.localName.includes("MOVE");
-            //     })
-            //     ?.map((e, i) => ({ localName: e.localName, index: i }))
-            // );
+            setrender(
+              deviceDiscovered.name
+                .filter((item) => {
+                  return item.localName.includes("MOVE");
+                })
+                ?.map((e, i) => ({ localName: e.localName, index: i }))
+            );
           }
         );
         return () => {
@@ -664,9 +636,7 @@ export default function index({ navigation }) {
             }}
           >
             <FlatList
-              data={list_setrender?.filter((e) =>
-                Platform.OS == "ios" ? e?.name?.includes("MOVE") : true
-              )}
+              data={list_setrender}
               ListHeaderComponent={
                 <View
                   style={{
@@ -689,7 +659,6 @@ export default function index({ navigation }) {
                 </View>
               }
               renderItem={({ item, index }) => {
-                console.log(item);
                 return (
                   <TouchableOpacity
                     onPress={() => {
@@ -698,7 +667,7 @@ export default function index({ navigation }) {
                           console.log(e);
                         });
                       } else {
-                        Fitblekit.onConnect(item?.id, (e) => {
+                        Fitblekit.onConnect(index, (e) => {
                           console.log(e);
                         });
                       }
@@ -720,7 +689,8 @@ export default function index({ navigation }) {
                         marginTop: 25,
                       }}
                     >
-                      {item?.name || item?.replace("[", "").replace("]", "")}
+                      {item?.localName ||
+                        item?.replace("[", "").replace("]", "")}
                     </Text>
                   </TouchableOpacity>
                 );
@@ -766,16 +736,20 @@ export default function index({ navigation }) {
             <FlatList
               data={[
                 {
+                  img: require("../../img/mi3.png"),
+                  title: "เข้า Application ZepLife และเชื่อมอุปกรณ์",
+                },
+                {
+                  img: require("../../img/mi4.png"),
+                  title: "เข้าไปที่ตั้งค่า และ กดเพิ่มบัญชี",
+                },
+                {
                   img: require("../../img/mi1.png"),
-                  title: "เข้า Application Strava และเชื่อมอุปกรณ์",
+                  title: "เลือก GoogleFit และ กดที่ชื่อตนเอง",
                 },
                 {
                   img: require("../../img/mi2.png"),
-                  title: "เข้าไปที่ตั้งค่า และ Link Other services",
-                },
-                {
-                  img: require("../../img/mi3.png"),
-                  title: "เลือก GoogleFit",
+                  title: "รอ GoogleFit Sync Data เป็นอันเสร็จขั้นตอน",
                 },
               ]}
               pagingEnabled
@@ -1393,8 +1367,18 @@ export default function index({ navigation }) {
                     source={require("../../img/115.png")}
                     style={styles.imgsoso2}
                   />
+<<<<<<< HEAD
                   <Text style={styles.textdevice}>Strava</Text>
                   <View style={{ position: "absolute", right: 25, top: -7 }}>
+=======
+                  <Text style={styles.textdevice}>Zepp Life(Mi Fit)</Text>
+                  <View
+                    style={{ position: "absolute", right: 25, top: -7 }}
+                    name="check"
+                    size={32}
+                    color="#55AB68"
+                  >
+>>>>>>> parent of 645d93e (update)
                     {devicsI == 0 && (
                       <TouchableOpacity
                         onPress={async () => {

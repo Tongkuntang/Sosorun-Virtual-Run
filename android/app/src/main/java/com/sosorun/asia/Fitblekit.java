@@ -39,7 +39,6 @@ public class Fitblekit extends ReactContextBaseJavaModule {
         super(context);
         this.applicationContext = context;
     }
-
     private static final String TAG = "MyActivity";
     private static List<FBKBleDevice> m_deviceArray = new ArrayList<>();
     private FBKApiScan m_scanner;
@@ -72,15 +71,15 @@ public class Fitblekit extends ReactContextBaseJavaModule {
                 String rendx = "[";
 
                 while (x > y) {
-                    if (y == x - 1) {
-                        rendx = rendx + deviceArray.get(y).getDeviceName() + "]";
-                    } else {
-                        rendx = rendx + deviceArray.get(y).getDeviceName();
+                    if(y == x - 1){
+                        rendx = rendx  +  deviceArray.get(y).getDeviceName() + "]";
+                    }else{
+                        rendx = rendx  +  deviceArray.get(y).getDeviceName();
                     }
                     y++;
                 }
                 sendEvent(applicationContext, "EVENTFBK", rendx);
-                // m_scanner.stopScan();
+                m_scanner.stopScan();
             }
 
             @Override
@@ -100,17 +99,17 @@ public class Fitblekit extends ReactContextBaseJavaModule {
 
         @Override
         public void bleConnectError(String s, FBKApiBsaeMethod fbkApiBsaeMethod) {
-            sendEvent(applicationContext, "ERRORBLE", s);
+            sendEvent(applicationContext,"ERRORBLE", s);
         }
 
         @Override
         public void bleConnectStatus(FBKBleDeviceStatus fbkBleDeviceStatus, FBKApiBsaeMethod fbkApiBsaeMethod) {
-            sendEvent(applicationContext, "ERRORBLE", fbkBleDeviceStatus.toString());
+            sendEvent(applicationContext,"ERRORBLE", fbkBleDeviceStatus.toString());
         }
 
         @Override
         public void batteryPower(int i, FBKApiBsaeMethod fbkApiBsaeMethod) {
-            sendEvent(applicationContext, "batteryPower", String.valueOf(i));
+            sendEvent(applicationContext,"batteryPower", String.valueOf(i));
         }
 
         @Override
@@ -151,7 +150,7 @@ public class Fitblekit extends ReactContextBaseJavaModule {
         @Override
         public void realTimeSteps(Object data, FBKApiOldTracker apiOldTracker) {
             final Map<String, String> resultMap = (Map<String, String>) data;
-            sendEvent(applicationContext, "EVENTFBKSTEP", resultMap.get("steps"));
+            sendEvent(applicationContext, "EVENTFBKSTEP",resultMap.get("steps"));
         }
 
         @Override
@@ -161,7 +160,7 @@ public class Fitblekit extends ReactContextBaseJavaModule {
 
         @Override
         public void oldTrackerRecord(Object data, FBKApiOldTracker apiOldTracker) {
-            sendEvent(applicationContext, "EVENTFBKSTEP1", data.toString());
+            sendEvent(applicationContext, "EVENTFBKSTEP1",data.toString());
         }
 
     };
@@ -169,7 +168,7 @@ public class Fitblekit extends ReactContextBaseJavaModule {
     @ReactMethod
     public void onScanStop() {
         m_apiOldTracker = new FBKApiOldTracker(applicationContext, m_apiOldTrackerCallBack);
-        // m_apiOldTracker.unregisterBleListenerReceiver();
+//        m_apiOldTracker.unregisterBleListenerReceiver();
         m_apiOldTracker.disconnectBle();
 
     }
@@ -178,7 +177,7 @@ public class Fitblekit extends ReactContextBaseJavaModule {
     public void onConnect(int name, String location, Callback callBack) {
         m_apiOldTracker = new FBKApiOldTracker(applicationContext, m_apiOldTrackerCallBack);
         FBKBleDevice myBleDevice = m_deviceArray.get(name);
-        sendEvent(applicationContext, "EVENTFBKSTEP1", myBleDevice.getDeviceName());
+        sendEvent(applicationContext, "EVENTFBKSTEP1",myBleDevice.getDeviceName());
         m_apiOldTracker.connecBluetooth(myBleDevice.getMacAddress());
         m_apiOldTracker.registerBleListenerReceiver();
         FBKParaUserInfo myUserInfo = new FBKParaUserInfo();

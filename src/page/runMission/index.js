@@ -39,11 +39,7 @@ import { apiservice } from "../../service/service";
 import moment from "moment";
 import { Pedometer, Gyroscope } from "expo-sensors";
 import { timeformet } from "../components/test";
-import {
-  actionEditwal,
-  getActionUser,
-  actionEditprofile,
-} from "../../action/actionauth";
+import { actionEditwal, getActionUser } from "../../action/actionauth";
 import { getAllbanner, getBanNer } from "../../action/actionbanner";
 import Carousel from "react-native-snap-carousel";
 const { width, height } = Dimensions.get("window");
@@ -79,7 +75,7 @@ export default function index({ navigation, route }) {
     });
 
     if (response.status == 200) {
-      const lv = autolize_Lv(parseInt(users?.user_accounts?.total_distance)).lv;
+      const lv = autolize_Lv(parseInt(users.user_accounts.total_distance)).lv;
 
       const checl_list = d_arr?.map((e) => {
         if (e < lv) {
@@ -161,18 +157,10 @@ export default function index({ navigation, route }) {
       GoogleFit.observeSteps((callback) => {
         if (back != callback.steps) {
           back = callback.steps;
-          if (num == 0) {
-            setState((val) => ({
-              ...val,
-              currentStepCount:
-                val.currentStepCount + callback.steps * 1 - val?.prevStepCount,
-            }));
-          } else {
-            setState((val) => ({
-              ...val,
-              prevStepCount: val.currentStepCount + callback.steps * 1,
-            }));
-          }
+          setState((val) => ({
+            ...val,
+            currentStepCount: val.currentStepCount + callback.steps,
+          }));
         }
       });
     } else {
@@ -200,7 +188,7 @@ export default function index({ navigation, route }) {
             let options = {
               startDate: new Date(dates).toISOString(),
               endDate: new Date().toISOString(),
-              type: "Walking",
+              type: "Walking", // one of: ['Walking', 'StairClimbing', 'Running', 'Cycling', 'Workout']
             };
             setVisible1(true);
             let valuse = setInterval(() => {
@@ -229,6 +217,8 @@ export default function index({ navigation, route }) {
         } else {
           dates = new Date().getTime();
         }
+        // appState.current = nextAppState;
+        // setAppStateVisible(appState.current);
       }
     );
   }, []);
@@ -308,6 +298,8 @@ export default function index({ navigation, route }) {
         method: "get",
         token: token.accessToken,
       });
+      // console.log("106", resposne.data.data[0].id);
+      // setmission_id(resposne.data.data.id);
       if (resposne.status == 200) {
         setmissionid(resposne.data.data[0].id);
         console.log(resposne.data.data[0]);
@@ -321,9 +313,8 @@ export default function index({ navigation, route }) {
     isPedometerAvailable: "checking",
     pastStepCount: 0,
     currentStepCount: 0,
-    prevStepCount: 0,
   });
-
+  // console.log(state);
   useEffect(() => {
     if (chick) {
       Pedometer.requestPermissionsAsync();
@@ -644,23 +635,6 @@ export default function index({ navigation, route }) {
                     const getuser = await getActionUser(token);
                     setUser(getuser.data);
                   }
-
-                  const updateCal = await actionEditprofile({
-                    body: {
-                      id: user.id,
-                      total_distance:
-                        parseInt(user.user_accounts.total_distance) +
-                        ((state.currentStepCount * strip) / 100000) * 1000,
-                      wallet: {
-                        ...user.user_accounts?.wallet,
-                        cal:
-                          (user?.user_accounts?.wallet?.cal || 0) +
-                          parseInt(state.currentStepCount * conversationFactor),
-                      },
-                    },
-                    token,
-                  });
-
                   const response = await apiservice({
                     path: "/event/updateuserjoinEvent",
                     method: "put",
@@ -732,13 +706,11 @@ export default function index({ navigation, route }) {
               <View style={styles.viewdistance}>
                 <View style={styles.viewsmall2}>
                   {dataEV.distance != undefined && (
-                    <Text style={styles.text1}>
-                      {parseFloat(dataEV.distance).toFixed(3)} กม.
-                    </Text>
+                    <Text style={styles.text1}>{dataEV.distance} กม.</Text>
                   )}
                   {dataEV.total_distance != undefined && (
                     <Text style={styles.text1}>
-                      {parseFloat(dataEV.total_distance / 1000).toFixed(3)} กม.
+                      {dataEV.total_distance / 1000} กม.
                     </Text>
                   )}
                 </View>
@@ -747,7 +719,7 @@ export default function index({ navigation, route }) {
                     {(
                       (state.currentStepCount * strip) / 100000 +
                       lastDistance / 1000
-                    ).toFixed(3)}{" "}
+                    ).toFixed(2)}{" "}
                     กม.
                   </Text>
                 </View>
@@ -759,16 +731,13 @@ export default function index({ navigation, route }) {
               </Text>
               {chick ? (
                 <TouchableOpacity
-                  onLongPress={() => {
+                  onPress={() => {
                     clearInterval(clear);
                     setchick((val) => !val);
                   }}
                   style={styles.bottompause}
                 >
                   <Text style={styles.textpause}>พัก</Text>
-                  <Text style={[styles.textpause, { fontSize: 16 }]}>
-                    กดค้างเพื่อพัก
-                  </Text>
                 </TouchableOpacity>
               ) : (
                 <View
@@ -788,15 +757,12 @@ export default function index({ navigation, route }) {
                     <Text style={styles.textpause}>ดำเนินการต่อ</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    onLongPress={async () => {
+                    onPress={async () => {
                       setput(true);
                     }}
                     style={styles.bottomresume}
                   >
                     <Text style={styles.textpause}>หยุด</Text>
-                    <Text style={[styles.textpause, { fontSize: 16 }]}>
-                      กดค้างเพื่อหยุด
-                    </Text>
                   </TouchableOpacity>
                 </View>
               )}
@@ -978,7 +944,7 @@ export default function index({ navigation, route }) {
                 {datamis[0] != undefined ? (
                   <View style={styles.viewsmall1}>
                     <Text style={styles.text1}>
-                      {(parseFloat(datamis[0].last_distance) / 1000).toFixed(3)}{" "}
+                      {(parseFloat(datamis[0].last_distance) / 1000).toFixed(2)}{" "}
                       กม.
                     </Text>
                   </View>
@@ -989,11 +955,11 @@ export default function index({ navigation, route }) {
                       <Text style={styles.text1}>
                         {(
                           parseFloat(route.params.last_distance) / 1000
-                        ).toFixed(3)}{" "}
+                        ).toFixed(2)}{" "}
                         กม.
                       </Text>
                     ) : (
-                      <Text style={styles.text1}>0.000 กม.</Text>
+                      <Text style={styles.text1}>0.00 กม.</Text>
                     )}
                   </View>
                 )}

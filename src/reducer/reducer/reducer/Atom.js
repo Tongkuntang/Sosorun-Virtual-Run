@@ -7,6 +7,7 @@ const { persistAtom } = recoilPersist({
   storage: AsyncStorage,
 });
 
+<<<<<<< HEAD
 export const n_devices = atom({
   key: "n_devices",
   default: "",
@@ -19,6 +20,8 @@ export const lans = atom({
   effects_UNSTABLE: [persistAtom],
 });
 
+=======
+>>>>>>> parent of 645d93e (update)
 export const tokenState = atom({
   key: "token",
   default: {},

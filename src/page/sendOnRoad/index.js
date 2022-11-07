@@ -73,7 +73,7 @@ export default function index({ navigation, route }) {
     });
 
     if (response.status == 200) {
-      const lv = autolize_Lv(parseInt(users?.user_accounts?.total_distance)).lv;
+      const lv = autolize_Lv(parseInt(users.user_accounts.total_distance)).lv;
 
       const checl_list = d_arr?.map((e) => {
         if (e < lv) {
@@ -460,7 +460,7 @@ export default function index({ navigation, route }) {
     res?.map((item) => {
       if (item.source == "com.google.android.gms:estimated_steps") {
         item.rawSteps
-          ?.filter((e) => e?.appPackageName?.includes("strava"))
+          ?.filter((e) => e?.appPackageName == "com.xiaomi.hm.health")
           .map((e) => (steps = steps + e.steps));
       }
     });
@@ -1138,7 +1138,7 @@ export default function index({ navigation, route }) {
               </Text>
               {chick ? (
                 <TouchableOpacity
-                  onLongPress={() => {
+                  onPress={() => {
                     setResume(true);
 
                     setchick((val) => !val);
@@ -1146,9 +1146,6 @@ export default function index({ navigation, route }) {
                   style={styles.bottompause}
                 >
                   <Text style={styles.textpause}>พัก</Text>
-                  <Text style={[styles.textpause, { fontSize: 16 }]}>
-                    กดค้างเพื่อพัก
-                  </Text>
                 </TouchableOpacity>
               ) : (
                 <View
@@ -1168,15 +1165,12 @@ export default function index({ navigation, route }) {
                     <Text style={styles.textpause}>ดำเนินการต่อ</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    onLongPress={async () => {
+                    onPress={async () => {
                       setput(true);
                     }}
                     style={styles.bottomresume}
                   >
                     <Text style={styles.textpause}>หยุด</Text>
-                    <Text style={[styles.textpause, { fontSize: 16 }]}>
-                      กดค้างเพื่อหยุด
-                    </Text>
                   </TouchableOpacity>
                 </View>
               )}

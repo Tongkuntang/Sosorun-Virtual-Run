@@ -307,6 +307,7 @@ export default function register({ navigation, lan }) {
               style={styles.input}
               autoCapitalize="none"
             />
+<<<<<<< HEAD
             <TextInput
               placeholder={lan == "en" ? "gender" : "เพศ"}
               onChangeText={(text) => setbody({ ...body, gender: text })}
@@ -319,6 +320,8 @@ export default function register({ navigation, lan }) {
               style={styles.input}
               autoCapitalize="none"
             />
+=======
+>>>>>>> parent of 645d93e (update)
             <TouchableOpacity
               disabled={
                 body.height == null ||
